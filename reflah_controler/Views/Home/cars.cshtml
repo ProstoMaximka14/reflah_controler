@@ -1,0 +1,223 @@
+﻿@model List<reflah_controler.Models.ReflashCarModel>
+@{
+    ViewData["Title"] = "Выбор автомобиля для редактирования";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .car-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .car-image {
+            height: 200px;
+            object-fit: cover;
+            background-color: #f8f9fa;
+        }
+        
+        .placeholder-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .message-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .message-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        
+        .message-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+        
+        .car-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Сообщения -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="message-box message-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Message"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="message-box message-error">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <h1 class="mb-4">
+            <i class="bi bi-car-front-fill text-primary"></i>
+            Выбор автомобиля для редактирования
+        </h1>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <div class="mb-3 mb-md-0">
+                <span class="text-muted">Всего автомобилей:</span>
+                <span class="badge bg-info ms-2">@Model.Count</span>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarModal">
+                <i class="bi bi-plus-circle"></i>
+                Добавить автомобиль
+            </button>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var car in Model)
+                {
+                    <div class="col">
+                        <div class="card car-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    @car.Brand @car.Model
+                                    @if (!string.IsNullOrEmpty(car.Generation))
+                                    {
+                                        <span class="text-muted">(@car.Generation)</span>
+                                    }
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    @if (!string.IsNullOrEmpty(car.Image))
+                                    {
+                                        <img src="@car.Image" class="img-fluid rounded car-image" alt="@car.Brand @car.Model" 
+                                             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'placeholder-image\'><i class=\'bi bi-car-front fs-1\'></i></div>'">
+                                    }
+                                    else
+                                    {
+                                        <div class="placeholder-image">
+                                            <i class="bi bi-car-front fs-1"></i>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <div class="car-info mb-3">
+                                    @if (!string.IsNullOrEmpty(car.Engine))
+                                    {
+                                        <div><strong>Двигатель:</strong> @car.Engine</div>
+                                    }
+                                    <div><strong>ID:</strong> #@car.Id</div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="@Url.Action("EditCar", new { id = car.Id })" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                        Редактировать
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle"></i> Нет автомобилей</h5>
+                <p class="mb-3">Добавьте первый автомобиль для управления чип-тюнингом.</p>
+            </div>
+        }
+    </div>
+
+    <!-- Модальное окно для добавления -->
+    <div class="modal fade" id="addCarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-car-front me-2"></i>
+                        Добавить новый автомобиль
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Home/AddCar">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Марка*</label>
+                            <input type="text" class="form-control" name="Brand" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Модель*</label>
+                            <input type="text" class="form-control" name="Model" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Поколение</label>
+                            <input type="text" class="form-control" name="Generation">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Двигатель</label>
+                            <input type="text" class="form-control" name="Engine">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Изображение (URL)</label>
+                            <input type="text" class="form-control" name="Image" placeholder="https://example.com/image.jpg">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Добавить автомобиль</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Автоматически скрываем сообщения через 5 секунд
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message-box');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
