@@ -161,6 +161,9 @@
                             <th>Телефон</th>
                             <th>ВКонтакте</th>
                             <th>Сайт</th>
+                            <th>Город</th>
+                            <th>Улица</th>
+                            <th>Дом</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -177,7 +180,10 @@
                                     <div class="d-flex flex-column align-items-center">
                                         @if (!string.IsNullOrEmpty(partner.photo))
                                         {
-                                            <img src="@partner.photo" class="photo-preview mb-2" alt="Фото" id="preview-@partner.Id">
+                                            <img src="/shared-fotos/partners/@partner.photo" 
+                                                    class="photo-preview mb-2" 
+                                                    alt="Фото партнера"
+                                                    onerror="this.src='/images/default-partner.jpg'">
                                         }
                                         else
                                         {
@@ -225,6 +231,30 @@
                                            value="@partner.website"
                                            class="partner-input"
                                            placeholder="https://example.com">
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="city"
+                                           value="@partner.city"
+                                           required
+                                           class="partner-input"
+                                           placeholder="Город">
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="street"
+                                           value="@partner.street"
+                                           required
+                                           class="partner-input"
+                                           placeholder="Улица">
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="house"
+                                           value="@partner.house"
+                                           required
+                                           class="partner-input"
+                                           placeholder="номер дома">
                                 </td>
 
                                 <td class="text-nowrap">
@@ -322,7 +352,33 @@
                                    name="website"
                                    placeholder="https://example.com">
                         </div>
-
+                        <div class="col-12 col-md-2">
+                            <label for="newCity" class="form-label">Город</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newCity"
+                                   name="city"
+                                   placeholder="Город"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label for="newStreet" class="form-label">улица</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newStreet"
+                                   name="street"
+                                   placeholder="Улица"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label for="newHouse" class="form-label">Номер дома</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newHouse"
+                                   name="house"
+                                   placeholder="Номер дома"
+                                   required>
+                        </div>
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-plus-circle"></i>

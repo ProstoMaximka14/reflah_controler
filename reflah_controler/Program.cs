@@ -1,9 +1,20 @@
+using Microsoft.Extensions.FileProviders;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+// Разрешаем доступ к общей папке
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(@"C:\fotos"),
+    RequestPath = "/shared-fotos"
+});
+
+app.UseStaticFiles(); // Для wwwroot
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

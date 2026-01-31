@@ -137,14 +137,18 @@
                             {
                                 <img src="@Model.Image" class="img-fluid car-image-preview mb-3" 
                                      alt="@Model.Brand @Model.Model"
-                                     onerror="this.style.display='none'; document.getElementById('noImageMessage').style.display='block';">
+                                onerror="this.style.display='none'; document.getElementById('noImageMessage').style.display='block';">
                             }
-                            <div id="noImageMessage" class="@(string.IsNullOrEmpty(Model.Image) ? "" : "d-none")">
+                            else
+                            {
+                                <div id="noImageMessage" class="@(string.IsNullOrEmpty(Model.Image) ? "" : "d-none")">
                                 <div class="placeholder-image">
                                     <i class="bi bi-car-front fs-1"></i>
                                     <div class="mt-2">Изображение отсутствует</div>
                                 </div>
                             </div>
+                            }
+                            
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">

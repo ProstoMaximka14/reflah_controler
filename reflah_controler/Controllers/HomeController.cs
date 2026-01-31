@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using reflah_controler.Models;
-using System.Diagnostics;
-using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace reflah_controler.Controllers
 {
@@ -515,7 +516,7 @@ namespace reflah_controler.Controllers
         // ПАРТНЁРЫ
         // ============================================
 
-        
+        private readonly string sharedUploadsPath = @"C:\fotos";
 
         // GET: Страница партнеров
         public IActionResult Partners()
@@ -526,53 +527,72 @@ namespace reflah_controler.Controllers
 
         // POST: Добавить партнера
         [HttpPost]
-        public async Task<IActionResult> AddPartner(string name, string phone, string vk, string website, IFormFile photoFile)
+        public async Task<IActionResult> AddPartner(string name, string phone, string vk, string website,
+            IFormFile photoFile, string photo, string city, string street, string house)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
 
             try
             {
-                string photoUrl = "";
+                string fileName = null;
 
                 // Обработка загрузки фото
                 if (photoFile != null && photoFile.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "partners");
+                    var partnersPath = Path.Combine(sharedUploadsPath, "partners");
 
                     // Создаем папку, если не существует
-                    if (!Directory.Exists(uploadsFolder))
+                    if (!Directory.Exists(partnersPath))
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        Directory.CreateDirectory(partnersPath);
+                    }
+
+                    // Проверка типа файла
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        return RedirectToAction("Partners");
+                    }
+
+                    // Проверка размера (макс. 5MB)
+                    if (photoFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        return RedirectToAction("Partners");
                     }
 
                     // Генерируем уникальное имя файла
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photoFile.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var filePath = Path.Combine(partnersPath, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await photoFile.CopyToAsync(stream);
                     }
-
-                    photoUrl = $"/uploads/partners/{fileName}";
                 }
 
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
                     string query = @"INSERT INTO partners 
-                            (name, phone, photo_url, vk_url, website_url) 
-                            VALUES 
-                            (@name, @phone, @photo_url, @vk_url, @website_url)";
+                    (name, phone, photo_url, vk_url, website_url, city, street, house) 
+                    VALUES 
+                    (@name, @phone, @photo_url, @vk_url, @website_url, @city, @street, @house)";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@name", name ?? "");
                         command.Parameters.AddWithValue("@phone", phone ?? "");
-                        command.Parameters.AddWithValue("@photo_url", photoUrl);
+                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); //  Сохраняем только имя файла
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
+                        command.Parameters.AddWithValue("@city", city ?? "");
+                        command.Parameters.AddWithValue("@street", street ?? "");
+                        command.Parameters.AddWithValue("@house", house ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -601,44 +621,68 @@ namespace reflah_controler.Controllers
 
         // POST: Обновить партнера
         [HttpPost]
-        public async Task<IActionResult> UpdatePartner(int id, string name, string phone, string vk, string website, IFormFile photoFile, string photo)
+        public async Task<IActionResult> UpdatePartner(int id, string name, string phone, string vk,
+            string website, IFormFile photoFile, string photo, string city, string street, string house)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
 
             try
             {
-                string photoUrl = photo;
+                string fileName = photo; // Изначально старое имя файла
 
                 // Обработка загрузки нового фото
                 if (photoFile != null && photoFile.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "partners");
+                    var partnersPath = Path.Combine(sharedUploadsPath, "partners");
 
                     // Создаем папку, если не существует
-                    if (!Directory.Exists(uploadsFolder))
+                    if (!Directory.Exists(partnersPath))
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        Directory.CreateDirectory(partnersPath);
+                    }
+
+                    // Проверка типа файла
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        return RedirectToAction("Partners");
+                    }
+
+                    // Проверка размера (макс. 5MB)
+                    if (photoFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        return RedirectToAction("Partners");
                     }
 
                     // Генерируем уникальное имя файла
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photoFile.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var filePath = Path.Combine(partnersPath, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await photoFile.CopyToAsync(stream);
                     }
 
-                    photoUrl = $"/uploads/partners/{fileName}";
-
-                    // Удаляем старое фото, если оно существует и это не дефолтное
-                    if (!string.IsNullOrEmpty(photo) && photo.StartsWith("/uploads/partners/"))
+                    // Удаляем старое фото, если оно существует
+                    if (!string.IsNullOrEmpty(photo))
                     {
-                        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", photo.TrimStart('/'));
+                        var oldFilePath = Path.Combine(partnersPath, photo);
                         if (System.IO.File.Exists(oldFilePath))
                         {
-                            System.IO.File.Delete(oldFilePath);
+                            try
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                // Логируем, но не прерываем
+                                Console.WriteLine($"Не удалось удалить старый файл: {ex.Message}");
+                            }
                         }
                     }
                 }
@@ -647,21 +691,27 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
                     string query = @"UPDATE partners SET 
-                            name = @name, 
-                            phone = @phone, 
-                            photo_url = @photo_url, 
-                            vk_url = @vk_url, 
-                            website_url = @website_url 
-                            WHERE id = @id";
+                    name = @name, 
+                    phone = @phone, 
+                    photo_url = @photo_url, 
+                    vk_url = @vk_url, 
+                    website_url = @website_url,
+                    city = @city,
+                    street = @street,
+                    house = @house
+                    WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@id", id);
                         command.Parameters.AddWithValue("@name", name ?? "");
                         command.Parameters.AddWithValue("@phone", phone ?? "");
-                        command.Parameters.AddWithValue("@photo_url", photoUrl);
+                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); // Сохраняем только имя файла
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
+                        command.Parameters.AddWithValue("@city", city ?? "");
+                        command.Parameters.AddWithValue("@street", street ?? "");
+                        command.Parameters.AddWithValue("@house", house ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -672,6 +722,16 @@ namespace reflah_controler.Controllers
                         else
                         {
                             TempData["Error"] = "Партнер не найден";
+
+                            // Если создали новый файл, но запись не обновилась - удаляем файл
+                            if (photoFile != null && fileName != photo)
+                            {
+                                var newFilePath = Path.Combine(sharedUploadsPath, "partners", fileName);
+                                if (System.IO.File.Exists(newFilePath))
+                                {
+                                    System.IO.File.Delete(newFilePath);
+                                }
+                            }
                         }
                     }
                 }
@@ -697,8 +757,9 @@ namespace reflah_controler.Controllers
 
             try
             {
-                // Сначала получаем информацию о фото
-                string photoUrl = "";
+                string fileName = "";
+
+                // Сначала получаем имя файла фото
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -708,9 +769,10 @@ namespace reflah_controler.Controllers
                     {
                         command.Parameters.AddWithValue("@id", id);
                         var result = await command.ExecuteScalarAsync();
+
                         if (result != null && result != DBNull.Value)
                         {
-                            photoUrl = result.ToString();
+                            fileName = result.ToString();
                         }
                     }
                 }
@@ -730,12 +792,21 @@ namespace reflah_controler.Controllers
                         if (rowsAffected > 0)
                         {
                             // Удаляем файл фото, если он существует
-                            if (!string.IsNullOrEmpty(photoUrl) && photoUrl.StartsWith("/uploads/partners/"))
+                            if (!string.IsNullOrEmpty(fileName))
                             {
-                                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", photoUrl.TrimStart('/'));
+                                var filePath = Path.Combine(sharedUploadsPath, "partners", fileName);
+
                                 if (System.IO.File.Exists(filePath))
                                 {
-                                    System.IO.File.Delete(filePath);
+                                    try
+                                    {
+                                        System.IO.File.Delete(filePath);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // Логируем, но не прерываем
+                                        Console.WriteLine($"Не удалось удалить файл: {ex.Message}");
+                                    }
                                 }
                             }
 
@@ -777,14 +848,26 @@ namespace reflah_controler.Controllers
                         {
                             while (reader.Read())
                             {
+                                var photoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url")) ? "" : reader.GetString("photo_url");
+
+                                // Если в БД сохранен полный путь, оставляем только имя файла
+                                string photoFileName = photoUrl;
+                                if (!string.IsNullOrEmpty(photoUrl) && photoUrl.Contains("/"))
+                                {
+                                    photoFileName = Path.GetFileName(photoUrl);
+                                }
+
                                 partners.Add(new PartnersModel
                                 {
                                     Id = reader.GetInt32("id"),
                                     name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
                                     phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? "" : reader.GetString("phone"),
-                                    photo = reader.IsDBNull(reader.GetOrdinal("photo_url")) ? "" : reader.GetString("photo_url"),
+                                    photo = photoFileName, // Только имя файла
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
-                                    website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url")
+                                    website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
+                                    city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
+                                    street = reader.IsDBNull(reader.GetOrdinal("street")) ? "" : reader.GetString("street"),
+                                    house = reader.IsDBNull(reader.GetOrdinal("house")) ? "" : reader.GetString("house")
                                 });
                             }
                         }
