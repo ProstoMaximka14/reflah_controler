@@ -1,0 +1,372 @@
+﻿@model List<reflah_controler.Models.NewsModel>
+@{
+    ViewData["Title"] = "Управление новостями";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .news-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+            .news-input:focus {
+                border-color: #86b7fe;
+                outline: 0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 2px;
+        }
+
+        .btn-save {
+            background-color: #198754;
+            color: white;
+        }
+
+            .btn-save:hover {
+                background-color: #157347;
+            }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+            .btn-delete:hover {
+                background-color: #bb2d3b;
+            }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 2px;
+        }
+
+            .btn-cancel:hover {
+                background-color: #5c636a;
+                color: white;
+                text-decoration: none;
+            }
+
+        .message-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .message-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .table th {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .url-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Сообщения -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="message-box message-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Message"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="message-box message-error">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <h1 class="mb-4">
+            <i class="bi bi-newspaper text-primary"></i>
+            Управление новостями
+        </h1>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+                <div class="mb-3 mb-md-0">
+                    <span class="text-muted">Всего новостей:</span>
+                    <span class="badge bg-info ms-2">@Model.Count</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 120px;">Фото</th>
+                            <th>Название новости</th>
+                            <th>Текст новости</th>
+                            <th>Дата новости</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var news = Model[i];
+
+                            <form method="post" action="/Home/UpdateNews" enctype="multipart/form-data">
+                            <tr>
+                                <td class="fw-bold text-center">@(i + 1)</td>
+
+                                <td>
+                                    <div class="d-flex flex-column align-items-center">
+                                        @if (!string.IsNullOrEmpty(news.news_url))
+                                        {
+                                            <!-- ИСПРАВЛЕНО: путь к фото новостей -->
+                                            <img src="/shared-fotos/news/@news.news_url"
+                                                 class="photo-preview mb-2"
+                                                 alt="Фото новости"
+                                                 onerror="this.src='/images/default-news.jpg'">
+                                        }
+                                        else
+                                        {
+                                            <div class="photo-preview mb-2 bg-light d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                            </div>
+                                        }
+                                        <input type="file"
+                                               name="photoFile"
+                                               class="form-control form-control-sm"
+                                               accept="image/*"
+                                               onchange="previewImage(this, 'preview-@news.id')">
+                                        <input type="hidden" name="current_photo" value="@news.news_url">
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <input type="text"
+                                           name="news_name"
+                                           value="@news.news_name"
+                                           required
+                                           class="form-control"
+                                           placeholder="Название новости">
+                                </td>
+
+                                <td>
+                                    <!-- ИСПРАВЛЕНО: textarea для текста новости -->
+                                    <textarea name="news_text"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Текст новости">@news.news_text</textarea>
+                                </td>
+
+                                <td>
+                                    <input type="text"
+                                           name="news_date"
+                                           value="@news.news_date"
+                                           class="form-control"
+                                           placeholder="дд.мм.гггг">
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <input type="hidden" name="id" value="@news.id">
+
+                                    <div class="d-flex flex-column flex-sm-row gap-2">
+                                        <!-- Кнопка сохранения -->
+                                        <button type="submit" class="btn-action btn-save">
+                                            <i class="bi bi-check-circle"></i>
+                                            <span class="d-none d-sm-inline">Сохранить</span>
+                                        </button>
+
+                                        <!-- Кнопка удаления -->
+                                        <button type="submit"
+                                                formaction="/Home/DeleteNews"
+                                                class="btn-action btn-delete"
+                                                onclick="return confirm('Вы уверены, что хотите удалить новость @news.news_name?')">
+                                            <i class="bi bi-trash"></i>
+                                            <span class="d-none d-sm-inline">Удалить</span>
+                                        </button>
+
+                                        <!-- Кнопка отмены -->
+                                        <a href="@Url.Action("News", "Home")" class="btn-cancel">
+                                            <i class="bi bi-x-circle"></i>
+                                            <span class="d-none d-sm-inline">Отмена</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </form>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <!-- Форма добавления новой новости -->
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle"></i>
+                    Добавить новую новость
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Home/AddNews" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">Фото</label>
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="photo-preview mb-2 bg-light d-flex align-items-center justify-content-center" id="newPhotoPreview">
+                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                </div>
+                                <input type="file"
+                                       name="photoFile"
+                                       class="form-control form-control-sm"
+                                       accept="image/*"
+                                       onchange="previewImage(this, 'newPhotoPreview')">
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="newName" class="form-label">Название новости</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newName"
+                                   name="news_name"
+                                   placeholder="Введите название"
+                                   required>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="newText" class="form-label">Текст новости</label>
+                            <textarea class="form-control"
+                                      id="newText"
+                                      name="news_text"
+                                      rows="3"
+                                      placeholder="Введите текст новости"></textarea>
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label for="newDate" class="form-label">Дата</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newDate"
+                                   name="news_date"
+                                   placeholder="дд.мм.гггг"
+                                   value="@DateTime.Now.ToString("dd.MM.yyyy")">
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i>
+                                Добавить новость
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Функция для предпросмотра изображения
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    if (preview.tagName === 'IMG') {
+                        preview.src = e.target.result;
+                    } else {
+                        preview.innerHTML = `<img src="${e.target.result}" class="photo-preview" alt="Предпросмотр">`;
+                    }
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                if (preview.tagName === 'IMG') {
+                    preview.src = '';
+                } else {
+                    preview.innerHTML = '<i class="bi bi-image text-muted" style="font-size: 2rem;"></i>';
+                }
+            }
+        }
+
+        // Автоматически скрываем сообщения через 5 секунд
+        document.addEventListener('DOMContentLoaded', function () {
+            const messages = document.querySelectorAll('.message-box');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

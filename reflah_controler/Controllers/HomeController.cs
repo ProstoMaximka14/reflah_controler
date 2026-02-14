@@ -185,7 +185,7 @@ namespace reflah_controler.Controllers
         }
 
         // ============================================
-        // АВТОМОБИЛИ (ЧИП-ТЮНИНГ)
+        // АВТОМОБИЛИ 
         // ============================================
 
         // GET: Страница выбора автомобиля
@@ -881,6 +881,375 @@ namespace reflah_controler.Controllers
 
             return partners;
         }
+
+        // ============================================
+        // НОВООСТИ
+        // ============================================
+
+        // GET: Страница новоостей
+        public IActionResult News()
+        {
+            List<NewsModel> news = Get_News_from_data();
+            return View(news);
+        }
+
+        // POST: Добавить новость
+        [HttpPost]
+        public async Task<IActionResult> AddNews(string news_name, string news_text, string news_date, IFormFile photoFile, string photo)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")
+                ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
+
+            try
+            {
+                string fileName = null;
+
+                // Обработка загрузки фото
+                if (photoFile != null && photoFile.Length > 0)
+                {
+                    var newsPath = Path.Combine(sharedUploadsPath, "news");
+
+                    // Создаем папку, если не существует
+                    if (!Directory.Exists(newsPath))
+                    {
+                        Directory.CreateDirectory(newsPath);
+                    }
+
+                    // Проверка типа файла
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        return RedirectToAction("News");
+                    }
+
+                    // Проверка размера (макс. 5MB)
+                    if (photoFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        return RedirectToAction("News");
+                    }
+
+                    // Генерируем уникальное имя файла
+                    fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var filePath = Path.Combine(newsPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await photoFile.CopyToAsync(stream);
+                    }
+                }
+
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    string query = @"INSERT INTO news 
+                    (news_name, news_text, news_url, news_date) 
+                    VALUES 
+                    (@news_name, @news_text, @news_url, @news_date)";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@news_name", news_name ?? "");
+                        command.Parameters.AddWithValue("@news_text", news_text ?? "");
+                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); //  Сохраняем только имя файла
+                        command.Parameters.AddWithValue("news_date", news_date ?? "");
+                        
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            TempData["Message"] = $"Новость {news_name} успешно добавлен";
+                        }
+                        else
+                        {
+                            TempData["Error"] = "Не удалось добавить новость";
+                        }
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Ошибка при загрузке файла: {ex.Message}";
+            }
+
+            return RedirectToAction("News");
+        }
+
+        // POST: Обновить новость
+        [HttpPost]
+        public async Task<IActionResult> UpdateNews(int id, string news_name, string news_text, string news_date, IFormFile photoFile, string photo)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")
+                ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
+
+            try
+            {
+                string fileName = photo; // Изначально старое имя файла
+
+                // Обработка загрузки нового фото
+                if (photoFile != null && photoFile.Length > 0)
+                {
+                    var newsPath = Path.Combine(sharedUploadsPath, "news");
+
+                    // Создаем папку, если не существует
+                    if (!Directory.Exists(newsPath))
+                    {
+                        Directory.CreateDirectory(newsPath);
+                    }
+
+                    // Проверка типа файла
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                    var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        return RedirectToAction("Partners");
+                    }
+
+                    // Проверка размера (макс. 5MB)
+                    if (photoFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        return RedirectToAction("Partners");
+                    }
+
+                    // Генерируем уникальное имя файла
+                    fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var filePath = Path.Combine(newsPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await photoFile.CopyToAsync(stream);
+                    }
+
+                    // Удаляем старое фото, если оно существует
+                    if (!string.IsNullOrEmpty(photo))
+                    {
+                        var oldFilePath = Path.Combine(newsPath, photo);
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                            catch (Exception ex)
+                            {
+                                // Логируем, но не прерываем
+                                Console.WriteLine($"Не удалось удалить старый файл: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    string query = @"UPDATE news SET 
+                    news_name = @news_name, 
+                    news_text = @news_text, 
+                    news_url = @news_url, 
+                    news_date = @news_date 
+                    WHERE id = @id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                        command.Parameters.AddWithValue("@news_name", news_name ?? "");
+                        command.Parameters.AddWithValue("@news_text", news_text ?? "");
+                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); // Сохраняем только имя файла
+                        command.Parameters.AddWithValue("@news_date", news_date ?? "");
+                       
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            TempData["Message"] = $"Новость {news_name} успешно обновлен";
+                        }
+                        else
+                        {
+                            TempData["Error"] = "Нвость не найден";
+
+                            // Если создали новый файл, но запись не обновилась - удаляем файл
+                            if (photoFile != null && fileName != photo)
+                            {
+                                var newFilePath = Path.Combine(sharedUploadsPath, "news", fileName);
+                                if (System.IO.File.Exists(newFilePath))
+                                {
+                                    System.IO.File.Delete(newFilePath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Ошибка при обработке файла: {ex.Message}";
+            }
+
+            return RedirectToAction("News");
+        }
+
+        // POST: Удалить новость
+        [HttpPost]
+        public async Task<IActionResult> DeleteNews(int id)
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")
+                ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
+
+            try
+            {
+                string fileName = "";
+
+                // Сначала получаем имя файла фото
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    string query = "SELECT news_url FROM news WHERE id = @id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                        var result = await command.ExecuteScalarAsync();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            fileName = result.ToString();
+                        }
+                    }
+                }
+
+                // Удаляем запись из БД
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+                    string query = "DELETE FROM news WHERE id = @id";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                        if (rowsAffected > 0)
+                        {
+                            // Удаляем файл фото, если он существует
+                            if (!string.IsNullOrEmpty(fileName))
+                            {
+                                var filePath = Path.Combine(sharedUploadsPath, "news", fileName);
+
+                                if (System.IO.File.Exists(filePath))
+                                {
+                                    try
+                                    {
+                                        System.IO.File.Delete(filePath);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // Логируем, но не прерываем
+                                        Console.WriteLine($"Не удалось удалить файл: {ex.Message}");
+                                    }
+                                }
+                            }
+
+                            TempData["Message"] = "Новость успешно удален";
+                        }
+                        else
+                        {
+                            TempData["Error"] = "Новсть не найден";
+                        }
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+            }
+
+            return RedirectToAction("News");
+        }
+
+        // Метод для получения списка нвостей из БД
+        private List<NewsModel> Get_News_from_data()
+        {
+            List<NewsModel> news = new List<NewsModel>();
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")
+                ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
+
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = "SELECT * FROM news ORDER BY news_name";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var photoUrl = reader.IsDBNull(reader.GetOrdinal("news_url")) ? "" : reader.GetString("news_url");
+
+                                // ВАЖНО: Если в БД сохранен полный путь, оставляем только имя файла
+                                string photoFileName = photoUrl;
+                                if (!string.IsNullOrEmpty(photoUrl) && photoUrl.Contains("/"))
+                                {
+                                    photoFileName = Path.GetFileName(photoUrl);
+                                }
+
+                                news.Add(new NewsModel
+                                {
+                                    id = reader.GetInt32("id"),
+                                    news_name = reader.IsDBNull(reader.GetOrdinal("news_name")) ? "" : reader.GetString("news_name"),
+                                    news_text = reader.IsDBNull(reader.GetOrdinal("news_text")) ? "" : reader.GetString("news_text"),
+                                    news_date = reader.IsDBNull(reader.GetOrdinal("news_date")) ? "" : reader.GetString("news_date"),
+                                    news_url = photoFileName
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                TempData["Error"] = $"Ошибка MySQL при загрузке партнеров: {ex.Message}";
+            }
+            return news;
+        }
+
+        // ============================================
+        // Главная страница
+        // ============================================
+
+        // GET: Страница для редактироования основной страницы
+        public IActionResult Furst_page()
+        {
+            FurstPageModel first_page = new FurstPageModel();   
+            
+            return View(first_page);
+        }
+
+        //Полуение данных главной странцицы из бд
+
+
+        //Редактирование основнй страницы
+
 
         // ============================================
         // ОБЩИЕ МЕТОДЫ
