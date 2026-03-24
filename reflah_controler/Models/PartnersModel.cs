@@ -17,6 +17,8 @@
         public string city { get; set; }
         public string street { get; set; }
         public string house { get; set; }
+        public string longitude { get; set; }
+        public string latitude { get; set; }
 
     }
 }

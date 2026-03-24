@@ -528,7 +528,7 @@ namespace reflah_controler.Controllers
         // POST: Добавить партнера
         [HttpPost]
         public async Task<IActionResult> AddPartner(string name, string phone, string vk, string website,
-            IFormFile photoFile, string photo, string city, string street, string house)
+            IFormFile photoFile, string photo, string city, string street, string house, string longitude, string latitude)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
@@ -579,9 +579,9 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
                     string query = @"INSERT INTO partners 
-                    (name, phone, photo_url, vk_url, website_url, city, street, house) 
+                    (name, phone, photo_url, vk_url, website_url, city, street, house, longitude, latitude) 
                     VALUES 
-                    (@name, @phone, @photo_url, @vk_url, @website_url, @city, @street, @house)";
+                    (@name, @phone, @photo_url, @vk_url, @website_url, @city, @street, @house, @longitude, @latitude)";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
@@ -593,6 +593,8 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@city", city ?? "");
                         command.Parameters.AddWithValue("@street", street ?? "");
                         command.Parameters.AddWithValue("@house", house ?? "");
+                        command.Parameters.AddWithValue("@longitude", longitude ?? "");
+                        command.Parameters.AddWithValue("@latitude", latitude ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -622,7 +624,7 @@ namespace reflah_controler.Controllers
         // POST: Обновить партнера
         [HttpPost]
         public async Task<IActionResult> UpdatePartner(int id, string name, string phone, string vk,
-            string website, IFormFile photoFile, string photo, string city, string street, string house)
+            string website, IFormFile photoFile, string photo, string city, string street, string house, string longitude, string latitude)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
@@ -698,7 +700,10 @@ namespace reflah_controler.Controllers
                     website_url = @website_url,
                     city = @city,
                     street = @street,
-                    house = @house
+                    house = @house,
+                    longitude = @longitude,
+                    latitude = @latitude
+
                     WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -712,7 +717,8 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@city", city ?? "");
                         command.Parameters.AddWithValue("@street", street ?? "");
                         command.Parameters.AddWithValue("@house", house ?? "");
-
+                        command.Parameters.AddWithValue("@longitude", longitude ?? "");
+                        command.Parameters.AddWithValue("@latitude", latitude ?? "");
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
                         if (rowsAffected > 0)
@@ -867,7 +873,9 @@ namespace reflah_controler.Controllers
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
                                     street = reader.IsDBNull(reader.GetOrdinal("street")) ? "" : reader.GetString("street"),
-                                    house = reader.IsDBNull(reader.GetOrdinal("house")) ? "" : reader.GetString("house")
+                                    house = reader.IsDBNull(reader.GetOrdinal("house")) ? "" : reader.GetString("house"),
+                                    longitude = reader.IsDBNull(reader.GetOrdinal("longitude")) ? "" : reader.GetString("longitude"),
+                                    latitude = reader.IsDBNull(reader.GetOrdinal("latitude")) ? "" : reader.GetString("latitude")
                                 });
                             }
                         }

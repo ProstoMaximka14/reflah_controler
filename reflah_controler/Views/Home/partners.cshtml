@@ -164,6 +164,8 @@
                             <th>Город</th>
                             <th>Улица</th>
                             <th>Дом</th>
+                            <th>Долгота</th>
+                            <th>Широта</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -256,7 +258,22 @@
                                            class="partner-input"
                                            placeholder="номер дома">
                                 </td>
-
+                                <td>
+                                    <input type="text"
+                                           name="longitude"
+                                           value="@partner.longitude"
+                                           required
+                                           class="partner-input"
+                                           placeholder="долота">
+                                </td>
+                                <td>
+                                    <input type="text"
+                                           name="latitude"
+                                           value="@partner.latitude"
+                                           required
+                                           class="partner-input"
+                                           placeholder="широта">
+                                </td>
                                 <td class="text-nowrap">
                                     <input type="hidden" name="id" value="@partner.Id">
 
@@ -377,6 +394,24 @@
                                    id="newHouse"
                                    name="house"
                                    placeholder="Номер дома"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label for="newlongitude" class="form-label">долгота</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newlongitude"
+                                   name="longitude"
+                                   placeholder="долгота"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label for="newlatitude" class="form-label">широта</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="newlatitude"
+                                   name="latitude"
+                                   placeholder="широта"
                                    required>
                         </div>
                         <div class="col-12">
