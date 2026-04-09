@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+п»їusing Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using reflah_controler.Models;
@@ -6,22 +6,29 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using Microsoft.AspNetCore.SignalR;
+using reflah_controler.Hubs;
+
 namespace reflah_controler.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IConfiguration _configuration;
 
-        public HomeController(IConfiguration configuration)
+        private readonly IConfiguration _configuration;
+        private readonly IHubContext<DatabaseHub> _hubContext;
+
+
+        public HomeController(IConfiguration configuration, IHubContext<DatabaseHub> hubContext) 
         {
             _configuration = configuration;
+            _hubContext = hubContext;
         }
 
         // ============================================
-        // АДМИНИСТРАТОРЫ
+        // РђР”РњРРќРРЎРўР РђРўРћР Р«
         // ============================================
 
-        // GET: Показать список администраторов
+        // GET: РџРѕРєР°Р·Р°С‚СЊ СЃРїРёСЃРѕРє Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ
         public IActionResult Index()
         {
             List<AdminsModel> admins = GetAdminsFromDatabase();
@@ -51,18 +58,18 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Администратор успешно обновлен";
+                            TempData["Message"] = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
                         }
                         else
                         {
-                            TempData["Error"] = "Администратор не найден";
+                            TempData["Error"] = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Index");
@@ -89,18 +96,18 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Администратор успешно удален";
+                            TempData["Message"] = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                         }
                         else
                         {
-                            TempData["Error"] = "Администратор не найден";
+                            TempData["Error"] = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Index");
@@ -128,18 +135,18 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Администратор успешно добавлен";
+                            TempData["Message"] = "РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                         }
                         else
                         {
-                            TempData["Error"] = "Не удалось добавить администратора";
+                            TempData["Error"] = "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Index");
@@ -178,38 +185,38 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return admins;
         }
 
         // ============================================
-        // АВТОМОБИЛИ 
+        // РђР’РўРћРњРћР‘РР›Р 
         // ============================================
 
-        // GET: Страница выбора автомобиля
+        // GET: РЎС‚СЂР°РЅРёС†Р° РІС‹Р±РѕСЂР° Р°РІС‚РѕРјРѕР±РёР»СЏ
         public IActionResult Cars()
         {
             List<ReflashCarModel> cars = GetCarsFromDatabase();
             return View(cars);
         }
 
-        // GET: Страница редактирования конкретного автомобиля
+        // GET: РЎС‚СЂР°РЅРёС†Р° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ Р°РІС‚РѕРјРѕР±РёР»СЏ
         public IActionResult EditCar(int id)
         {
             ReflashCarModel car = GetCarById(id);
             if (car == null)
             {
-                TempData["Error"] = "Автомобиль не найден";
+                TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("Cars");
             }
             return View(car);
         }
 
-        // POST: Обновить автомобиль
+        // POST: РћР±РЅРѕРІРёС‚СЊ Р°РІС‚РѕРјРѕР±РёР»СЊ
         [HttpPost]
-        public IActionResult UpdateCar(ReflashCarModel car)
+        public async Task<IActionResult> UpdateCar(ReflashCarModel car)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
@@ -273,26 +280,27 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Автомобиль {car.Brand} {car.Model} успешно обновлен";
+                            TempData["Message"] = $"РђРІС‚РѕРјРѕР±РёР»СЊ {car.Brand} {car.Model} СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Автомобиль не найден";
+                            TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("EditCar", new { id = car.Id });
         }
 
-        // POST: Удалить автомобиль
+        // POST: РЈРґР°Р»РёС‚СЊ Р°РІС‚РѕРјРѕР±РёР»СЊ
         [HttpPost]
-        public IActionResult DeleteCar(int id)
+        public async Task<IActionResult> DeleteCar(int id)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
@@ -312,26 +320,27 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Автомобиль успешно удален";
+                            TempData["Message"] = "РђРІС‚РѕРјРѕР±РёР»СЊ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Автомобиль не найден";
+                            TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("Cars");
         }
 
-        // POST: Добавить автомобиль
+        // POST: Р”РѕР±Р°РІРёС‚СЊ Р°РІС‚РѕРјРѕР±РёР»СЊ
         [HttpPost]
-        public IActionResult AddCar(ReflashCarModel car)
+        public async Task<IActionResult> AddCar(ReflashCarModel car)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
                 ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
@@ -386,14 +395,15 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Автомобиль {car.Brand} {car.Model} успешно добавлен";
-                            // Получаем ID нового автомобиля
+                            TempData["Message"] = $"РђРІС‚РѕРјРѕР±РёР»СЊ {car.Brand} {car.Model} СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
+                            // РџРѕР»СѓС‡Р°РµРј ID РЅРѕРІРѕРіРѕ Р°РІС‚РѕРјРѕР±РёР»СЏ
                             int newId = (int)command.LastInsertedId;
+                            await NotifyReaderSite();
                             return RedirectToAction("EditCar", new { id = newId });
                         }
                         else
                         {
-                            TempData["Error"] = "Не удалось добавить автомобиль";
+                            TempData["Error"] = "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ Р°РІС‚РѕРјРѕР±РёР»СЊ";
                             return RedirectToAction("Cars");
                         }
                     }
@@ -401,12 +411,12 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё: {ex.Message}";
                 return RedirectToAction("Cars");
             }
         }
 
-        // Метод для получения списка автомобилей
+        // РњРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЃРїРёСЃРєР° Р°РІС‚РѕРјРѕР±РёР»РµР№
         private List<ReflashCarModel> GetCarsFromDatabase()
         {
             List<ReflashCarModel> cars = new List<ReflashCarModel>();
@@ -443,13 +453,13 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке автомобилей: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ Р°РІС‚РѕРјРѕР±РёР»РµР№: {ex.Message}";
             }
 
             return cars;
         }
 
-        // Метод для получения конкретного автомобиля по ID
+        // РњРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ Р°РІС‚РѕРјРѕР±РёР»СЏ РїРѕ ID
         private ReflashCarModel GetCarById(int id)
         {
             ReflashCarModel car = null;
@@ -506,26 +516,26 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке автомобиля: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ Р°РІС‚РѕРјРѕР±РёР»СЏ: {ex.Message}";
             }
 
             return car;
         }
 
         // ============================================
-        // ПАРТНЁРЫ
+        // РџРђР РўРќРЃР Р«
         // ============================================
 
         private readonly string sharedUploadsPath = @"C:\fotos";
 
-        // GET: Страница партнеров
+        // GET: РЎС‚СЂР°РЅРёС†Р° РїР°СЂС‚РЅРµСЂРѕРІ
         public IActionResult Partners()
         {
             List<PartnersModel> partners = GetPartnersFromDatabase();
             return View(partners);
         }
 
-        // POST: Добавить партнера
+        // POST: Р”РѕР±Р°РІРёС‚СЊ РїР°СЂС‚РЅРµСЂР°
         [HttpPost]
         public async Task<IActionResult> AddPartner(string name, string phone, string vk, string website,
             IFormFile photoFile, string photo, string city, string street, string house, string longitude, string latitude)
@@ -537,35 +547,35 @@ namespace reflah_controler.Controllers
             {
                 string fileName = null;
 
-                // Обработка загрузки фото
+                // РћР±СЂР°Р±РѕС‚РєР° Р·Р°РіСЂСѓР·РєРё С„РѕС‚Рѕ
                 if (photoFile != null && photoFile.Length > 0)
                 {
                     var partnersPath = Path.Combine(sharedUploadsPath, "partners");
 
-                    // Создаем папку, если не существует
+                    // РЎРѕР·РґР°РµРј РїР°РїРєСѓ, РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!Directory.Exists(partnersPath))
                     {
                         Directory.CreateDirectory(partnersPath);
                     }
 
-                    // Проверка типа файла
+                    // РџСЂРѕРІРµСЂРєР° С‚РёРїР° С„Р°Р№Р»Р°
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Проверка размера (макс. 5MB)
+                    // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂР° (РјР°РєСЃ. 5MB)
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Генерируем уникальное имя файла
+                    // Р“РµРЅРµСЂРёСЂСѓРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ РёРјСЏ С„Р°Р№Р»Р°
                     fileName = $"{Guid.NewGuid()}{fileExtension}";
                     var filePath = Path.Combine(partnersPath, fileName);
 
@@ -587,7 +597,7 @@ namespace reflah_controler.Controllers
                     {
                         command.Parameters.AddWithValue("@name", name ?? "");
                         command.Parameters.AddWithValue("@phone", phone ?? "");
-                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); //  Сохраняем только имя файла
+                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); //  РЎРѕС…СЂР°РЅСЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
                         command.Parameters.AddWithValue("@city", city ?? "");
@@ -600,28 +610,29 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Партнер {name} успешно добавлен";
+                            TempData["Message"] = $"РџР°СЂС‚РЅРµСЂ {name} СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Не удалось добавить партнера";
+                            TempData["Error"] = "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ РїР°СЂС‚РЅРµСЂР°";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при загрузке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
         }
 
-        // POST: Обновить партнера
+        // POST: РћР±РЅРѕРІРёС‚СЊ РїР°СЂС‚РЅРµСЂР°
         [HttpPost]
         public async Task<IActionResult> UpdatePartner(int id, string name, string phone, string vk,
             string website, IFormFile photoFile, string photo, string city, string street, string house, string longitude, string latitude)
@@ -631,37 +642,37 @@ namespace reflah_controler.Controllers
 
             try
             {
-                string fileName = photo; // Изначально старое имя файла
+                string fileName = photo; // РР·РЅР°С‡Р°Р»СЊРЅРѕ СЃС‚Р°СЂРѕРµ РёРјСЏ С„Р°Р№Р»Р°
 
-                // Обработка загрузки нового фото
+                // РћР±СЂР°Р±РѕС‚РєР° Р·Р°РіСЂСѓР·РєРё РЅРѕРІРѕРіРѕ С„РѕС‚Рѕ
                 if (photoFile != null && photoFile.Length > 0)
                 {
                     var partnersPath = Path.Combine(sharedUploadsPath, "partners");
 
-                    // Создаем папку, если не существует
+                    // РЎРѕР·РґР°РµРј РїР°РїРєСѓ, РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!Directory.Exists(partnersPath))
                     {
                         Directory.CreateDirectory(partnersPath);
                     }
 
-                    // Проверка типа файла
+                    // РџСЂРѕРІРµСЂРєР° С‚РёРїР° С„Р°Р№Р»Р°
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Проверка размера (макс. 5MB)
+                    // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂР° (РјР°РєСЃ. 5MB)
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Генерируем уникальное имя файла
+                    // Р“РµРЅРµСЂРёСЂСѓРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ РёРјСЏ С„Р°Р№Р»Р°
                     fileName = $"{Guid.NewGuid()}{fileExtension}";
                     var filePath = Path.Combine(partnersPath, fileName);
 
@@ -670,7 +681,7 @@ namespace reflah_controler.Controllers
                         await photoFile.CopyToAsync(stream);
                     }
 
-                    // Удаляем старое фото, если оно существует
+                    // РЈРґР°Р»СЏРµРј СЃС‚Р°СЂРѕРµ С„РѕС‚Рѕ, РµСЃР»Рё РѕРЅРѕ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!string.IsNullOrEmpty(photo))
                     {
                         var oldFilePath = Path.Combine(partnersPath, photo);
@@ -682,8 +693,8 @@ namespace reflah_controler.Controllers
                             }
                             catch (Exception ex)
                             {
-                                // Логируем, но не прерываем
-                                Console.WriteLine($"Не удалось удалить старый файл: {ex.Message}");
+                                // Р›РѕРіРёСЂСѓРµРј, РЅРѕ РЅРµ РїСЂРµСЂС‹РІР°РµРј
+                                Console.WriteLine($"РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ СЃС‚Р°СЂС‹Р№ С„Р°Р№Р»: {ex.Message}");
                             }
                         }
                     }
@@ -711,7 +722,7 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@id", id);
                         command.Parameters.AddWithValue("@name", name ?? "");
                         command.Parameters.AddWithValue("@phone", phone ?? "");
-                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); // Сохраняем только имя файла
+                        command.Parameters.AddWithValue("@photo_url", fileName ?? ""); // РЎРѕС…СЂР°РЅСЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
                         command.Parameters.AddWithValue("@city", city ?? "");
@@ -723,13 +734,14 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Партнер {name} успешно обновлен";
+                            TempData["Message"] = $"РџР°СЂС‚РЅРµСЂ {name} СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Партнер не найден";
+                            TempData["Error"] = "РџР°СЂС‚РЅРµСЂ РЅРµ РЅР°Р№РґРµРЅ";
 
-                            // Если создали новый файл, но запись не обновилась - удаляем файл
+                            // Р•СЃР»Рё СЃРѕР·РґР°Р»Рё РЅРѕРІС‹Р№ С„Р°Р№Р», РЅРѕ Р·Р°РїРёСЃСЊ РЅРµ РѕР±РЅРѕРІРёР»Р°СЃСЊ - СѓРґР°Р»СЏРµРј С„Р°Р№Р»
                             if (photoFile != null && fileName != photo)
                             {
                                 var newFilePath = Path.Combine(sharedUploadsPath, "partners", fileName);
@@ -744,17 +756,17 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при обработке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
         }
 
-        // POST: Удалить партнера
+        // POST: РЈРґР°Р»РёС‚СЊ РїР°СЂС‚РЅРµСЂР°
         [HttpPost]
         public async Task<IActionResult> DeletePartner(int id)
         {
@@ -765,7 +777,7 @@ namespace reflah_controler.Controllers
             {
                 string fileName = "";
 
-                // Сначала получаем имя файла фото
+                // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј РёРјСЏ С„Р°Р№Р»Р° С„РѕС‚Рѕ
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -783,7 +795,7 @@ namespace reflah_controler.Controllers
                     }
                 }
 
-                // Удаляем запись из БД
+                // РЈРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ РёР· Р‘Р”
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -797,7 +809,7 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            // Удаляем файл фото, если он существует
+                            // РЈРґР°Р»СЏРµРј С„Р°Р№Р» С„РѕС‚Рѕ, РµСЃР»Рё РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                             if (!string.IsNullOrEmpty(fileName))
                             {
                                 var filePath = Path.Combine(sharedUploadsPath, "partners", fileName);
@@ -810,30 +822,31 @@ namespace reflah_controler.Controllers
                                     }
                                     catch (Exception ex)
                                     {
-                                        // Логируем, но не прерываем
-                                        Console.WriteLine($"Не удалось удалить файл: {ex.Message}");
+                                        // Р›РѕРіРёСЂСѓРµРј, РЅРѕ РЅРµ РїСЂРµСЂС‹РІР°РµРј
+                                        Console.WriteLine($"РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р»: {ex.Message}");
                                     }
                                 }
                             }
 
-                            TempData["Message"] = "Партнер успешно удален";
+                            TempData["Message"] = "РџР°СЂС‚РЅРµСЂ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Партнер не найден";
+                            TempData["Error"] = "РџР°СЂС‚РЅРµСЂ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
         }
 
-        // Метод для получения списка партнеров из БД
+        // РњРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЃРїРёСЃРєР° РїР°СЂС‚РЅРµСЂРѕРІ РёР· Р‘Р”
         private List<PartnersModel> GetPartnersFromDatabase()
         {
             List<PartnersModel> partners = new List<PartnersModel>();
@@ -856,7 +869,7 @@ namespace reflah_controler.Controllers
                             {
                                 var photoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url")) ? "" : reader.GetString("photo_url");
 
-                                // Если в БД сохранен полный путь, оставляем только имя файла
+                                // Р•СЃР»Рё РІ Р‘Р” СЃРѕС…СЂР°РЅРµРЅ РїРѕР»РЅС‹Р№ РїСѓС‚СЊ, РѕСЃС‚Р°РІР»СЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                                 string photoFileName = photoUrl;
                                 if (!string.IsNullOrEmpty(photoUrl) && photoUrl.Contains("/"))
                                 {
@@ -868,7 +881,7 @@ namespace reflah_controler.Controllers
                                     Id = reader.GetInt32("id"),
                                     name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
                                     phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? "" : reader.GetString("phone"),
-                                    photo = photoFileName, // Только имя файла
+                                    photo = photoFileName, // РўРѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
@@ -884,24 +897,24 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке партнеров: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ РїР°СЂС‚РЅРµСЂРѕРІ: {ex.Message}";
             }
 
             return partners;
         }
 
         // ============================================
-        // НОВООСТИ
+        // РќРћР’РћРћРЎРўР
         // ============================================
 
-        // GET: Страница новоостей
+        // GET: РЎС‚СЂР°РЅРёС†Р° РЅРѕРІРѕРѕСЃС‚РµР№
         public IActionResult News()
         {
             List<NewsModel> news = Get_News_from_data();
             return View(news);
         }
 
-        // POST: Добавить новость
+        // POST: Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІРѕСЃС‚СЊ
         [HttpPost]
         public async Task<IActionResult> AddNews(string news_name, string news_text, string news_date, IFormFile photoFile, string photo)
         {
@@ -912,35 +925,35 @@ namespace reflah_controler.Controllers
             {
                 string fileName = null;
 
-                // Обработка загрузки фото
+                // РћР±СЂР°Р±РѕС‚РєР° Р·Р°РіСЂСѓР·РєРё С„РѕС‚Рѕ
                 if (photoFile != null && photoFile.Length > 0)
                 {
                     var newsPath = Path.Combine(sharedUploadsPath, "news");
 
-                    // Создаем папку, если не существует
+                    // РЎРѕР·РґР°РµРј РїР°РїРєСѓ, РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!Directory.Exists(newsPath))
                     {
                         Directory.CreateDirectory(newsPath);
                     }
 
-                    // Проверка типа файла
+                    // РџСЂРѕРІРµСЂРєР° С‚РёРїР° С„Р°Р№Р»Р°
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("News");
                     }
 
-                    // Проверка размера (макс. 5MB)
+                    // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂР° (РјР°РєСЃ. 5MB)
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("News");
                     }
 
-                    // Генерируем уникальное имя файла
+                    // Р“РµРЅРµСЂРёСЂСѓРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ РёРјСЏ С„Р°Р№Р»Р°
                     fileName = $"{Guid.NewGuid()}{fileExtension}";
                     var filePath = Path.Combine(newsPath, fileName);
 
@@ -962,7 +975,7 @@ namespace reflah_controler.Controllers
                     {
                         command.Parameters.AddWithValue("@news_name", news_name ?? "");
                         command.Parameters.AddWithValue("@news_text", news_text ?? "");
-                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); //  Сохраняем только имя файла
+                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); //  РЎРѕС…СЂР°РЅСЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                         command.Parameters.AddWithValue("news_date", news_date ?? "");
                         
 
@@ -970,28 +983,29 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Новость {news_name} успешно добавлен";
+                            TempData["Message"] = $"РќРѕРІРѕСЃС‚СЊ {news_name} СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Не удалось добавить новость";
+                            TempData["Error"] = "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ РЅРѕРІРѕСЃС‚СЊ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при загрузке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("News");
         }
 
-        // POST: Обновить новость
+        // POST: РћР±РЅРѕРІРёС‚СЊ РЅРѕРІРѕСЃС‚СЊ
         [HttpPost]
         public async Task<IActionResult> UpdateNews(int id, string news_name, string news_text, string news_date, IFormFile photoFile, string photo)
         {
@@ -1000,37 +1014,37 @@ namespace reflah_controler.Controllers
 
             try
             {
-                string fileName = photo; // Изначально старое имя файла
+                string fileName = photo; // РР·РЅР°С‡Р°Р»СЊРЅРѕ СЃС‚Р°СЂРѕРµ РёРјСЏ С„Р°Р№Р»Р°
 
-                // Обработка загрузки нового фото
+                // РћР±СЂР°Р±РѕС‚РєР° Р·Р°РіСЂСѓР·РєРё РЅРѕРІРѕРіРѕ С„РѕС‚Рѕ
                 if (photoFile != null && photoFile.Length > 0)
                 {
                     var newsPath = Path.Combine(sharedUploadsPath, "news");
 
-                    // Создаем папку, если не существует
+                    // РЎРѕР·РґР°РµРј РїР°РїРєСѓ, РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!Directory.Exists(newsPath))
                     {
                         Directory.CreateDirectory(newsPath);
                     }
 
-                    // Проверка типа файла
+                    // РџСЂРѕРІРµСЂРєР° С‚РёРїР° С„Р°Р№Р»Р°
                     var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     var fileExtension = Path.GetExtension(photoFile.FileName).ToLower();
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Проверка размера (макс. 5MB)
+                    // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂР° (РјР°РєСЃ. 5MB)
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("Partners");
                     }
 
-                    // Генерируем уникальное имя файла
+                    // Р“РµРЅРµСЂРёСЂСѓРµРј СѓРЅРёРєР°Р»СЊРЅРѕРµ РёРјСЏ С„Р°Р№Р»Р°
                     fileName = $"{Guid.NewGuid()}{fileExtension}";
                     var filePath = Path.Combine(newsPath, fileName);
 
@@ -1039,7 +1053,7 @@ namespace reflah_controler.Controllers
                         await photoFile.CopyToAsync(stream);
                     }
 
-                    // Удаляем старое фото, если оно существует
+                    // РЈРґР°Р»СЏРµРј СЃС‚Р°СЂРѕРµ С„РѕС‚Рѕ, РµСЃР»Рё РѕРЅРѕ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     if (!string.IsNullOrEmpty(photo))
                     {
                         var oldFilePath = Path.Combine(newsPath, photo);
@@ -1051,8 +1065,8 @@ namespace reflah_controler.Controllers
                             }
                             catch (Exception ex)
                             {
-                                // Логируем, но не прерываем
-                                Console.WriteLine($"Не удалось удалить старый файл: {ex.Message}");
+                                // Р›РѕРіРёСЂСѓРµРј, РЅРѕ РЅРµ РїСЂРµСЂС‹РІР°РµРј
+                                Console.WriteLine($"РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ СЃС‚Р°СЂС‹Р№ С„Р°Р№Р»: {ex.Message}");
                             }
                         }
                     }
@@ -1073,7 +1087,7 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@id", id);
                         command.Parameters.AddWithValue("@news_name", news_name ?? "");
                         command.Parameters.AddWithValue("@news_text", news_text ?? "");
-                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); // Сохраняем только имя файла
+                        command.Parameters.AddWithValue("@news_url", fileName ?? ""); // РЎРѕС…СЂР°РЅСЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                         command.Parameters.AddWithValue("@news_date", news_date ?? "");
                        
 
@@ -1081,13 +1095,14 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Новость {news_name} успешно обновлен";
+                            TempData["Message"] = $"РќРѕРІРѕСЃС‚СЊ {news_name} СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Нвость не найден";
+                            TempData["Error"] = "РќРІРѕСЃС‚СЊ РЅРµ РЅР°Р№РґРµРЅ";
 
-                            // Если создали новый файл, но запись не обновилась - удаляем файл
+                            // Р•СЃР»Рё СЃРѕР·РґР°Р»Рё РЅРѕРІС‹Р№ С„Р°Р№Р», РЅРѕ Р·Р°РїРёСЃСЊ РЅРµ РѕР±РЅРѕРІРёР»Р°СЃСЊ - СѓРґР°Р»СЏРµРј С„Р°Р№Р»
                             if (photoFile != null && fileName != photo)
                             {
                                 var newFilePath = Path.Combine(sharedUploadsPath, "news", fileName);
@@ -1102,17 +1117,17 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при обработке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("News");
         }
 
-        // POST: Удалить новость
+        // POST: РЈРґР°Р»РёС‚СЊ РЅРѕРІРѕСЃС‚СЊ
         [HttpPost]
         public async Task<IActionResult> DeleteNews(int id)
         {
@@ -1123,7 +1138,7 @@ namespace reflah_controler.Controllers
             {
                 string fileName = "";
 
-                // Сначала получаем имя файла фото
+                // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј РёРјСЏ С„Р°Р№Р»Р° С„РѕС‚Рѕ
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -1141,7 +1156,7 @@ namespace reflah_controler.Controllers
                     }
                 }
 
-                // Удаляем запись из БД
+                // РЈРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ РёР· Р‘Р”
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -1155,7 +1170,7 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            // Удаляем файл фото, если он существует
+                            // РЈРґР°Р»СЏРµРј С„Р°Р№Р» С„РѕС‚Рѕ, РµСЃР»Рё РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                             if (!string.IsNullOrEmpty(fileName))
                             {
                                 var filePath = Path.Combine(sharedUploadsPath, "news", fileName);
@@ -1168,30 +1183,31 @@ namespace reflah_controler.Controllers
                                     }
                                     catch (Exception ex)
                                     {
-                                        // Логируем, но не прерываем
-                                        Console.WriteLine($"Не удалось удалить файл: {ex.Message}");
+                                        // Р›РѕРіРёСЂСѓРµРј, РЅРѕ РЅРµ РїСЂРµСЂС‹РІР°РµРј
+                                        Console.WriteLine($"РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р»: {ex.Message}");
                                     }
                                 }
                             }
 
-                            TempData["Message"] = "Новость успешно удален";
+                            TempData["Message"] = "РќРѕРІРѕСЃС‚СЊ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
+                            await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Новсть не найден";
+                            TempData["Error"] = "РќРѕРІСЃС‚СЊ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("News");
         }
 
-        // Метод для получения списка нвостей из БД
+        // РњРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ СЃРїРёСЃРєР° РЅРІРѕСЃС‚РµР№ РёР· Р‘Р”
         private List<NewsModel> Get_News_from_data()
         {
             List<NewsModel> news = new List<NewsModel>();
@@ -1214,7 +1230,7 @@ namespace reflah_controler.Controllers
                             {
                                 var photoUrl = reader.IsDBNull(reader.GetOrdinal("news_url")) ? "" : reader.GetString("news_url");
 
-                                // ВАЖНО: Если в БД сохранен полный путь, оставляем только имя файла
+                                // Р’РђР–РќРћ: Р•СЃР»Рё РІ Р‘Р” СЃРѕС…СЂР°РЅРµРЅ РїРѕР»РЅС‹Р№ РїСѓС‚СЊ, РѕСЃС‚Р°РІР»СЏРµРј С‚РѕР»СЊРєРѕ РёРјСЏ С„Р°Р№Р»Р°
                                 string photoFileName = photoUrl;
                                 if (!string.IsNullOrEmpty(photoUrl) && photoUrl.Contains("/"))
                                 {
@@ -1236,16 +1252,16 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке партнеров: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ РїР°СЂС‚РЅРµСЂРѕРІ: {ex.Message}";
             }
             return news;
         }
 
         // ============================================
-        // Главная страница
+        // Р“Р»Р°РІРЅР°СЏ СЃС‚СЂР°РЅРёС†Р°
         // ============================================
 
-        // GET: Страница для редактироования основной страницы
+        // GET: РЎС‚СЂР°РЅРёС†Р° РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРѕРІР°РЅРёСЏ РѕСЃРЅРѕРІРЅРѕР№ СЃС‚СЂР°РЅРёС†С‹
         public IActionResult Furst_page()
         {
             FurstPageModel first_page = new FurstPageModel();   
@@ -1253,20 +1269,41 @@ namespace reflah_controler.Controllers
             return View(first_page);
         }
 
-        //Полуение данных главной странцицы из бд
+        //РџРѕР»СѓРµРЅРёРµ РґР°РЅРЅС‹С… РіР»Р°РІРЅРѕР№ СЃС‚СЂР°РЅС†РёС†С‹ РёР· Р±Рґ
 
 
-        //Редактирование основнй страницы
+        //Р РµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РѕСЃРЅРѕРІРЅР№ СЃС‚СЂР°РЅРёС†С‹
 
 
         // ============================================
-        // ОБЩИЕ МЕТОДЫ
+        // РћР‘Р©РР• РњР•РўРћР”Р«
         // ============================================
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private async Task NotifyReaderSite()
+        {
+            try
+            {
+                string readerSiteUrl = "http://localhost:80";
+
+                // РЎРѕР·РґР°РµРј handler СЃ РѕС‚РєР»СЋС‡РµРЅРЅРѕР№ РїСЂРѕРІРµСЂРєРѕР№ SSL
+                using var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+                using var client = new HttpClient(handler);
+                await client.PostAsync($"{readerSiteUrl}/api/db-notify", null);
+
+                Console.WriteLine("вњ… РЈРІРµРґРѕРјР»РµРЅРёРµ РѕС‚РїСЂР°РІР»РµРЅРѕ С‡РёС‚Р°СЋС‰РµРјСѓ СЃР°Р№С‚Сѓ");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"вќЊ РћС€РёР±РєР° РѕС‚РїСЂР°РІРєРё: {ex.Message}");
+            }
         }
     }
 }
