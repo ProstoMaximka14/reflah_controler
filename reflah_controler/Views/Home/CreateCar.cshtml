@@ -1,6 +1,6 @@
 ﻿@model reflah_controler.Models.ReflashCarModel
 @{
-    ViewData["Title"] = $"Редактирование: {Model.Brand} {Model.Model}";
+    ViewData["Title"] = "Добавление нового автомобиля";
 }
 <!DOCTYPE html>
 <html lang="ru">
@@ -104,14 +104,10 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="mb-0">
-                    <i class="bi bi-car-front-fill text-primary"></i>
-                    @Model.Brand @Model.Model
-                    @if (!string.IsNullOrEmpty(Model.Generation))
-                    {
-                        <span class="text-muted h4">(@Model.Generation)</span>
-                    }
+                    <i class="bi bi-plus-circle-fill text-success"></i>
+                    Добавление нового автомобиля
                 </h1>
-                <div class="text-muted">ID: #@Model.Id</div>
+                <div class="text-muted">Заполните информацию об автомобиле</div>
             </div>
             <div>
                 <a href="@Url.Action("Cars")" class="btn btn-outline-secondary">
@@ -121,9 +117,7 @@
             </div>
         </div>
 
-        <form method="post" action="/Home/UpdateCar">
-            <input type="hidden" name="Id" value="@Model.Id">
-            
+        <form method="post" action="/Home/CreateCar">
             <!-- Блок с изображением -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -132,27 +126,18 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            @if (!string.IsNullOrEmpty(Model.Image))
-                            {
-                                <img src="@Model.Image" class="img-fluid car-image-preview mb-3" 
-                                     alt="@Model.Brand @Model.Model"
-                                onerror="this.style.display='none'; document.getElementById('noImageMessage').style.display='block';">
-                            }
-                            else
-                            {
-                                <div id="noImageMessage" class="@(string.IsNullOrEmpty(Model.Image) ? "" : "d-none")">
+                            <div id="noImageMessage">
                                 <div class="placeholder-image">
                                     <i class="bi bi-car-front fs-1"></i>
                                     <div class="mt-2">Изображение отсутствует</div>
                                 </div>
                             </div>
-                            }
-                            
+                            <img id="previewImg" class="img-fluid car-image-preview mb-3" style="display:none;" alt="Предварительный просмотр">
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Ссылка на изображение</label>
-                                <input type="text" class="form-control" name="Image" value="@Model.Image" 
+                                <input type="text" class="form-control" name="Image" id="ImageUrl" 
                                        placeholder="https://example.com/image.jpg">
                                 <div class="form-text">Введите URL изображения для предварительного просмотра</div>
                             </div>
@@ -174,19 +159,19 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Марка*</label>
-                            <input type="text" class="form-control" name="Brand" value="@Model.Brand" required>
+                            <input type="text" class="form-control" name="Brand" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Модель*</label>
-                            <input type="text" class="form-control" name="Model" value="@Model.Model" required>
+                            <input type="text" class="form-control" name="Model" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Поколение</label>
-                            <input type="text" class="form-control" name="Generation" value="@Model.Generation">
+                            <input type="text" class="form-control" name="Generation">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Двигатель</label>
-                            <input type="text" class="form-control" name="Engine" value="@Model.Engine">
+                            <input type="text" class="form-control" name="Engine">
                         </div>
                     </div>
                 </div>
@@ -220,23 +205,23 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Описание</label>
-                                <textarea class="form-control car-textarea" name="AboutRu" rows="4">@Model.AboutRu</textarea>
+                                <textarea class="form-control car-textarea" name="AboutRu" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Результат тюнинга</label>
-                                <textarea class="form-control car-textarea" name="ResultRu" rows="4">@Model.ResultRu</textarea>
+                                <textarea class="form-control car-textarea" name="ResultRu" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Блок управления</label>
-                                <textarea class="form-control car-textarea" name="EngineControlRu" rows="4">@Model.EngineControlRu</textarea>
+                                <textarea class="form-control car-textarea" name="EngineControlRu" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Опции</label>
-                                <textarea class="form-control car-textarea" name="OptionsRu" rows="4">@Model.OptionsRu</textarea>
+                                <textarea class="form-control car-textarea" name="OptionsRu" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Цена</label>
-                                <textarea class="form-control car-textarea" name="PriceRu" rows="4">@Model.PriceRu</textarea>
+                                <textarea class="form-control car-textarea" name="PriceRu" rows="4"></textarea>
                             </div>
                         </div>
                     </div>
@@ -246,23 +231,23 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control car-textarea" name="AboutEng" rows="4">@Model.AboutEng</textarea>
+                                <textarea class="form-control car-textarea" name="AboutEng" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Tuning Result</label>
-                                <textarea class="form-control car-textarea" name="ResultEng" rows="4">@Model.ResultEng</textarea>
+                                <textarea class="form-control car-textarea" name="ResultEng" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Engine Control Unit</label>
-                                <textarea class="form-control car-textarea" name="EngineControlEng" rows="4">@Model.EngineControlEng</textarea>
+                                <textarea class="form-control car-textarea" name="EngineControlEng" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Options</label>
-                                <textarea class="form-control car-textarea" name="OptionsEng" rows="4">@Model.OptionsEng</textarea>
+                                <textarea class="form-control car-textarea" name="OptionsEng" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Price</label>
-                                <textarea class="form-control car-textarea" name="PriceEng" rows="4">@Model.PriceEng</textarea>
+                                <textarea class="form-control car-textarea" name="PriceEng" rows="4"></textarea>
                             </div>
                         </div>
                     </div>
@@ -272,23 +257,23 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Beschreibung</label>
-                                <textarea class="form-control car-textarea" name="AboutGer" rows="4">@Model.AboutGer</textarea>
+                                <textarea class="form-control car-textarea" name="AboutGer" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Tuning-Ergebnis</label>
-                                <textarea class="form-control car-textarea" name="ResultGer" rows="4">@Model.ResultGer</textarea>
+                                <textarea class="form-control car-textarea" name="ResultGer" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Motorsteuergerät</label>
-                                <textarea class="form-control car-textarea" name="EngineControlGer" rows="4">@Model.EngineControlGer</textarea>
+                                <textarea class="form-control car-textarea" name="EngineControlGer" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Optionen</label>
-                                <textarea class="form-control car-textarea" name="OptionsGer" rows="4">@Model.OptionsGer</textarea>
+                                <textarea class="form-control car-textarea" name="OptionsGer" rows="4"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Preis</label>
-                                <textarea class="form-control car-textarea" name="PriceGer" rows="4">@Model.PriceGer</textarea>
+                                <textarea class="form-control car-textarea" name="PriceGer" rows="4"></textarea>
                             </div>
                         </div>
                     </div>
@@ -298,48 +283,22 @@
             <!-- Кнопки действий -->
             <div class="d-flex justify-content-between">
                 <div>
-                    <button type="submit" class="btn btn-primary me-2">
+                    <button type="submit" class="btn btn-success me-2">
                         <i class="bi bi-check-circle"></i>
-                        Сохранить изменения
+                        Добавить автомобиль
                     </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="window.location.reload()">
+                    <button type="reset" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-clockwise"></i>
-                        Отмена
+                        Очистить форму
                     </button>
                 </div>
                 
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash"></i>
-                    Удалить автомобиль
-                </button>
+                <a href="@Url.Action("Cars")" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                    Отмена
+                </a>
             </div>
         </form>
-    </div>
-
-    <!-- Модальное окно подтверждения удаления -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        Подтверждение удаления
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Вы уверены, что хотите удалить автомобиль <strong>@Model.Brand @Model.Model</strong>?</p>
-                    <p class="text-danger"><small>Это действие нельзя отменить!</small></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <form method="post" action="/Home/DeleteCar" style="display: inline;">
-                        <input type="hidden" name="id" value="@Model.Id">
-                        <button type="submit" class="btn btn-danger">Удалить</button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Bootstrap JS -->
@@ -374,35 +333,23 @@
 
         // Функция предварительного просмотра изображения
         function previewImage() {
-            const imageUrl = document.querySelector('input[name="Image"]').value;
+            const imageUrl = document.getElementById('ImageUrl').value;
+            const previewImg = document.getElementById('previewImg');
+            const noImageMessage = document.getElementById('noImageMessage');
+            
             if (imageUrl) {
-                const img = document.querySelector('.car-image-preview');
-                const noImageMessage = document.getElementById('noImageMessage');
-                
-                if (img) {
-                    img.src = imageUrl;
-                    img.style.display = 'block';
+                previewImg.src = imageUrl;
+                previewImg.onload = function() {
+                    previewImg.style.display = 'block';
                     noImageMessage.style.display = 'none';
-                } else {
-                    // Если изображение отсутствует, создаем его
-                    const imageContainer = document.querySelector('.col-md-6');
-                    const newImg = document.createElement('img');
-                    newImg.src = imageUrl;
-                    newImg.className = 'img-fluid car-image-preview mb-3';
-                    newImg.alt = 'Предварительный просмотр';
-                    newImg.onerror = function() {
-                        this.style.display = 'none';
-                        noImageMessage.style.display = 'block';
-                    };
-                    
-                    const existingImg = imageContainer.querySelector('img');
-                    if (existingImg) {
-                        existingImg.replaceWith(newImg);
-                    } else {
-                        imageContainer.insertBefore(newImg, imageContainer.firstChild);
-                        noImageMessage.style.display = 'none';
-                    }
-                }
+                };
+                previewImg.onerror = function() {
+                    previewImg.style.display = 'none';
+                    noImageMessage.style.display = 'block';
+                    alert('Не удалось загрузить изображение по указанному URL');
+                };
+            } else {
+                alert('Введите URL изображения');
             }
         }
     </script>

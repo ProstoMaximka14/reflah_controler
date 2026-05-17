@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace reflah_controler.Models
+﻿namespace reflah_controler.Models
 {
     public class FurstPageModel
     {
