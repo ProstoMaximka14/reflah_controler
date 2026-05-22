@@ -217,7 +217,7 @@ namespace reflah_controler.Controllers
         // GET: Страница Создание нового автомобиля
         public IActionResult CreateCar()
         {
-            return View("EditCar", new ReflashCarModel());
+            return View("CreateCar", new ReflashCarModel());
         }
 
         // POST: Обновить автомобиль
@@ -348,31 +348,66 @@ namespace reflah_controler.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCar(ReflashCarModel car)
         {
+            
+
             string connectionString = _configuration.GetConnectionString("DefaultConnection")
-                ?? "server=localhost;port=3306;database=reflash_cars;user=root;password=;";
+                ?? "server=localhost;port=3306;database=reflash;user=root;password=QaZmLp2414;CharSet=utf8;";
 
             try
             {
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    connection.Open();
-                    string query = @"INSERT INTO reflash_cars 
-                                    (brand, model, generation, engine, image, 
-                                     about_ru, about_eng, about_ger,
-                                     result_ru, result_eng, result_ger,
-                                     engine_control_ru, engine_control_eng, engine_control_ger,
-                                     options_ru, options_eng, options_ger,
-                                     price_ru, price_eng, price_ger) 
-                                    VALUES 
-                                    (@brand, @model, @generation, @engine, @image,
-                                     @about_ru, @about_eng, @about_ger,
-                                     @result_ru, @result_eng, @result_ger,
-                                     @engine_control_ru, @engine_control_eng, @engine_control_ger,
-                                     @options_ru, @options_eng, @options_ger,
-                                     @price_ru, @price_eng, @price_ger)";
+                    await connection.OpenAsync();
+
+
+                    string query = @"
+                INSERT INTO reflash_cars (
+                    brand, 
+                    model, 
+                    generation, 
+                    engine, 
+                    image,
+                    about_ru, 
+                    about_eng, 
+                    about_ger,
+                    result_ru, 
+                    result_eng, 
+                    result_ger,
+                    engine_control_ru, 
+                    engine_control_eng, 
+                    engine_control_ger,
+                    options_ru, 
+                    options_eng, 
+                    options_ger,
+                    price_ru, 
+                    price_eng, 
+                    price_ger
+                ) VALUES (
+                    @brand, 
+                    @model, 
+                    @generation, 
+                    @engine, 
+                    @image,
+                    @about_ru, 
+                    @about_eng, 
+                    @about_ger,
+                    @result_ru, 
+                    @result_eng, 
+                    @result_ger,
+                    @engine_control_ru, 
+                    @engine_control_eng, 
+                    @engine_control_ger,
+                    @options_ru, 
+                    @options_eng, 
+                    @options_ger,
+                    @price_ru, 
+                    @price_eng, 
+                    @price_ger
+                )";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@id", car.Id);
                         command.Parameters.AddWithValue("@brand", car.Brand);
                         command.Parameters.AddWithValue("@model", car.Model);
                         command.Parameters.AddWithValue("@generation", car.Generation);
@@ -397,27 +432,27 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@options_ger", car.OptionsGer ?? "");
                         command.Parameters.AddWithValue("@price_ger", car.PriceGer ?? "");
 
-                        int rowsAffected = command.ExecuteNonQuery();
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+                       
 
                         if (rowsAffected > 0)
                         {
                             TempData["Message"] = $"Автомобиль {car.Brand} {car.Model} успешно добавлен";
-                            // Получаем ID нового автомобиля
-                            int newId = (int)command.LastInsertedId;
-                            await NotifyReaderSite();
-                            return RedirectToAction("EditCar", new { id = newId });
+                            return RedirectToAction("Cars");
                         }
                         else
                         {
+                            System.IO.File.AppendAllText(@"C:\temp\addcar_log.txt", "ERROR: rowsAffected == 0\n");
                             TempData["Error"] = "Не удалось добавить автомобиль";
                             return RedirectToAction("Cars");
                         }
                     }
                 }
             }
-            catch (MySqlException ex)
+            catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+                
+                TempData["Error"] = $"Ошибка: {ex.Message}";
                 return RedirectToAction("Cars");
             }
         }
@@ -612,7 +647,7 @@ namespace reflah_controler.Controllers
         // GET: Страница Создание нового автомобиля
         public IActionResult CreatePartner()
         {
-            return View("EditPartner", new PartnersModel());
+            return View("CreatePartner", new PartnersModel());
         }
 
         // POST: Добавить партнера
@@ -1580,6 +1615,7 @@ namespace reflah_controler.Controllers
                         if (rowsAffected > 0)
                         {
                             TempData["Message"] = "Данные главной страницы успешно обновлены";
+                            await NotifyReaderSite();
                         }
                         else
                         {
