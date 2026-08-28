@@ -1,0 +1,1191 @@
+﻿@model reflah_controler.Models.FurstPageModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Предпросмотр главной страницы";
+    
+    // Читаем язык из cookie
+    var language = Context.Request.Cookies["Language"] ?? "ru";
+    
+    // Читаем тему из cookie
+    var currentTheme = Context.Request.Cookies["Theme"] ?? "dark";
+    
+    string GetLocalized(string ru, string eng, string ger)
+    {
+        return language switch
+        {
+            "en" => eng,
+            "de" => ger,
+            _ => ru
+        };
+    }
+    
+    // Функция получения URL изображения из папки furst
+    string GetImageUrl(string imageName)
+    {
+        if (string.IsNullOrEmpty(imageName)) 
+            return "/images/default-bg.jpg";
+        
+        // Если это полный URL (http:// или https://) — оставляем как есть
+        if (imageName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+            imageName.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return imageName;
+        
+        // Если это уже абсолютный путь (начинается с /) — оставляем как есть
+        if (imageName.StartsWith("/"))
+            return imageName;
+        
+        // Иначе — это имя файла из папки furst
+        return $"/shared-fotos/furst/{imageName}";
+    }
+    
+    // Функция для слайдера
+    string GetSlideStyle(string imageUrl, int index)
+    {
+        if (!string.IsNullOrEmpty(imageUrl))
+        {
+            if (imageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                imageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                imageUrl.StartsWith("/"))
+            {
+                return $"background-image: url('{imageUrl}'); background-size: cover; background-position: center;";
+            }
+            else
+            {
+                return $"background-image: url('/shared-fotos/furst/{imageUrl}'); background-size: cover; background-position: center;";
+            }
+        }
+        else
+        {
+            return $"background: linear-gradient(45deg, #1A0B0E, #0F0F1A);";
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="@language" data-theme="@currentTheme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>@ViewData["Title"] — Performance Tuning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ==========================================
+           CSS ПЕРЕМЕННЫЕ ДЛЯ ТЕМ
+           ========================================== */
+
+        /* Светлая тема (по умолчанию) */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-input: #f0f0f0;
+            --bg-overlay: rgba(255, 255, 255, 0.9);
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a5e;
+            --text-muted: #88889a;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --accent-color: #2196F3;
+            --accent-hover: #1976D2;
+            --gradient-start: #f8f9fa;
+            --gradient-end: #e9ecef;
+            --slider-overlay: rgba(255, 255, 255, 0.4);
+            --block-bg: #ffffff;
+            --block-border: #e0e0e0;
+            --frame-bg: rgba(255, 255, 255, 0.95);
+            --frame-text: #1a1a2e;
+            --logo-color-start: #0D47A1;
+            --logo-color-end: #42A5F5;
+            --title-gradient-start: #ADD8E6;
+            --title-gradient-end: #2563EB;
+            --title-shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Тёмная тема */
+        [data-theme="dark"] {
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #14141C;
+            --bg-card: #111118;
+            --bg-input: #1a1a24;
+            --bg-overlay: rgba(10, 10, 15, 0.9);
+            --text-primary: #E8E8F0;
+            --text-secondary: #C0C0D0;
+            --text-muted: #88889a;
+            --border-color: #2A2A35;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --accent-color: #FF3A2F;
+            --accent-hover: #D62B1F;
+            --gradient-start: #111118;
+            --gradient-end: #0D0D14;
+            --slider-overlay: rgba(0, 0, 0, 0.85);
+            --block-bg: #111118;
+            --block-border: #252530;
+            --frame-bg: rgba(10, 10, 15, 0.85);
+            --frame-text: #E8E8F0;
+            --logo-color-start: #FFB5A0;
+            --logo-color-end: #FFD4C4;
+            --title-gradient-start: #E8E8F0;
+            --title-gradient-end: #FF3A2F;
+            --title-shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        /* ==========================================
+           ОБЩИЕ СТИЛИ
+           ========================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        /* ========== ПАНЕЛЬ ПРЕДПРОСМОТРА ========== */
+        .preview-header {
+            background: var(--accent-color);
+            padding: 8px 16px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .preview-header h4 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 14px;
+        }
+        .preview-header a {
+            color: white;
+            text-decoration: underline;
+            font-size: 13px;
+        }
+        .preview-header a:hover {
+            color: #fff;
+            opacity: 0.8;
+        }
+        .preview-header .close-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+            background: none;
+            border: none;
+            padding: 0 4px;
+        }
+        .preview-header .close-btn:hover {
+            opacity: 0.8;
+        }
+        .preview-header .btn-edit {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .preview-header .btn-edit:hover {
+            background: rgba(255,255,255,0.35);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* ========================================== */
+        /* ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА И ТЕМЫ */
+        /* ========================================== */
+        .controls-switcher {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 1100;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(12px);
+            padding: 6px 12px;
+            border-radius: 60px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 20px var(--shadow-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .controls-switcher .divider {
+            width: 1px;
+            background: var(--border-color);
+            margin: 4px 0;
+        }
+
+        .lang-btn, .theme-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .lang-btn:hover, .theme-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,58,47,0.1);
+        }
+
+        .lang-btn.active, .theme-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 8px rgba(255,58,47,0.5);
+        }
+
+        /* ========== HERO СЛАЙДЕР ========== */
+        .hero-section {
+            position: relative;
+            height: 580px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slider-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 2800px;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1.05);
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-overlay);
+            backdrop-filter: blur(8px);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            font-size: 20px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .prev {
+            left: 30px;
+        }
+
+        .next {
+            right: 30px;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 15;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.5;
+        }
+
+        .dot.active {
+            background: var(--accent-color);
+            width: 28px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px var(--accent-color);
+            opacity: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, var(--slider-overlay) 100%);
+            z-index: 1;
+            transition: background 0.3s ease;
+        }
+
+        /* ===================================== */
+        /* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+        /* ===================================== */
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            max-width: 2500px;
+            width: 100%;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* ===================================== */
+        /* ===== ДРОПДАУНЫ (БАЗОВЫЕ СТИЛИ) ===== */
+        /* ===================================== */
+
+        .dropdowns-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 40px 36px;
+            max-width: 2000px;
+            width: 65%;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 45px -12px var(--shadow-color);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dropdowns-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .dropdown-section {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .dropdown-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .dropdown-select {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', monospace;
+        }
+
+        .dropdown-select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,58,47,0.2);
+        }
+
+        .dropdown-select:disabled {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border-color: var(--border-color);
+        }
+
+        .btn-next {
+            margin-top: 40px;
+            padding: 14px 42px;
+            background: linear-gradient(95deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1.2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+            text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(255,58,47,0.3);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(255,58,47,0.5);
+        }
+
+        .main-title-bottom {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--title-gradient-start) 0%, var(--title-gradient-end) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            max-width: 90%;
+            margin: 0 auto;
+            letter-spacing: -0.2px;
+            z-index: 20;
+            text-shadow: 0 2px 10px var(--title-shadow);
+            pointer-events: none;
+        }
+
+        /* ===================================== */
+        /* ========== БЛОКИ 1-6 ========== */
+        /* ===================================== */
+
+        .blocks-section {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .blocks-container {
+            max-width: 70%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+            gap: 28px;
+        }
+
+        .block-card {
+            background: var(--block-bg);
+            padding: 32px 28px;
+            border-radius: 28px;
+            border: 1px solid var(--block-border);
+            transition: all 0.25s;
+            text-align: left;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .block-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            box-shadow: 0 20px 30px -12px rgba(255,58,47,0.2);
+        }
+
+        .block-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .block-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* ========== СЕКЦИЯ С РАМКОЙ ========== */
+
+        .info-section {
+            padding: 40px 24px;
+            background: var(--bg-primary);
+            transition: background 0.3s ease;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 48px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(120deg, var(--text-primary), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .image-frame-container {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            border-radius: 36px;
+            padding: 80px 40px;
+            min-height: 520px;
+            max-width: 2500px;
+            width: 85%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 30px 40px -20px var(--shadow-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-frame-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, var(--slider-overlay) 100%);
+            border-radius: 36px;
+            z-index: 1;
+            transition: background 0.3s ease;
+        }
+
+        .frame-content {
+            position: relative;
+            z-index: 2;
+            background: var(--frame-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 48px 52px;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .info-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--frame-text);
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        /* ========== БЛОК С КНОПКАМИ БРЕНДОВ (ВНИЗУ) ========== */
+        .brands-section-bottom {
+            padding: 20px 24px 40px;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .brands-title-bottom {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--text-primary);
+        }
+
+        .brands-title-bottom i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        .brands-grid-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .brand-card-bottom {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .brand-card-bottom:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            box-shadow: 0 20px 30px -12px var(--shadow-hover);
+        }
+
+        .brand-card-bottom .brand-logo {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .brand-card-bottom .brand-name {
+            font-size: 28px;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .brand-card-bottom .brand-count {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .brand-card-bottom.honda:hover {
+            border-color: #E63946;
+        }
+
+        .brand-card-bottom.acura:hover {
+            border-color: #1A1A2E;
+        }
+
+        /* ==========================================
+           ПЕРЕКЛЮЧЕНИЕ ЛОГОТИПОВ ПО ТЕМЕ
+           ========================================== */
+
+        .brand-logo {
+            display: block;
+            position: relative;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+        }
+
+        .brand-logo img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .brand-logo .logo-light {
+            display: block !important;
+        }
+        .brand-logo .logo-dark {
+            display: none !important;
+        }
+
+        [data-theme="dark"] .brand-logo .logo-light {
+            display: none !important;
+        }
+        [data-theme="dark"] .brand-logo .logo-dark {
+            display: block !important;
+        }
+
+        /* ==========================================
+           АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ
+           ========================================== */
+
+        @@media (max-width: 700px) {
+            .preview-header {
+                padding: 6px 12px;
+                gap: 8px;
+            }
+            .preview-header h4 {
+                font-size: 12px;
+            }
+            .preview-header .btn-edit {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+
+            .controls-switcher {
+                top: 12px;
+                right: 12px;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .lang-btn, .theme-btn {
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+
+            .hero-section {
+                height: 430px;
+                margin: 0;
+            }
+
+            .main-title-bottom {
+                font-size: 13px;
+                bottom: 8px;
+                max-width: 90%;
+            }
+
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .content-wrapper {
+                padding: 24px 16px;
+            }
+
+            .dropdowns-container {
+                padding: 24px 20px;
+                width: 80%;
+                border-radius: 24px;
+            }
+
+            .dropdowns-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .dropdown-label {
+                font-size: 10px;
+                margin-bottom: 6px;
+                letter-spacing: 0.5px;
+            }
+
+            .dropdown-select {
+                padding: 14px 16px;
+                font-size: 10px;
+                border-radius: 16px;
+            }
+
+            .btn-next {
+                margin-top: 12px;
+                padding: 6px 20px;
+                font-size: 12px;
+                width: auto;
+                min-width: 120px;
+                border-radius: 30px;
+                letter-spacing: 0.5px;
+                line-height: 1.2;
+            }
+
+            .blocks-section {
+                padding: 20px 12px;
+            }
+
+            .block-card {
+                padding: 20px 18px;
+                border-radius: 20px;
+            }
+
+            .blocks-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .block-number {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .block-text {
+                font-size: 10px;
+                line-height: 1.5;
+            }
+
+            .info-section {
+                padding: 30px 16px;
+            }
+
+            .section-title {
+                font-size: 15px;
+                margin-bottom: 24px;
+            }
+
+            .image-frame-container {
+                padding: 30px 16px;
+                min-height: 320px;
+                width: 100%;
+                border-radius: 24px;
+            }
+
+            .frame-content {
+                padding: 24px 20px;
+                border-radius: 20px;
+                max-width: 100%;
+            }
+
+            .info-text {
+                font-size: 10px;
+                line-height: 1.6;
+            }
+
+            .brands-section-bottom {
+                padding: 24px 16px 30px;
+            }
+
+            .brands-title-bottom {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .brands-grid-bottom {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                max-width: 100%;
+            }
+
+            .brand-card-bottom {
+                padding: 24px 20px;
+                border-radius: 20px;
+            }
+
+            .brand-card-bottom .brand-logo {
+                font-size: 52px;
+                margin-bottom: 8px;
+            }
+
+            .brand-card-bottom .brand-name {
+                font-size: 22px;
+            }
+
+            .brand-logo img {
+                width: 56px;
+                height: 56px;
+            }
+
+            .brand-card-bottom.acura:hover,
+            .brand-card-bottom.honda:hover {
+                transform: translateY(-4px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- ПАНЕЛЬ ПРЕДПРОСМОТРА (СТИКЕР СВЕРХУ) -->
+    <!-- ========================================== -->
+    <div class="preview-header">
+        <h4><i class="fas fa-eye"></i> @GetLocalized("ПРЕДПРОСМОТР ГЛАВНОЙ СТРАНИЦЫ", "PREVIEW HOME PAGE", "VORSCHAU HAUPTSEITE")</h4>
+        <a href="@Url.Action("FurstPage", "Home")" class="btn-edit">
+            <i class="fas fa-edit"></i> @GetLocalized("Редактировать", "Edit", "Bearbeiten")
+        </a>
+        <a href="@Url.Action("FurstPage", "Home")" class="close-btn" title="Закрыть предпросмотр">✕</a>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА И ТЕМЫ -->
+    <!-- ========================================== -->
+    <div class="controls-switcher">
+        <!-- Языки -->
+        <button class="lang-btn @(language == "ru" ? "active" : "")" onclick="switchLanguage('ru')">RU</button>
+        <button class="lang-btn @(language == "en" ? "active" : "")" onclick="switchLanguage('en')">EN</button>
+        <button class="lang-btn @(language == "de" ? "active" : "")" onclick="switchLanguage('de')">DE</button>
+        
+        <span class="divider"></span>
+        
+        <!-- Тема -->
+        <button class="theme-btn @(currentTheme == "light" ? "active" : "")" onclick="switchTheme('light')">
+            <i class="fas fa-sun"></i>
+        </button>
+        <button class="theme-btn @(currentTheme == "dark" ? "active" : "")" onclick="switchTheme('dark')">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- HERO СЛАЙДЕР -->
+    <!-- ========================================== -->
+    <div class="hero-section" id="heroSection">
+        <div class="slider-container">
+            <div class="slider">
+                <div class="slide active" style="@GetSlideStyle(Model?.image_1, 0)"></div>
+                <div class="slide" style="@GetSlideStyle(Model?.image_2, 1)"></div>
+                <div class="slide" style="@GetSlideStyle(Model?.image_3, 2)"></div>
+            </div>
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(0)"></span>
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+            </div>
+        </div>
+        <div class="overlay"></div>
+
+        <!-- ЗАГОЛОВОК head_1 (локализованный) -->
+        @if (!string.IsNullOrEmpty(Model?.head_1_ru) || !string.IsNullOrEmpty(Model?.head_1_eng) || !string.IsNullOrEmpty(Model?.head_1_ger))
+        {
+            <div class="main-title-bottom">@GetLocalized(Model?.head_1_ru, Model?.head_1_eng, Model?.head_1_ger)</div>
+        }
+
+        <div class="content-wrapper">
+            <!-- Дропдауны (демонстрационные) -->
+            <div class="dropdowns-container">
+                <div class="dropdowns-row">
+                    <div class="dropdown-section">
+                        <label class="dropdown-label">@GetLocalized("БРЕНД", "BRAND", "MARKE")</label>
+                        <select class="dropdown-select" disabled>
+                            <option>Honda</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label">@GetLocalized("МОДЕЛЬ", "MODEL", "MODELL")</label>
+                        <select class="dropdown-select" disabled>
+                            <option>Civic</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label">@GetLocalized("ПОКОЛЕНИЕ", "GENERATION", "GENERATION")</label>
+                        <select class="dropdown-select" disabled>
+                            <option>FK8</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label">@GetLocalized("ДВИГАТЕЛЬ", "ENGINE", "MOTOR")</label>
+                        <select class="dropdown-select" disabled>
+                            <option>2.0 Turbo</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn-next" style="display: inline-block; opacity: 0.5; cursor: default;">
+                        @GetLocalized("ДАЛЕЕ →", "NEXT →", "WEITER →")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- БЛОКИ 1-6 (локализованные) -->
+    <!-- ========================================== -->
+    @{
+        var blocks = new List<string> {
+            GetLocalized(Model?.block_1_ru, Model?.block_1_eng, Model?.block_1_ger) ?? "",
+            GetLocalized(Model?.block_2_ru, Model?.block_2_eng, Model?.block_2_ger) ?? "",
+            GetLocalized(Model?.block_3_ru, Model?.block_3_eng, Model?.block_3_ger) ?? "",
+            GetLocalized(Model?.block_4_ru, Model?.block_4_eng, Model?.block_4_ger) ?? "",
+            GetLocalized(Model?.block_5_ru, Model?.block_5_eng, Model?.block_5_ger) ?? "",
+            GetLocalized(Model?.block_6_ru, Model?.block_6_eng, Model?.block_6_ger) ?? ""
+        };
+        bool hasAnyBlock = blocks.Any(b => !string.IsNullOrEmpty(b));
+    }
+    @if (hasAnyBlock)
+    {
+        <div class="blocks-section">
+            <div class="blocks-container">
+                @for (int i = 0; i < blocks.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(blocks[i]))
+                    {
+                        <div class="block-card">
+                            <div class="block-number">STAGE 0@(i + 1)</div>
+                            <div class="block-text">@blocks[i]</div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- СЕКЦИЯ С РАМКОЙ (локализованная) -->
+    <!-- ========================================== -->
+    @if (!string.IsNullOrEmpty(Model?.head_2_ru) || !string.IsNullOrEmpty(Model?.text_ru) ||
+         !string.IsNullOrEmpty(Model?.head_2_eng) || !string.IsNullOrEmpty(Model?.text_eng) ||
+         !string.IsNullOrEmpty(Model?.head_2_ger) || !string.IsNullOrEmpty(Model?.text_ger))
+    {
+        var head2 = GetLocalized(Model?.head_2_ru, Model?.head_2_eng, Model?.head_2_ger);
+        var text = GetLocalized(Model?.text_ru, Model?.text_eng, Model?.text_ger);
+        
+        <div class="info-section">
+            <div class="info-container">
+                @if (!string.IsNullOrEmpty(head2))
+                {
+                    <div class="section-title">@head2</div>
+                }
+                <div class="image-frame-container" style="background-image: url('@GetImageUrl(Model?.image_4)');">
+                    <div class="frame-content">
+                        @if (!string.IsNullOrEmpty(text))
+                        {
+                            <div class="info-text">@Html.Raw(text.Replace("\n", "<br/>"))</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- БЛОК С КНОПКАМИ БРЕНДОВ -->
+    <!-- ========================================== -->
+    <div class="brands-section-bottom">
+        <div class="brands-title-bottom">
+            <i class="fas fa-car"></i>
+            @GetLocalized("Список автомобилей по бренду", "Cars by brand", "Autos nach Marke")
+        </div>
+        <div class="brands-grid-bottom">
+            <!-- Honda -->
+            <a href="@Url.Action("CarsByBrand", "Home", new { brand = "Honda" })" class="brand-card-bottom honda">
+                <span class="brand-logo">
+                    <img src="https://logo-teka.com/wp-content/uploads/2025/06/honda-auto-logo.png"
+                         alt="Honda"
+                         class="logo-light"
+                         style="display: block; margin: 0 auto; width: 64px; height: 64px;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRdXFkhytgizlD868Ugijx1gETANFjG37KWA&s"
+                         alt="Honda"
+                         class="logo-dark"
+                         style="display: none; margin: 0 auto; width: 64px; height: 64px;">
+                </span>
+                <span class="brand-name">Honda</span>
+            </a>
+
+            <!-- Acura -->
+            <a href="@Url.Action("CarsByBrand", "Home", new { brand = "Acura" })" class="brand-card-bottom honda">
+                <span class="brand-logo">
+                    <img src="https://thumbs.dreamstime.com/b/acura-124812338.jpg"
+                         alt="Acura"
+                         style="display: block; margin: 0 auto; width: 64px; height: 64px;">
+                </span>
+                <span class="brand-name">Acura</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================== -->
+    <script>
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА
+        // ==========================================
+        function switchLanguage(lang) {
+            document.cookie = "Language=" + lang + "; path=/; max-age=" + (365 * 24 * 60 * 60);
+            location.reload();
+        }
+
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        // ==========================================
+        function switchTheme(theme) {
+            document.cookie = "Theme=" + theme + "; path=/; max-age=" + (365 * 24 * 60 * 60);
+            location.reload();
+        }
+
+        // ==========================================
+        // СЛАЙДЕР
+        // ==========================================
+        let currentSlideIndex = 0;
+        let slideInterval;
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (!slides.length) return;
+            if (index >= slides.length) currentSlideIndex = 0;
+            if (index < 0) currentSlideIndex = slides.length - 1;
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            slides[currentSlideIndex].classList.add('active');
+            if (dots[currentSlideIndex]) dots[currentSlideIndex].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentSlideIndex++;
+            showSlide(currentSlideIndex);
+            resetInterval();
+        }
+
+        function prevSlide() {
+            currentSlideIndex--;
+            showSlide(currentSlideIndex);
+            resetInterval();
+        }
+
+        function currentSlide(index) {
+            currentSlideIndex = index;
+            showSlide(currentSlideIndex);
+            resetInterval();
+        }
+
+        function resetInterval() {
+            if (slideInterval) clearInterval(slideInterval);
+            if (document.querySelectorAll('.slide').length > 1) {
+                slideInterval = setInterval(() => {
+                    currentSlideIndex++;
+                    showSlide(currentSlideIndex);
+                }, 60000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.querySelectorAll('.slide').length > 1) {
+                resetInterval();
+            }
+        });
+    </script>
+
+</body>
+</html>

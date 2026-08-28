@@ -9,19 +9,21 @@
         public string Engine { get; set; }
         public string Image { get; set; }
         public string AboutRu { get; set; }
-        public string AboutEng { get; set; }
-        public string AboutGer { get; set; }
         public string ResultRu { get; set; }
-        public string ResultEng { get; set; }
-        public string ResultGer { get; set; }
         public string EngineControlRu { get; set; }
-        public string EngineControlEng { get; set; }
-        public string EngineControlGer { get; set; }
-        public string OptionsRu { get; set; }
-        public string OptionsEng { get; set; }
-        public string OptionsGer { get; set; }
         public string PriceRu { get; set; }
-        public string PriceEng { get; set; }
-        public string PriceGer { get; set; }
+        public string grafic { get; set; }
+
+        public string additional_price_ru { get; set; }
+
+        public List<AboutModel> Abouts { get; set; } = new List<AboutModel>();
+        public List<ResultModel> PriResults { get; set; } = new List<ResultModel>();
+        public List<EngineControlModel> Engine_controlers { get; set; } = new List<EngineControlModel>();
+        public List<PriceModel> Prices { get; set; } = new List<PriceModel>();
+        public List<GraficModel> Grafics { get; set; } = new List<GraficModel>();
+
+        public string old_url { get; set; }
+
+        public int SortOrder { get; set; }
     }
 }

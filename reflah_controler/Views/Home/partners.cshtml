@@ -1,6 +1,12 @@
 ﻿@model List<reflah_controler.Models.PartnersModel>
 @{
     ViewData["Title"] = "Выбор партнёра для редактирования";
+    
+    // Группируем по городу
+    var groupedByCity = Model
+        .GroupBy(c => string.IsNullOrEmpty(c.city) ? "Без города" : c.city)
+        .OrderBy(g => g.Key)
+        .ToList();
 }
 
 <!DOCTYPE html>
@@ -12,177 +18,385 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
-        /* Общие стили для карточек */
-        .partner-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-            height: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .partner-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        /* Стили для изображений (одинаковые с автомобилями) */
-        .partner-image {
-            height: 200px;
-            width: 100%;
-            object-fit: cover;
+        /* ===== ОБЩИЕ СТИЛИ ===== */
+        body {
             background-color: #f8f9fa;
-            border-radius: 8px;
         }
-        
-        .placeholder-image {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            background-color: #f8f9fa;
-            color: #6c757d;
-            border-radius: 8px;
-        }
-        
-        /* Стили для сообщений */
+
+        /* ===== СООБЩЕНИЯ ===== */
         .message-box {
-            padding: 15px;
+            padding: 15px 20px;
             margin-bottom: 20px;
-            border-radius: 5px;
-            animation: fadeIn 0.5s ease;
+            border-radius: 8px;
         }
-        
-        @@keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+
         .message-success {
-            background-color: #d1e7dd;
+            background: #d1e7dd;
             color: #0f5132;
             border: 1px solid #badbcc;
         }
-        
+
         .message-error {
-            background-color: #f8d7da;
+            background: #f8d7da;
             color: #842029;
             border: 1px solid #f5c2c7;
         }
-        
-        /* Информация о партнёре */
-        .partner-info {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-        
-        .partner-info div {
-            margin-bottom: 5px;
-        }
-        
-        .partner-info strong {
-            color: #495057;
+
+        /* ===== КНОПКИ ===== */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
             font-weight: 600;
-        }
-        
-        /* Заголовок карточки */
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #1a1a1a;
-        }
-        
-        .card-title .text-muted {
-            font-size: 0.9rem;
-            font-weight: normal;
-        }
-        
-        /* Кнопки */
-        .btn-primary {
-            background-color: #0d6efd;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
             border: none;
-            padding: 8px 16px;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 14px;
         }
-        
+
+        .btn-primary {
+            background: #0d6efd;
+            color: white;
+        }
+
         .btn-primary:hover {
-            background-color: #0b5ed7;
+            background: #0b5ed7;
             transform: translateY(-2px);
         }
-        
-        /* Бейдж для подсчёта */
-        .badge.bg-info {
-            background-color: #0dcaf0 !important;
-            padding: 5px 10px;
-            font-size: 0.9rem;
+
+        .btn-outline-secondary {
+            background: transparent;
+            color: #6c757d;
+            border: 1px solid #ced4da;
         }
-        
-        /* Ховер эффект для карточек */
-        .partner-card .card-body {
-            padding: 1.25rem;
+
+        .btn-outline-secondary:hover {
+            border-color: #0d6efd;
+            color: #0d6efd;
         }
-        
-        /* Адаптивность */
-        @@media (max-width: 768px) {
-            .partner-image, .placeholder-image {
-                height: 150px;
-            }
-            
-            .card-title {
-                font-size: 1rem;
-            }
+
+        .btn-edit {
+            background: #0d6efd;
+            color: white;
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 6px;
+            text-decoration: none;
         }
-        
-        /* Стили для фото-превью */
-        .photo-preview {
+
+        .btn-edit:hover {
+            background: #0b5ed7;
+            color: white;
+        }
+
+        /* ===== КНОПКА УДАЛЕНИЯ ===== */
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* ==========================================
+           АККОРДЕОН — ГОРОД
+           ========================================== */
+        .city-section {
+            margin-bottom: 12px;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .city-section:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        /* ===== ЗАГОЛОВОК ГОРОДА ===== */
+        .city-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .city-header:hover {
+            background: #f0f0f0;
+        }
+
+        .city-header.active {
+            background: #f0f0f0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .city-header .city-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .city-header .city-name i {
+            color: #0d6efd;
+            font-size: 20px;
+        }
+
+        .city-header .city-count {
+            font-size: 14px;
+            color: #88889a;
+            background: #ffffff;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .city-header .toggle-icon {
+            color: #88889a;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .city-header.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* ===== КОНТЕНТ ГОРОДА ===== */
+        .city-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+            padding: 0 24px;
+            background: #ffffff;
+        }
+
+        .city-content.open {
+            max-height: 10000px;
+            opacity: 1;
+            padding: 20px 24px;
+        }
+
+        /* ==========================================
+           СЕТКА КАРТОЧЕК ПАРТНЁРОВ
+           ========================================== */
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding-left: 16px;
+            padding-top: 4px;
+        }
+
+        /* ==========================================
+           КАРТОЧКА ПАРТНЁРА
+           ========================================== */
+        .partner-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #1a1a2e;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: block;
+            height: 100%;
+        }
+
+        .partner-card:hover {
+            transform: translateY(-4px);
+            border-color: #0d6efd;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+        }
+
+        .partner-card .partner-image-container {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-        
-        /* Анимация для сообщений */
-        .message-box {
-            animation: slideDown 0.5s ease;
-        }
-        
-        @@keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Стили для иконок */
-        .bi {
-            margin-right: 5px;
-        }
-        
-        /* Контейнер для фото с фоном */
-        .photo-container {
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            height: 180px;
+            overflow: hidden;
+            background: #f5f5f5;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 200px;
         }
-        
-        /* Разделитель */
-        .divider {
-            border-top: 1px solid #dee2e6;
-            margin: 15px 0;
+
+        .partner-card .partner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .partner-card:hover .partner-image {
+            transform: scale(1.05);
+        }
+
+        .partner-card .no-image {
+            font-size: 48px;
+            color: #88889a;
+        }
+
+        .partner-card .partner-info {
+            padding: 14px 16px;
+        }
+
+        .partner-card .partner-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .partner-card .partner-details {
+            color: #4a4a5e;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .partner-card .partner-details .label {
+            color: #88889a;
+            font-size: 12px;
+        }
+
+        .partner-card .partner-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ==========================================
+           ПУСТОЕ СОСТОЯНИЕ
+           ========================================== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #88889a;
+        }
+
+        .empty-state i {
+            font-size: 56px;
+            display: block;
+            margin-bottom: 16px;
+            color: #88889a;
+        }
+
+        .empty-state h3 {
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .empty-state .btn {
+            margin-top: 16px;
+        }
+
+        /* ==========================================
+           АДАПТИВНОСТЬ
+           ========================================== */
+        @@media (max-width: 992px) {
+            .partners-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .container {
+                padding: 10px 12px 40px;
+            }
+
+            .city-header {
+                padding: 14px 16px;
+            }
+
+            .city-header .city-name {
+                font-size: 18px;
+            }
+
+            .city-content.open {
+                padding: 16px;
+            }
+
+            .partners-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding-left: 0;
+                gap: 12px;
+            }
+
+            .partner-card .partner-image-container {
+                height: 140px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .city-header .city-name {
+                font-size: 16px;
+            }
+
+            .city-header .city-count {
+                font-size: 12px;
+                padding: 2px 12px;
+            }
+
+            .city-content.open {
+                padding: 12px;
+            }
+
+            .partners-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .partner-card .partner-image-container {
+                height: 120px;
+            }
+
+            .partner-card .partner-name {
+                font-size: 14px;
+            }
+
+            .partner-card .partner-details {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container py-4">
-        <!-- Сообщения -->
+
+        <!-- ===== СООБЩЕНИЯ ===== -->
         @if (TempData["Message"] != null)
         {
             <div class="message-box message-success">
@@ -199,110 +413,167 @@
             </div>
         }
 
-        <h1 class="mb-4">
-            <i class="bi bi-people-fill text-primary"></i>
-            Выбор партнёра для редактирования
-        </h1>
-
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-            <div class="mb-3 mb-md-0">
-                <span class="text-muted">Всего партнёров:</span>
-                <span class="badge bg-info ms-2">@Model.Count</span>
+        <!-- ===== ЗАГОЛОВОК ===== -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h1 class="mb-0">
+                    <i class="bi bi-people-fill text-primary"></i>
+                    Выбор партнёра для редактирования
+                </h1>
+                <div class="text-muted mt-1">
+                    Всего партнёров: @Model.Count
+                </div>
             </div>
-
-            <a href="@Url.Action("CreatePartner", new { id = 0 })" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i>
-                Добавить партнёра
-            </a>
+            <div>
+                <a href="@Url.Action("CreatePartner")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Добавить партнёра
+                </a>
+                <a href="@Url.Action("Partners")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Обновить
+                </a>
+            </div>
         </div>
 
-        @if (Model != null && Model.Count > 0)
+        <!-- ===== АККОРДЕОН ПО ГОРОДАМ ===== -->
+        @if (Model != null && Model.Any())
         {
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                @foreach (var partner in Model)
-                {
-                    <div class="col">
-                        <div class="card partner-card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-building"></i>
-                                    @partner.name
-                                    @if (!string.IsNullOrEmpty(partner.city))
-                                    {
-                                        <span class="text-muted">
-                                            <i class="bi bi-geo-alt"></i> (@partner.city)
-                                        </span>
-                                    }
-                                </h5>
-                                
-                                <div class="mb-3">
-                                    @if (!string.IsNullOrEmpty(partner.photo))
-                                    {
-                                        <img src="/shared-fotos/partners/@partner.photo" 
-                                             class="partner-image" 
-                                             alt="Фото партнера @partner.name"
-                                             onerror="this.onerror=null; this.src='/images/default-partner.jpg'">
-                                    }
-                                    else
-                                    {
-                                        <div class="placeholder-image">
-                                            <i class="bi bi-building fs-1"></i>
-                                            <span class="ms-2">Нет фото</span>
-                                        </div>
-                                    }
-                                </div>
-                                
-                                <div class="partner-info mb-3">
-                                    <div>
-                                        <i class="bi bi-telephone-fill"></i>
-                                        <strong>Телефон:</strong> @partner.phone
-                                    </div>
-                                    @if (!string.IsNullOrEmpty(partner.vk))
-                                    {
-                                        <div>
-                                            <i class="bi bi-vk"></i>
-                                            <strong>VK:</strong> 
-                                            <a href="@partner.vk" target="_blank" class="text-decoration-none">Профиль</a>
-                                        </div>
-                                    }
-                                    <div class="divider"></div>
-                                    <div>
-                                        <i class="bi bi-hash"></i>
-                                        <strong>ID:</strong> #@partner.Id
-                                    </div>
-                                </div>
+            @foreach (var cityGroup in groupedByCity)
+            {
+                var city = cityGroup.Key;
 
-                                <div class="d-grid gap-2">
-                                    <a href="@Url.Action("EditPartner", new { id = partner.Id })" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i>
-                                        Редактировать партнёра
-                                    </a>
+                <div class="city-section">
+                    <!-- ЗАГОЛОВОК ГОРОДА -->
+                    <div class="city-header" onclick="toggleCity(this)">
+                        <span class="city-name">
+                            <i class="bi bi-geo-alt"></i>
+                            @city
+                        </span>
+                        <span class="city-count">
+                            <i class="bi bi-building"></i>
+                            @cityGroup.Count()
+                        </span>
+                        <span class="toggle-icon">
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
+                    </div>
+
+                    <!-- КОНТЕНТ ГОРОДА (ПАРТНЁРЫ) -->
+                    <div class="city-content">
+                        <div class="partners-grid">
+                            @foreach (var partner in cityGroup.OrderBy(p => p.name))
+                            {
+                                <div class="partner-card">
+                                    <div class="partner-image-container">
+                                        @if (!string.IsNullOrEmpty(partner.photo))
+                                        {
+                                            <img src="/shared-fotos/partners/@partner.photo" 
+                                                 alt="@partner.name" 
+                                                 class="partner-image" 
+                                                 loading="lazy"
+                                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-image\'><i class=\'bi bi-building\'></i></div>'">
+                                        }
+                                        else
+                                        {
+                                            <div class="no-image">
+                                                <i class="bi bi-building"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="partner-info">
+                                        <div class="partner-name">@partner.name</div>
+                                        <div class="partner-details">
+                                            @if (!string.IsNullOrEmpty(partner.phone))
+                                            {
+                                                <div><span class="label">Телефон:</span> @partner.phone</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(partner.vk))
+                                            {
+                                                <div><span class="label">VK:</span> <a href="@partner.vk" target="_blank" class="text-decoration-none">Профиль</a></div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(partner.website))
+                                            {
+                                                <div><span class="label">Сайт:</span> <a href="@partner.website" target="_blank" class="text-decoration-none">@partner.website</a></div>
+                                            }
+                                            <div><span class="label">ID:</span> #@partner.Id</div>
+                                        </div>
+                                        <div class="partner-actions">
+                                            <a href="@Url.Action("EditPartner", new { id = partner.Id })" class="btn-edit">
+                                                <i class="bi bi-pencil"></i> Редактировать
+                                            </a>
+                                            <!-- ===== КНОПКА УДАЛЕНИЯ ===== -->
+                                            <button type="button" class="btn-delete" onclick="confirmDeletePartner(@partner.Id, '@partner.name')">
+                                                <i class="bi bi-trash"></i> Удалить
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     </div>
-                }
-            </div>
+                </div>
+            }
         }
         else
         {
-            <div class="alert alert-warning text-center">
-                <i class="bi bi-exclamation-triangle fs-1 d-block mb-3"></i>
-                <h5>Нет партнёров</h5>
-                <p class="mb-3">Добавьте первого партнёра для управления.</p>
-                <a href="@Url.Action("CreatePartner", new { id = 0 })" class="btn btn-primary">
+            <div class="empty-state">
+                <i class="bi bi-building"></i>
+                <h3>Нет партнёров</h3>
+                <p>Добавьте первого партнёра для управления.</p>
+                <a href="@Url.Action("CreatePartner")" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i>
                     Добавить партнёра
                 </a>
             </div>
         }
     </div>
-    
-    <!-- Bootstrap JS -->
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Автоматически скрываем сообщения через 5 секунд
+        // ==========================================
+        // АККОРДЕОН - РАСКРЫТИЕ/СКРЫТИЕ ГОРОДА
+        // ==========================================
+        function toggleCity(headerElement) {
+            const section = headerElement.closest('.city-section');
+            if (!section) return;
+
+            const content = section.querySelector('.city-content');
+            if (!content) return;
+
+            headerElement.classList.toggle('active');
+            content.classList.toggle('open');
+        }
+
+        // ==========================================
+        // ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ ПАРТНЁРА
+        // ==========================================
+        function confirmDeletePartner(id, name) {
+            if (confirm(`Вы уверены, что хотите удалить партнёра "${name}"?`)) {
+                if (confirm('Это действие НЕЛЬЗЯ будет отменить! Продолжить?')) {
+                    var form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = '/Home/DeletePartner';
+                    
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'id';
+                    input.value = id;
+                    form.appendChild(input);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+
+        // ==========================================
+        // АВТОМАТИЧЕСКОЕ СКРЫТИЕ СООБЩЕНИЙ
+        // ==========================================
         document.addEventListener('DOMContentLoaded', function() {
             const messages = document.querySelectorAll('.message-box');
             messages.forEach(message => {
@@ -318,5 +589,6 @@
             });
         });
     </script>
+
 </body>
 </html>

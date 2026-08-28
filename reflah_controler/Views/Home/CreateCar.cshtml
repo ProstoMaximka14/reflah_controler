@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Добавление нового автомобиля";
 }
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -11,45 +12,85 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
-        .car-input, .car-textarea, .car-select {
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0 !important;
+        }
+        .card-header h5 {
+            color: #1a1a1a;
+            margin: 0;
+        }
+        .form-control, .form-select {
             width: 100%;
             padding: 8px 12px;
             border: 1px solid #ced4da;
-            border-radius: 4px;
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 14px;
             font-family: inherit;
+            transition: all 0.3s ease;
         }
-
-        .car-input:focus, .car-textarea:focus, .car-select:focus {
+        .form-control:focus, .form-select:focus {
             border-color: #86b7fe;
             outline: 0;
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
-
-        .car-textarea {
-            min-height: 120px;
-            resize: vertical;
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
         }
-
+        .form-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .btn {
+            border-radius: 8px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+        }
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
         .message-box {
             padding: 15px;
             margin-bottom: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
+            animation: slideDown 0.5s ease;
         }
-
+        @@keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .message-success {
             background-color: #d1e7dd;
             color: #0f5132;
             border: 1px solid #badbcc;
         }
-
         .message-error {
             background-color: #f8d7da;
             color: #842029;
             border: 1px solid #f5c2c7;
         }
-
         .car-image-preview {
             max-height: 300px;
             object-fit: contain;
@@ -57,7 +98,6 @@
             border-radius: 8px;
             padding: 10px;
         }
-
         .placeholder-image {
             display: flex;
             align-items: center;
@@ -67,23 +107,11 @@
             border-radius: 8px;
             color: #6c757d;
         }
-
-        .tab-content {
-            border: 1px solid #dee2e6;
-            border-top: none;
-            padding: 20px;
-            border-radius: 0 0 4px 4px;
-            background-color: #fff;
-        }
-
-        .nav-tabs .nav-link.active {
-            background-color: #fff;
-            border-color: #dee2e6 #dee2e6 #fff;
-        }
     </style>
 </head>
 <body>
     <div class="container py-4">
+
         <!-- Сообщения -->
         @if (TempData["Message"] != null)
         {
@@ -107,7 +135,10 @@
                     <i class="bi bi-plus-circle-fill text-success"></i>
                     Добавление нового автомобиля
                 </h1>
-                <div class="text-muted">Заполните информацию об автомобиле</div>
+                <div class="text-muted mt-1">
+                    <i class="bi bi-info-circle"></i>
+                    Заполните основные параметры. После создания вы сможете добавить описания, цены и графики.
+                </div>
             </div>
             <div>
                 <a href="@Url.Action("Cars")" class="btn btn-outline-secondary">
@@ -117,241 +148,164 @@
             </div>
         </div>
 
-        <form method="post" action="/Home/AddCar">
-            <!-- Блок с изображением -->
-            <div class="card mb-4">
+        <!-- ============================================================ -->
+        <!-- ФОРМА ТОЛЬКО С ОСНОВНЫМИ ПАРАМЕТРАМИ -->
+        <!-- ============================================================ -->
+        <form method="post" action="/Home/AddCar" enctype="multipart/form-data">
+
+            <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-image text-primary"></i> Изображение автомобиля</h5>
+                    <h5><i class="bi bi-car-front text-primary"></i> Основные параметры автомобиля</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
+
+                    <!-- ФОТО -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
                             <div id="noImageMessage">
                                 <div class="placeholder-image">
                                     <i class="bi bi-car-front fs-1"></i>
                                     <div class="mt-2">Изображение отсутствует</div>
                                 </div>
                             </div>
-                            <img id="previewImg" class="img-fluid car-image-preview mb-3" style="display:none;" alt="Предварительный просмотр">
+                            <img id="previewImg" class="img-fluid car-image-preview" style="display:none;" alt="Предварительный просмотр">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <div class="mb-3">
-                                <label class="form-label">Ссылка на изображение</label>
-                                <input type="text" class="form-control" name="Image" id="ImageUrl" 
-                                       placeholder="https://example.com/image.jpg">
-                                <div class="form-text">Введите URL изображения для предварительного просмотра</div>
+                                <label class="form-label">Выберите фото на компьютере</label>
+                                <input type="file"
+                                       class="form-control"
+                                       name="imageFile"
+                                       id="imageFile"
+                                       accept="image/*"
+                                       onchange="previewFile(this)" />
+                                <div class="form-text">Поддерживаемые форматы: JPG, PNG, GIF, WebP. Максимальный размер: 5MB</div>
                             </div>
-                            <button type="button" class="btn btn-outline-primary" onclick="previewImage()">
-                                <i class="bi bi-eye"></i>
-                                Предварительный просмотр
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearPhoto()">
+                                <i class="bi bi-arrow-repeat"></i> Очистить выбор
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Основная информация -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-info-circle text-primary"></i> Основная информация</h5>
-                </div>
-                <div class="card-body">
+                    <!-- ОСНОВНЫЕ ПОЛЯ -->
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Марка*</label>
-                            <input type="text" class="form-control" name="Brand" required>
+                            <input type="text" class="form-control" name="Brand" id="Brand" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Модель*</label>
-                            <input type="text" class="form-control" name="Model" required>
+                            <input type="text" class="form-control" name="Model" id="Model" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Поколение</label>
-                            <input type="text" class="form-control" name="Generation">
+                            <input type="text" class="form-control" name="Generation" id="Generation">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Двигатель</label>
-                            <input type="text" class="form-control" name="Engine">
+                            <input type="text" class="form-control" name="Engine" id="Engine">
                         </div>
                     </div>
+
                 </div>
             </div>
 
-            <!-- Текстовые поля с вкладками -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" id="carTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="ru-tab" data-bs-toggle="tab" data-bs-target="#ru" type="button">
-                                <i class="bi bi-flag-fill text-danger"></i> Русский
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="eng-tab" data-bs-toggle="tab" data-bs-target="#eng" type="button">
-                                <i class="bi bi-flag-fill text-primary"></i> Английский
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="ger-tab" data-bs-toggle="tab" data-bs-target="#ger" type="button">
-                                <i class="bi bi-flag-fill text-warning"></i> Немецкий
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="tab-content" id="carTabsContent">
-                    <!-- Русский язык -->
-                    <div class="tab-pane fade show active" id="ru" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Описание</label>
-                                <textarea class="form-control car-textarea" name="AboutRu" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Результат тюнинга</label>
-                                <textarea class="form-control car-textarea" name="ResultRu" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Блок управления</label>
-                                <textarea class="form-control car-textarea" name="EngineControlRu" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Опции</label>
-                                <textarea class="form-control car-textarea" name="OptionsRu" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Цена</label>
-                                <textarea class="form-control car-textarea" name="PriceRu" rows="4"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Английский язык -->
-                    <div class="tab-pane fade" id="eng" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Description</label>
-                                <textarea class="form-control car-textarea" name="AboutEng" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Tuning Result</label>
-                                <textarea class="form-control car-textarea" name="ResultEng" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Engine Control Unit</label>
-                                <textarea class="form-control car-textarea" name="EngineControlEng" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Options</label>
-                                <textarea class="form-control car-textarea" name="OptionsEng" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Price</label>
-                                <textarea class="form-control car-textarea" name="PriceEng" rows="4"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Немецкий язык -->
-                    <div class="tab-pane fade" id="ger" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label">Beschreibung</label>
-                                <textarea class="form-control car-textarea" name="AboutGer" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Tuning-Ergebnis</label>
-                                <textarea class="form-control car-textarea" name="ResultGer" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Motorsteuergerät</label>
-                                <textarea class="form-control car-textarea" name="EngineControlGer" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Optionen</label>
-                                <textarea class="form-control car-textarea" name="OptionsGer" rows="4"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Preis</label>
-                                <textarea class="form-control car-textarea" name="PriceGer" rows="4"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Кнопки действий -->
-            <div class="d-flex justify-content-between">
+            <!-- КНОПКИ -->
+            <div class="d-flex justify-content-between mt-4">
                 <div>
                     <button type="submit" class="btn btn-success me-2">
                         <i class="bi bi-check-circle"></i>
-                        Добавить автомобиль
+                        Создать автомобиль
                     </button>
-                    <button type="reset" class="btn btn-outline-secondary">
+                    <button type="reset" class="btn btn-outline-secondary" onclick="resetForm()">
                         <i class="bi bi-arrow-clockwise"></i>
                         Очистить форму
                     </button>
                 </div>
-                
                 <a href="@Url.Action("Cars")" class="btn btn-outline-secondary">
                     <i class="bi bi-x-circle"></i>
                     Отмена
                 </a>
             </div>
+
         </form>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Автоматически скрываем сообщения через 5 секунд
+        // ============================================
+        // ПРЕВЬЮ ЗАГРУЖЕННОГО ФАЙЛА
+        // ============================================
+        function previewFile(input) {
+            const preview = document.getElementById('previewImg');
+            const noImage = document.getElementById('noImageMessage');
+            const file = input.files[0];
+
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Файл слишком большой! Максимум 5MB.');
+                    input.value = '';
+                    return;
+                }
+                if (!file.type.startsWith('image/')) {
+                    alert('Пожалуйста, выберите изображение.');
+                    input.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    noImage.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ============================================
+        // ОЧИСТКА ВЫБРАННОГО ФОТО
+        // ============================================
+        function clearPhoto() {
+            const preview = document.getElementById('previewImg');
+            const noImage = document.getElementById('noImageMessage');
+            const fileInput = document.getElementById('imageFile');
+            preview.style.display = 'none';
+            preview.src = '';
+            noImage.style.display = 'block';
+            fileInput.value = '';
+        }
+
+        // ============================================
+        // СБРОС ФОРМЫ
+        // ============================================
+        function resetForm() {
+            if (confirm('Вы уверены, что хотите очистить все поля формы?')) {
+                document.getElementById('carForm')?.reset();
+                clearPhoto();
+            }
+        }
+
+        // ============================================
+        // АВТОМАТИЧЕСКОЕ СКРЫТИЕ СООБЩЕНИЙ
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const messages = document.querySelectorAll('.message-box');
-            messages.forEach(message => {
-                setTimeout(() => {
+            messages.forEach(function(message) {
+                setTimeout(function() {
                     message.style.opacity = '0';
                     message.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => {
+                    setTimeout(function() {
                         if (message.parentNode) {
                             message.parentNode.removeChild(message);
                         }
                     }, 500);
                 }, 5000);
             });
-
-            // Инициализация табов
-            const triggerTabList = [].slice.call(document.querySelectorAll('#carTabs button'));
-            triggerTabList.forEach(function (triggerEl) {
-                const tabTrigger = new bootstrap.Tab(triggerEl);
-                triggerEl.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    tabTrigger.show();
-                });
-            });
         });
-
-        // Функция предварительного просмотра изображения
-        function previewImage() {
-            const imageUrl = document.getElementById('ImageUrl').value;
-            const previewImg = document.getElementById('previewImg');
-            const noImageMessage = document.getElementById('noImageMessage');
-            
-            if (imageUrl) {
-                previewImg.src = imageUrl;
-                previewImg.onload = function() {
-                    previewImg.style.display = 'block';
-                    noImageMessage.style.display = 'none';
-                };
-                previewImg.onerror = function() {
-                    previewImg.style.display = 'none';
-                    noImageMessage.style.display = 'block';
-                    alert('Не удалось загрузить изображение по указанному URL');
-                };
-            } else {
-                alert('Введите URL изображения');
-            }
-        }
     </script>
 </body>
 </html>

@@ -1,0 +1,2016 @@
+﻿@model reflah_controler.Models.ReflashCarModel
+@{
+    Layout = null;
+    ViewData["Title"] = $"Предпросмотр: {Model.Brand} {Model.Model}";
+
+    // Читаем язык из cookie
+    var language = Context.Request.Cookies["Language"];
+    if (string.IsNullOrEmpty(language)) language = "ru";
+
+    // Получаем тему из cookie
+    var currentTheme = Context.Request.Cookies["Theme"] ?? "dark";
+
+    string GetLocalized(string ru, string eng, string ger)
+    {
+        return language switch
+        {
+            "en" => eng,
+            "de" => ger,
+            _ => ru
+        };
+    }
+
+    string AddLineBreaks(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        return text.Replace("\n", "<br>").Replace("\r\n", "<br>");
+    }
+
+    // Функция для разбиения текста по разделителю ;
+    List<string> SplitTextBySeparator(string text, char separator = ';')
+    {
+        if (string.IsNullOrEmpty(text)) return new List<string>();
+        
+        var parts = text.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries);
+        return parts.Select(p => p.Trim()).ToList();
+    }
+}
+
+<!DOCTYPE html>
+<html lang="@language" data-theme="@currentTheme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>@ViewData["Title"] — Performance Tuning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ================================================================
+           CSS ПЕРЕМЕННЫЕ ДЛЯ ТЕМ
+           ================================================================ */
+
+        /* СВЕТЛАЯ ТЕМА (по умолчанию) */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-card: #ffffff;
+            --bg-input: #f0f0f0;
+            --bg-overlay: rgba(255, 255, 255, 0.9);
+            
+            --text-primary: #1a1a2e;
+            --text-secondary: #1a1a2e;
+            --text-muted: #88889a;
+            
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --accent-color: #2196F3;
+            --accent-hover: #1976D2;
+            --gradient-start: #f8f9fa;
+            --gradient-end: #e9ecef;
+            --slider-overlay: rgba(255, 255, 255, 0.4);
+            --block-bg: #ffffff;
+            --block-border: #e0e0e0;
+            --frame-bg: rgba(255, 255, 255, 0.95);
+            --frame-text: #1a1a2e;
+            --price-bg-start: #2196F3;
+            --price-bg-end: #1976D2;
+            --price-text: #ffffff;
+            --logo-color-start: #0D47A1;
+            --logo-color-end: #42A5F5;
+            --list-marker-color: var(--accent-color);
+            
+            --order-title-color: #2196F3;
+        }
+
+        /* ТЁМНАЯ ТЕМА */
+        [data-theme="dark"] {
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #14141C;
+            --bg-card: #111118;
+            --bg-input: #1a1a24;
+            --bg-overlay: rgba(10, 10, 15, 0.9);
+            
+            --text-primary: #E8E8F0;
+            --text-secondary: #E8E8F0;
+            --text-muted: #88889a;
+            
+            --border-color: #2A2A35;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --accent-color: #FF3A2F;
+            --accent-hover: #D62B1F;
+            --gradient-start: #111118;
+            --gradient-end: #0D0D14;
+            --slider-overlay: rgba(0, 0, 0, 0.85);
+            --block-bg: #111118;
+            --block-border: #252530;
+            --frame-bg: rgba(10, 10, 15, 0.85);
+            --frame-text: #E8E8F0;
+            --price-bg-start: #FF3A2F;
+            --price-bg-end: #B8251A;
+            --price-text: #ffffff;
+            --logo-color-start: #FFB5A0;
+            --logo-color-end: #FFD4C4;
+            --list-marker-color: var(--accent-color);
+            
+            --order-title-color: #FF3A2F;
+        }
+
+        /* ================================================================
+           ОБЩИЕ СТИЛИ
+           ================================================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.5;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        /* ===== ПАНЕЛЬ ПРЕДПРОСМОТРА ===== */
+        .preview-header {
+            background: var(--accent-color);
+            padding: 8px 16px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .preview-header h4 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 14px;
+        }
+        .preview-header a {
+            color: white;
+            text-decoration: underline;
+            font-size: 13px;
+        }
+        .preview-header a:hover {
+            color: #fff;
+            opacity: 0.8;
+        }
+        .preview-header .close-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+            background: none;
+            border: none;
+            padding: 0 4px;
+        }
+        .preview-header .close-btn:hover {
+            opacity: 0.8;
+        }
+        .preview-header .btn-edit {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .preview-header .btn-edit:hover {
+            background: rgba(255,255,255,0.35);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* ========================================== */
+        /* ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА И ТЕМЫ */
+        /* ========================================== */
+        .language-switcher {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 1100;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(12px);
+            padding: 6px 12px;
+            border-radius: 60px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 20px var(--shadow-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .lang-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,58,47,0.1);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 8px rgba(255,58,47,0.5);
+        }
+
+        .lang-btn .fa-sun, .lang-btn .fa-moon {
+            font-size: 14px;
+        }
+
+        /* ===== ОСНОВНАЯ СЕТКА ===== */
+        .page-wrapper {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 5% 60px 10%;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dropdowns-sidebar {
+            flex: 0 0 280px;
+            position: sticky;
+            top: 100px;
+            align-self: flex-start;
+        }
+
+        .dropdowns-mobile {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .dropdowns-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 35px -12px var(--shadow-color);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dropdown-section {
+            margin-bottom: 20px;
+        }
+
+        .dropdown-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .dropdown-label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--accent-color);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .dropdown-select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', monospace;
+        }
+
+        .dropdown-select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,58,47,0.2);
+        }
+
+        .dropdown-select:disabled {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            border-color: var(--border-color);
+        }
+
+        .btn-next {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 20px;
+            background: linear-gradient(95deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255,58,47,0.3);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,58,47,0.4);
+        }
+
+        .container {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ================================================================
+           КАРТОЧКА АВТОМОБИЛЯ
+           ================================================================ */
+
+        .car-header {
+            background: var(--bg-card);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* ----- ХАРАКТЕРИСТИКИ (БРЕНД, МОДЕЛЬ, ПОКОЛЕНИЕ, ДВИГАТЕЛЬ) ----- */
+        .specs-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .specs-container:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        .spec-item {
+            text-align: center;
+            padding: 8px 4px;
+        }
+
+        .spec-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .spec-divider {
+            width: 1px;
+            background: var(--border-color);
+            align-self: stretch;
+        }
+
+        /* ================================================================
+           КОНТЕЙНЕР: ФОТО + БЛОК ЗАКАЗА В РЯД (ТОЛЬКО НА ПК)
+           ================================================================ */
+
+        .car-info-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        /* ----- ФОТО АВТОМОБИЛЯ ----- */
+        .car-image-full {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .car-image-full:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 30px var(--shadow-hover);
+        }
+
+        .car-image {
+            max-width: 100%;
+            max-height: 250px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+            display: block;
+        }
+
+        .car-image:hover {
+            transform: scale(1.02);
+        }
+
+        .no-image-placeholder {
+            color: var(--text-muted);
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .no-image-placeholder i {
+            font-size: 64px;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        /* ================================================================
+           БЛОК: ЗАКАЗАТЬ ЧИП-ТЮНИНГ (ТОЛЬКО НА ПК)
+           ================================================================ */
+
+        .car-order-block {
+            flex: 0 0 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .car-order-block:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow-hover);
+        }
+
+        .order-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .order-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .order-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--order-title-color);
+            letter-spacing: 0.3px;
+        }
+
+        .order-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent-color);
+        }
+
+        .order-button {
+            display: inline-block;
+            padding: 12px 32px;
+            background: linear-gradient(95deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            border: none;
+            border-radius: 40px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255, 58, 47, 0.3);
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .order-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 58, 47, 0.4);
+        }
+
+        /* ================================================================
+           ЯКОРЬ ДЛЯ ПЕРЕХОДА К ЦЕНАМ
+           ================================================================ */
+
+        #prices-section {
+            scroll-margin-top: 20px;
+        }
+
+        /* ================================================================
+           ИНФОРМАЦИОННЫЕ БЛОКИ (О АВТОМОБИЛЕ, РЕЗУЛЬТАТЫ, УПРАВЛЕНИЕ, ГРАФИКИ)
+           ================================================================ */
+
+        .info-block {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            width: 100%;
+        }
+
+        .info-block:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+
+        .info-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+
+        .info-content {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* ----- СПИСКИ ВНУТРИ БЛОКОВ ----- */
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            position: relative;
+            padding: 8px 0 8px 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+            transition: color 0.2s ease;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-list li::before {
+            display: none;
+        }
+
+        .info-list li:hover {
+            color: var(--text-primary);
+        }
+
+        /* ================================================================
+           БЛОК ЦЕН
+           ================================================================ */
+
+        .price-label {
+            font-size: 17px;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+        }
+
+        .price-table-wrapper {
+            margin-top: 15px;
+            overflow-x: auto;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .price-table thead th {
+            padding: 10px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .price-table thead th:not(:first-child) {
+            text-align: center;
+        }
+
+        .price-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .price-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .price-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .price-table tbody td {
+            padding: 10px 16px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .price-table tbody td:not(:first-child) {
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .price-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .price-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .price-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ================================================================
+           ГРАФИКИ (ОБНОВЛЕННЫЕ - В СТИЛЕ ИНФОРМАЦИОННЫХ БЛОКОВ)
+           ================================================================ */
+
+        .grafic-grid {
+            margin-top: 4px;
+        }
+
+        .grafic-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .grafic-mini-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .grafic-mini-item:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 25px var(--shadow-hover);
+        }
+
+        .grafic-mini-item .mini-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .grafic-mini-item:hover .mini-image {
+            transform: scale(1.05);
+        }
+
+        .grafic-mini-item .mini-name {
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .grafic-mini-item .mini-icon {
+            font-size: 32px;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .grafic-mini-item .click-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Сообщение при отсутствии графиков */
+        .grafic-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .grafic-empty i {
+            font-size: 48px;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        /* ================================================================
+           КНОПКИ
+           ================================================================ */
+
+        .actions-bottom {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(95deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,58,47,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,58,47,0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .highlight {
+            border-left: 3px solid var(--accent-color);
+        }
+
+        /* ================================================================
+           МОДАЛЬНОЕ ОКНО ДЛЯ ГРАФИКОВ
+           ================================================================ */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 900px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 58, 47, 0.3);
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+            box-shadow: 0 6px 25px rgba(255, 58, 47, 0.5);
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 0;
+        }
+
+        .modal-title i {
+            color: var(--accent-color);
+            margin-right: 12px;
+        }
+
+        .modal-title span {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 12px;
+        }
+
+        .modal-grafic-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .modal-grafic-container img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .modal-grafic-container .no-image {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .modal-grafic-container .no-image i {
+            font-size: 64px;
+            opacity: 0.3;
+        }
+
+        .modal-grafic-container .no-image p {
+            margin-top: 12px;
+        }
+
+        .modal-footer {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .modal-footer i {
+            margin-right: 8px;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        /* ================================================================
+           АДАПТИВ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+           ================================================================ */
+
+        /* ПЛАНШЕТЫ И ТЕЛЕФОНЫ (≤ 700px) */
+        @@media (max-width: 700px) {
+            .preview-header {
+                padding: 6px 12px;
+                gap: 8px;
+            }
+            .preview-header h4 {
+                font-size: 12px;
+            }
+            .preview-header .btn-edit {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+
+            .language-switcher {
+                top: 12px;
+                right: 12px;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+
+            .lang-btn {
+                padding: 4px 10px;
+                font-size: 10px;
+            }
+
+            .page-wrapper {
+                flex-direction: column;
+                gap: 0px;
+                padding: 0 10px 0px 10px;
+            }
+
+            .dropdowns-sidebar {
+                flex: 1 1 100%;
+                position: static;
+                width: 100%;
+                order: 10;
+                margin-top: 20px;
+            }
+
+            .dropdowns-sidebar .dropdown-section {
+                display: none;
+            }
+
+            .dropdowns-mobile {
+                display: block;
+                margin-top: 0;
+            }
+
+            .dropdowns-mobile .dropdown-section {
+                display: block;
+            }
+
+            .container {
+                order: 0;
+                width: 100%;
+            }
+
+            /* ----- КАРТОЧКА АВТОМОБИЛЯ (МОБИЛЬНАЯ) ----- */
+            .car-header {
+                max-width: 100%;
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .specs-container {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                border-radius: 16px;
+            }
+
+            .spec-item {
+                padding: 4px 2px;
+            }
+
+            .spec-label {
+                font-size: 8px;
+                letter-spacing: 0.5px;
+            }
+
+            .spec-value {
+                font-size: 13px;
+            }
+
+            /* ----- ФОТО (МОБИЛЬНОЕ) ----- */
+            .car-info-wrapper {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .car-image-full {
+                flex: none;
+                width: 100%;
+                padding: 12px;
+                border-radius: 16px;
+                min-height: 150px;
+            }
+
+            .car-image {
+                max-height: 200px;
+                width: 100%;
+                height: auto;
+            }
+
+            /* ===== БЛОК ЗАКАЗА СКРЫТ НА МОБИЛЬНЫХ ===== */
+            .car-order-block {
+                display: none;
+            }
+
+            /* ----- ИНФОРМАЦИОННЫЕ БЛОКИ (МОБИЛЬНЫЕ) ----- */
+            .info-block {
+                padding: 16px 18px;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .info-title {
+                font-size: 12px;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+            }
+
+            .info-content {
+                font-size: 10px;
+                line-height: 1.5;
+            }
+
+            .info-list li {
+                padding: 6px 0 6px 6px;
+                font-size: 10px;
+            }
+
+            /* ----- ЦЕНЫ (МОБИЛЬНЫЕ) ----- */
+            .price-table thead th,
+            .price-table tbody td {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            .price-table tbody td:not(:first-child) {
+                font-size: 10px;
+            }
+
+            /* ----- ГРАФИКИ (МОБИЛЬНЫЕ) ----- */
+            .grafic-mini-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+
+            .grafic-mini-item .mini-image {
+                height: 80px;
+            }
+
+            .grafic-mini-item .mini-name {
+                font-size: 12px;
+            }
+
+            .grafic-empty i {
+                font-size: 36px;
+            }
+
+            /* ----- МОДАЛЬНОЕ ОКНО (МОБИЛЬНОЕ) ----- */
+            .modal-content {
+                padding: 20px;
+                width: 98%;
+                max-height: 95vh;
+            }
+
+            .modal-title {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+
+            .modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            /* ----- ДРОПДАУНЫ (МОБИЛЬНЫЕ) ----- */
+            .dropdowns-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .dropdown-section {
+                margin-bottom: 14px;
+            }
+
+            .dropdown-label {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+
+            .dropdown-select {
+                padding: 10px 14px;
+                font-size: 13px;
+                border-radius: 12px;
+            }
+
+            .btn-next {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* МАЛЕНЬКИЕ ТЕЛЕФОНЫ (≤ 480px) */
+        @@media (max-width: 480px) {
+            .specs-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                padding: 10px 12px;
+            }
+
+            .spec-divider {
+                display: none;
+            }
+
+            .info-list li {
+                padding: 4px 0 4px 20px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================== -->
+    <!-- ПАНЕЛЬ ПРЕДПРОСМОТРА -->
+    <!-- ========================================== -->
+    <div class="preview-header">
+        <h4><i class="fas fa-eye"></i> ПРЕДПРОСМОТР СТРАНИЦЫ АВТОМОБИЛЯ</h4>
+        <a href="@Url.Action("EditCar", "Home", new { id = Model.Id })" class="btn-edit">
+            <i class="fas fa-edit"></i> Редактировать
+        </a>
+        <a href="@Url.Action("Cars", "Home")" class="close-btn" title="Закрыть предпросмотр">✕</a>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА И ТЕМЫ -->
+    <!-- ========================================== -->
+    <div class="language-switcher">
+        <button class="lang-btn @(language == "ru" ? "active" : "")" onclick="switchLanguage('ru')">RU</button>
+        <button class="lang-btn @(language == "en" ? "active" : "")" onclick="switchLanguage('en')">EN</button>
+        <button class="lang-btn @(language == "de" ? "active" : "")" onclick="switchLanguage('de')">DE</button>
+        <span style="width:1px; background:var(--border-color); margin:0 4px;"></span>
+        <button class="lang-btn @(currentTheme == "light" ? "active" : "")" onclick="switchTheme('light')" title="Светлая тема">
+            <i class="fas fa-sun"></i>
+        </button>
+        <button class="lang-btn @(currentTheme == "dark" ? "active" : "")" onclick="switchTheme('dark')" title="Тёмная тема">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <div class="page-wrapper">
+        <!-- ================================================================
+        САЙДБАР С ВЫПАДАЮЩИМИ СПИСКАМИ
+        ================================================================ -->
+        <div class="dropdowns-sidebar">
+            <div class="dropdowns-card">
+                <!-- ДЕСКТОПНЫЕ ДРОПДАУНЫ -->
+                <div class="dropdown-section">
+                    <label class="dropdown-label" id="brandLabel"> БРЕНД</label>
+                    <select class="dropdown-select" id="brandDropdown" disabled>
+                        <option value="">-- Загрузка... --</option>
+                    </select>
+                </div>
+                <div class="dropdown-section">
+                    <label class="dropdown-label" id="modelLabel"> МОДЕЛЬ</label>
+                    <select class="dropdown-select" id="modelDropdown" disabled>
+                        <option value="">-- Сначала бренд --</option>
+                    </select>
+                </div>
+                <div class="dropdown-section">
+                    <label class="dropdown-label" id="generationLabel"> ПОКОЛЕНИЕ</label>
+                    <select class="dropdown-select" id="generationDropdown" disabled>
+                        <option value="">-- Сначала модель --</option>
+                    </select>
+                </div>
+                <div class="dropdown-section">
+                    <label class="dropdown-label" id="engineLabel"> ДВИГАТЕЛЬ</label>
+                    <select class="dropdown-select" id="engineDropdown" disabled>
+                        <option value="">-- Сначала поколение --</option>
+                    </select>
+                </div>
+
+                <!-- МОБИЛЬНЫЕ ДРОПДАУНЫ (дубликаты) -->
+                <div class="dropdowns-mobile">
+                    <div class="dropdown-section">
+                        <label class="dropdown-label" id="brandLabelMobile"> БРЕНД</label>
+                        <select class="dropdown-select" id="brandDropdownMobile" disabled>
+                            <option value="">-- Загрузка... --</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label" id="modelLabelMobile"> МОДЕЛЬ</label>
+                        <select class="dropdown-select" id="modelDropdownMobile" disabled>
+                            <option value="">-- Сначала бренд --</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label" id="generationLabelMobile"> ПОКОЛЕНИЕ</label>
+                        <select class="dropdown-select" id="generationDropdownMobile" disabled>
+                            <option value="">-- Сначала модель --</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-section">
+                        <label class="dropdown-label" id="engineLabelMobile"> ДВИГАТЕЛЬ</label>
+                        <select class="dropdown-select" id="engineDropdownMobile" disabled>
+                            <option value="">-- Сначала поколение --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-next" id="successButton" onclick="onSuccessButtonClick()">
+                    ПЕРЕЙТИ →
+                </button>
+            </div>
+        </div>
+
+        <!-- ================================================================
+        ОСНОВНОЙ КОНТЕНТ
+        ================================================================ -->
+        <div class="container">
+
+            <!-- ============================================================
+            КАРТОЧКА АВТОМОБИЛЯ
+            ============================================================ -->
+            <div class="car-header">
+                <!-- Характеристики -->
+                <div class="specs-container">
+                    <div class="spec-item">
+                        <span class="spec-label"> БРЕНД</span>
+                        <span class="spec-value">@Model.Brand</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label"> МОДЕЛЬ</span>
+                        <span class="spec-value">@Model.Model</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label"> ПОКОЛЕНИЕ</span>
+                        <span class="spec-value">@Model.Generation</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label"> ДВИГАТЕЛЬ</span>
+                        <span class="spec-value">@Model.Engine</span>
+                    </div>
+                </div>
+
+                <!-- ===== КОНТЕЙНЕР: ФОТО + БЛОК ЗАКАЗА В РЯД ===== -->
+                <div class="car-info-wrapper">
+                    <!-- Фото автомобиля -->
+                    <div class="car-image-full">
+                        @if (!string.IsNullOrEmpty(Model.Image))
+                        {
+                            <img src="/shared-fotos/cars/@Model.Image" alt="@Model.Brand @Model.Model" class="car-image" />
+                        }
+                        else
+                        {
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-car"></i>
+                                @GetLocalized("Нет изображения", "No image", "Kein Bild")
+                            </div>
+                        }
+                    </div>
+
+                    <!-- ===== БЛОК: ЗАКАЗАТЬ ЧИП-ТЮНИНГ (ТОЛЬКО НА ПК) ===== -->
+                    <div class="car-order-block">
+                        <div class="order-content">
+                            <div class="order-text">
+                                <span class="order-title">@GetLocalized("Заказать чип-тюнинг", "Order Chip Tuning", "Chip-Tuning bestellen")</span>
+                                <span class="order-price">
+                                    @{
+                                        decimal minPrice = 0;
+                                        if (Model.Prices != null && Model.Prices.Any())
+                                        {
+                                            var allPrices = Model.Prices
+                                                .SelectMany(p => new[] { p.BasePrice, p.ProPrice })
+                                                .Where(v => !string.IsNullOrEmpty(v))
+                                                .Select(v => decimal.TryParse(v, out decimal val) ? val : 0)
+                                                .Where(v => v > 0)
+                                                .Distinct()
+                                                .ToList();
+                                            
+                                            if (allPrices.Any())
+                                            {
+                                                minPrice = allPrices.Min();
+                                            }
+                                        }
+                                    }
+                                    @if (minPrice > 0)
+                                    {
+                                        <text>@GetLocalized("от", "from", "ab") @minPrice.ToString("N0") ₽</text>
+                                    }
+                                    else
+                                    {
+                                        <text>@GetLocalized("Уточняйте", "Ask for price", "Preis anfragen")</text>
+                                    }
+                                </span>
+                            </div>
+                            <button class="order-button" onclick="scrollToPrices()">
+                                @GetLocalized("Перейти к ценам", "Go to prices", "Zu Preisen")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+            БЛОК 1: О АВТОМОБИЛЕ
+            ============================================================ -->
+            <div class="info-block">
+                <div class="info-title"> @GetLocalized("О автомобиле", "About the Car", "Über das Auto")</div>
+                <div class="info-content">
+                    @if (Model.Abouts != null && Model.Abouts.Any())
+                    {
+                        var items = Model.Abouts.Select(item => GetLocalized(item.TextRu, item.TextEng, item.TextGer)).ToList();
+                        <ul class="info-list">
+                            @foreach (var item in items)
+                            {
+                                var parts = SplitTextBySeparator(item, ';');
+                                foreach (var part in parts)
+                                {
+                                    <li>@part</li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <text>@Model.AboutRu</text>
+                    }
+                </div>
+            </div>
+
+            <!-- ============================================================
+            БЛОК 2: РЕЗУЛЬТАТЫ ЧИП-ТЮНИНГА
+            ============================================================ -->
+            <div class="info-block">
+                <div class="info-title"> @GetLocalized("Результаты чип-тюнинга", "Chip Tuning Results", "Chip-Tuning Ergebnisse")</div>
+                <div class="info-content">
+                    @if (Model.PriResults != null && Model.PriResults.Any())
+                    {
+                        var items = Model.PriResults.Select(item => GetLocalized(item.TextRu, item.TextEng, item.TextGer)).ToList();
+                        <ul class="info-list">
+                            @foreach (var item in items)
+                            {
+                                var parts = SplitTextBySeparator(item, ';');
+                                foreach (var part in parts)
+                                {
+                                    <li>@part</li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <text>@Html.Raw(AddLineBreaks(Model.ResultRu))</text>
+                    }
+                </div>
+            </div>
+
+            <!-- ============================================================
+            БЛОК 3: УПРАВЛЕНИЕ ДВИГАТЕЛЕМ
+            ============================================================ -->
+            <div class="info-block">
+                <div class="info-title"> @GetLocalized("Управление двигателем", "Engine Control", "Motorsteuerung")</div>
+                <div class="info-content">
+                    @if (Model.Engine_controlers != null && Model.Engine_controlers.Any())
+                    {
+                        var items = Model.Engine_controlers.Select(item => GetLocalized(item.TextRu, item.TextEng, item.TextGer)).ToList();
+                        <ul class="info-list">
+                            @foreach (var item in items)
+                            {
+                                var parts = SplitTextBySeparator(item, ';');
+                                foreach (var part in parts)
+                                {
+                                    <li>@part</li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <text>@Html.Raw(AddLineBreaks(Model.EngineControlRu))</text>
+                    }
+                </div>
+            </div>
+
+            <!-- ============================================================
+            БЛОК 4: ЦЕНЫ (С ЯКОРЕМ ДЛЯ ПЕРЕХОДА)
+            ============================================================ -->
+            <div class="info-block" id="prices-section">
+                <div class="price-label"> @GetLocalized("СТОИМОСТЬ", "PRICE", "PREIS")</div>
+
+                @if (Model.Prices != null && Model.Prices.Any())
+                {
+                    <div class="price-table-wrapper">
+                        <table class="price-table">
+                            <thead>
+                                <tr>
+                                    <th>@GetLocalized("Название опции", "Option Name", "Optionsbezeichnung")</th>
+                                    <th>@GetLocalized("Цена на стоке", "Stock Price", "Aktienkurs")</th>
+                                    <th>@GetLocalized("Доплата при тюнинге", "Tuning Surcharge", "Tuning-Aufpreis")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var priceItem in Model.Prices)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="price-name-cell">
+                                                
+                                                <span>@GetLocalized(priceItem.NameRu, priceItem.NameEng, priceItem.NameGer)</span>
+                                            </div>
+                                        </td>
+                                        <td class="price-base">
+                                            @if (string.IsNullOrEmpty(priceItem.BasePrice))
+                                            {
+                                                <text>—</text>
+                                            }
+                                            else if (int.TryParse(priceItem.BasePrice, out int baseNum))
+                                            {
+                                                @baseNum.ToString("N0") <text>₽</text>
+                                            }
+                                            else
+                                            {
+                                                @priceItem.BasePrice
+                                            }
+                                        </td>
+                                        <td class="price-pro">
+                                            @if (string.IsNullOrEmpty(priceItem.ProPrice))
+                                            {
+                                                <text>—</text>
+                                            }
+                                            else if (int.TryParse(priceItem.ProPrice, out int proNum))
+                                            {
+                                                @proNum.ToString("N0") <text>₽</text>
+                                            }
+                                            else
+                                            {
+                                                @priceItem.ProPrice
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="price-empty">
+                        @if (!string.IsNullOrEmpty(Model.PriceRu))
+                        {
+                            @Model.PriceRu
+                        }
+                        else
+                        {
+                            @GetLocalized("Цены не указаны", "No prices available", "Keine Preise verfügbar")
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- ============================================================
+            БЛОК 5: ГРАФИКИ (КАК ИНФОРМАЦИОННЫЙ БЛОК)
+            ============================================================ -->
+            <div class="info-block">
+                <div class="info-title"> @GetLocalized("Графики", "Graphs", "Grafiken")</div>
+                <div class="grafic-grid">
+                    @if (Model.Grafics != null && Model.Grafics.Any())
+                    {
+                        <div class="grafic-mini-grid">
+                            @foreach (var grafic in Model.Grafics)
+                            {
+                                // Формируем правильный путь к изображению
+                                var imagePath = grafic.Image;
+                                if (!string.IsNullOrEmpty(imagePath) && 
+                                    !imagePath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
+                                    !imagePath.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
+                                    !imagePath.StartsWith("/"))
+                                {
+                                    imagePath = "/shared-fotos/grafics/" + imagePath;
+                                }
+                                <div class="grafic-mini-item" onclick="openGraficModal(@grafic.Id)">
+                                    @if (!string.IsNullOrEmpty(grafic.Image))
+                                    {
+                                        <img src="@imagePath" alt="@grafic.Name" class="mini-image" loading="lazy" 
+                                             onerror="this.style.display='none'; this.parentElement.querySelector('.mini-icon')?.style?.removeProperty('display');" />
+                                        <span class="mini-icon" style="display: none;"><i class="fas fa-chart-line"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="mini-icon"><i class="fas fa-chart-line"></i></span>
+                                    }
+                                    <div class="mini-name">@grafic.Name</div>
+                                    <div class="click-hint">@GetLocalized("Нажмите для увеличения", "Click to enlarge", "Zum Vergrößern klicken")</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="grafic-empty">
+                            <i class="fas fa-chart-pie"></i>
+                            @GetLocalized("Графики отсутствуют", "No graphs available", "Keine Grafiken verfügbar")
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ГРАФИКОВ -->
+    <!-- ================================================================ -->
+    <div class="modal-overlay" id="graficModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeGraficModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <h2 class="modal-title">
+                <i class="fas fa-chart-line"></i>
+                <span id="modalGraficName">@GetLocalized("График", "Graph", "Grafik")</span>
+                <span style="font-size: 16px; font-weight: 400; color: var(--text-muted); margin-left: 12px;">@Model.Brand @Model.Model</span>
+            </h2>
+
+            <div class="modal-grafic-container">
+                <img id="modalGraficImage" src="" alt="" style="display: none; max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;" />
+                <div id="modalGraficNoImage" class="no-image" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <p>@GetLocalized("Изображение отсутствует", "No image", "Kein Bild")</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <i class="fas fa-info-circle"></i>
+                @GetLocalized("Нажмите на изображение для увеличения", "Click on image to enlarge", "Klicken Sie auf das Bild zum Vergrößern")
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ================================================================ -->
+    <script>
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА
+        // ==========================================
+        function switchLanguage(lang) {
+            document.cookie = "Language=" + lang + "; path=/; max-age=" + (365 * 24 * 60 * 60);
+            location.reload();
+        }
+
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        // ==========================================
+        function switchTheme(theme) {
+            document.cookie = "Theme=" + theme + "; path=/; max-age=" + (365 * 24 * 60 * 60);
+            location.reload();
+        }
+
+        // ==========================================
+        // ПРОКРУТКА К ТАБЛИЦЕ ЦЕН
+        // ==========================================
+        function scrollToPrices() {
+            const pricesSection = document.getElementById('prices-section');
+            if (pricesSection) {
+                const offset = 20;
+                const elementPosition = pricesSection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // ==========================================
+        // МОДАЛЬНОЕ ОКНО ГРАФИКОВ
+        // ==========================================
+
+        var graficList = @Json.Serialize(Model.Grafics);
+
+        function openGraficModal(graficId) {
+            const modal = document.getElementById('graficModal');
+            if (!modal) return;
+
+            const selected = graficList.find(g => g.id === graficId);
+
+            if (!selected) {
+                console.warn('График с ID ' + graficId + ' не найден');
+                return;
+            }
+
+            const imageEl = document.getElementById('modalGraficImage');
+            const nameEl = document.getElementById('modalGraficName');
+            const noImageEl = document.getElementById('modalGraficNoImage');
+
+            if (selected.image && selected.image !== '') {
+                // Формируем правильный путь к файлу
+                var imagePath = selected.image;
+                if (!imagePath.startsWith('http://') && !imagePath.startsWith('https://') && !imagePath.startsWith('/')) {
+                    imagePath = '/shared-fotos/grafics/' + imagePath;
+                }
+                imageEl.src = imagePath;
+                imageEl.alt = selected.name || 'График';
+                imageEl.style.display = 'block';
+                noImageEl.style.display = 'none';
+            } else {
+                imageEl.style.display = 'none';
+                noImageEl.style.display = 'flex';
+            }
+
+            nameEl.textContent = selected.name || '@Html.Raw(GetLocalized("График", "Graph", "Grafik"))';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGraficModal() {
+            const modal = document.getElementById('graficModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('graficModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeGraficModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeGraficModal();
+                }
+            });
+        });
+
+        // ==========================================
+        // ДРОПДАУНЫ
+        // ==========================================
+
+        function updateDropdownLabels() {
+            const getCookie = (name) => {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return 'ru';
+            };
+            const lang = getCookie('Language');
+
+            const labels = {
+                brand: { ru: ' БРЕНД', en: ' BRAND', de: ' MARKE' },
+                model: { ru: ' МОДЕЛЬ', en: ' MODEL', de: ' MODELL' },
+                generation: { ru: ' ПОКОЛЕНИЕ', en: ' GENERATION', de: ' GENERATION' },
+                engine: { ru: ' ДВИГАТЕЛЬ', en: ' ENGINE', de: ' MOTOR' }
+            };
+
+            document.getElementById('brandLabel').textContent = labels.brand[lang] || ' БРЕНД';
+            document.getElementById('modelLabel').textContent = labels.model[lang] || ' МОДЕЛЬ';
+            document.getElementById('generationLabel').textContent = labels.generation[lang] || ' ПОКОЛЕНИЕ';
+            document.getElementById('engineLabel').textContent = labels.engine[lang] || ' ДВИГАТЕЛЬ';
+
+            document.getElementById('brandLabelMobile').textContent = labels.brand[lang] || ' БРЕНД';
+            document.getElementById('modelLabelMobile').textContent = labels.model[lang] || ' МОДЕЛЬ';
+            document.getElementById('generationLabelMobile').textContent = labels.generation[lang] || ' ПОКОЛЕНИЕ';
+            document.getElementById('engineLabelMobile').textContent = labels.engine[lang] || ' ДВИГАТЕЛЬ';
+        }
+
+        let currentCar = {
+            brand: '@Model.Brand',
+            model: '@Model.Model',
+            generation: '@Model.Generation',
+            engine: '@Model.Engine'
+        };
+
+        function syncDropdowns() {
+            const brandDesktop = document.getElementById('brandDropdown');
+            const brandMobile = document.getElementById('brandDropdownMobile');
+            const modelDesktop = document.getElementById('modelDropdown');
+            const modelMobile = document.getElementById('modelDropdownMobile');
+            const genDesktop = document.getElementById('generationDropdown');
+            const genMobile = document.getElementById('generationDropdownMobile');
+            const engineDesktop = document.getElementById('engineDropdown');
+            const engineMobile = document.getElementById('engineDropdownMobile');
+
+            if (brandDesktop && brandMobile && brandDesktop.value !== brandMobile.value) brandMobile.value = brandDesktop.value;
+            if (modelDesktop && modelMobile && modelDesktop.value !== modelMobile.value) modelMobile.value = modelDesktop.value;
+            if (genDesktop && genMobile && genDesktop.value !== genMobile.value) genMobile.value = genDesktop.value;
+            if (engineDesktop && engineMobile && engineDesktop.value !== engineMobile.value) engineMobile.value = engineDesktop.value;
+        }
+
+        function isCarComplete() {
+            return currentCar.brand && currentCar.model && currentCar.generation && currentCar.engine;
+        }
+
+        function showSuccessButton() {
+            const btnDesktop = document.getElementById('successButton');
+            const btnMobile = document.getElementById('successButtonMobile');
+            if (btnDesktop) btnDesktop.style.display = 'block';
+            if (btnMobile) btnMobile.style.display = 'block';
+        }
+
+        function hideSuccessButton() {
+            const btnDesktop = document.getElementById('successButton');
+            const btnMobile = document.getElementById('successButtonMobile');
+            if (btnDesktop) btnDesktop.style.display = 'none';
+            if (btnMobile) btnMobile.style.display = 'none';
+        }
+
+        function onSuccessButtonClick() {
+            if (!isCarComplete()) {
+                const lang = document.cookie.split('; ').find(row => row.startsWith('Language='))?.split('=')[1] || 'ru';
+                const msg = lang === 'ru' ? 'Заполните все поля' : (lang === 'en' ? 'Fill all fields' : 'Alle Felder ausfüllen');
+                alert(msg);
+                return;
+            }
+            const brand = encodeURIComponent(currentCar.brand);
+            const model = encodeURIComponent(currentCar.model);
+            const generation = encodeURIComponent(currentCar.generation);
+            const engine = encodeURIComponent(currentCar.engine);
+            window.location.href = `/${brand}/${model}/${generation}/${engine}`;
+        }
+
+        function onSuccessButtonClickMobile() {
+            onSuccessButtonClick();
+        }
+
+        async function loadInitialData() {
+            try {
+                const response = await fetch('/Home/GetInitialData');
+                const result = await response.json();
+                updateCar(result.car);
+                if (result.nextField === 'brand') {
+                    const placeholder = getPlaceholder('brand');
+                    ['brandDropdown', 'brandDropdownMobile'].forEach(id => {
+                        const dropdown = document.getElementById(id);
+                        if (dropdown) {
+                            dropdown.innerHTML = `<option value="">-- ${placeholder} --</option>`;
+                            if (result.options && result.options.length > 0) {
+                                result.options.forEach(option => {
+                                    const opt = document.createElement('option');
+                                    opt.value = option;
+                                    opt.textContent = option;
+                                    dropdown.appendChild(opt);
+                                });
+                            }
+                            dropdown.disabled = false;
+                            dropdown.onchange = function() { handleChange('brand', this.value); };
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        async function handleChange(fieldName, newValue) {
+            try {
+                const response = await fetch('/Home/ProcessSelection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ car: currentCar, changedField: fieldName, newValue: newValue })
+                });
+                const result = await response.json();
+                updateCar(result.car);
+                updateUI(result);
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        function updateCar(newCar) {
+            currentCar = {
+                brand: newCar.brand || '',
+                model: newCar.model || '',
+                generation: newCar.generation || '',
+                engine: newCar.engine || ''
+            };
+        }
+
+        function updateUI(result) {
+            updateDropdownValues();
+            if (result.nextField && result.nextField !== 'complete') updateDropdown(result.nextField, result.options);
+            if (result.nextField === 'complete') showSuccessButton(); else hideSuccessButton();
+            if (result.nextField && result.nextField !== 'complete') resetDropdownsAfter(result.nextField);
+            syncDropdowns();
+        }
+
+        function updateDropdownValues() {
+            const fields = ['brand', 'model', 'generation', 'engine'];
+            fields.forEach(field => {
+                const value = currentCar[field];
+                const desktop = document.getElementById(field + 'Dropdown');
+                const mobile = document.getElementById(field + 'DropdownMobile');
+                if (desktop && value) desktop.value = value;
+                if (mobile && value) mobile.value = value;
+            });
+        }
+
+        function updateDropdown(fieldName, options) {
+            const desktopId = fieldName + 'Dropdown';
+            const mobileId = fieldName + 'DropdownMobile';
+            const currentValue = currentCar[fieldName];
+
+            [desktopId, mobileId].forEach(id => {
+                const dropdown = document.getElementById(id);
+                if (!dropdown) return;
+
+                dropdown.innerHTML = '';
+                const emptyOption = document.createElement('option');
+                emptyOption.value = '';
+                emptyOption.textContent = getPlaceholder(fieldName);
+                dropdown.appendChild(emptyOption);
+
+                if (options && options.length > 0) {
+                    options.forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option;
+                        opt.textContent = option;
+                        dropdown.appendChild(opt);
+                    });
+                }
+
+                if (currentValue && options && options.includes(currentValue)) {
+                    dropdown.value = currentValue;
+                } else {
+                    dropdown.value = currentCar[fieldName] || '';
+                }
+                dropdown.disabled = false;
+                dropdown.onchange = function() { handleChange(fieldName, this.value); };
+            });
+        }
+
+        function resetDropdownsAfter(fieldName) {
+            const fields = ['brand', 'model', 'generation', 'engine'];
+            const startIndex = fields.indexOf(fieldName) + 1;
+            for (let i = startIndex; i < fields.length; i++) {
+                const desktop = document.getElementById(fields[i] + 'Dropdown');
+                const mobile = document.getElementById(fields[i] + 'DropdownMobile');
+                if (desktop && !currentCar[fields[i]]) {
+                    desktop.innerHTML = `<option value="">-- ${getPlaceholder(fields[i])} --</option>`;
+                    desktop.disabled = true;
+                    desktop.onchange = null;
+                }
+                if (mobile && !currentCar[fields[i]]) {
+                    mobile.innerHTML = `<option value="">-- ${getPlaceholder(fields[i])} --</option>`;
+                    mobile.disabled = true;
+                    mobile.onchange = null;
+                }
+                currentCar[fields[i]] = '';
+            }
+        }
+
+        function getPlaceholder(fieldName) {
+            const getCookie = (name) => {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return 'ru';
+            };
+            const lang = getCookie('Language');
+
+            const placeholders = {
+                brand: { ru: 'Выберите бренд', en: 'Select brand', de: 'Marke wählen' },
+                model: { ru: 'Выберите модель', en: 'Select model', de: 'Modell wählen' },
+                generation: { ru: 'Выберите поколение', en: 'Select generation', de: 'Generation wählen' },
+                engine: { ru: 'Выберите двигатель', en: 'Select engine', de: 'Motor wählen' }
+            };
+            return placeholders[fieldName]?.[lang] || 'Выберите';
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateDropdownLabels();
+            await loadInitialData();
+            if (isCarComplete()) showSuccessButton();
+            syncDropdowns();
+        });
+
+        // ==========================================
+        // ЗАКРЫТИЕ ПРЕДПРОСМОТРА (кнопка ✕)
+        // ==========================================
+        document.querySelector('.close-btn')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '@Url.Action("Cars", "Home")';
+        });
+    </script>
+
+</body>
+</html>

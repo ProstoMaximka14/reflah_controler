@@ -47,6 +47,29 @@
         public string block_6_eng { get; set; }
         public string block_6_ger { get; set; }
 
+        public string block_1_title_ru { get; set; }
+        public string block_1_title_eng { get; set; }
+        public string block_1_title_ger { get; set; }
+
+        public string block_2_title_ru { get; set; }
+        public string block_2_title_eng { get; set; }
+        public string block_2_title_ger { get; set; }
+
+        public string block_3_title_ru { get; set; }
+        public string block_3_title_eng { get; set; }
+        public string block_3_title_ger { get; set; }
+
+        public string block_4_title_ru { get; set; }
+        public string block_4_title_eng { get; set; }
+        public string block_4_title_ger { get; set; }
+
+        public string block_5_title_ru { get; set; }
+        public string block_5_title_eng { get; set; }
+        public string block_5_title_ger { get; set; }
+
+        public string block_6_title_ru { get; set; }
+        public string block_6_title_eng { get; set; }
+        public string block_6_title_ger { get; set; }
 
         public string image_4 { get; set; }
     }
