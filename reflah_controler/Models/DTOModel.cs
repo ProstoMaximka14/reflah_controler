@@ -104,4 +104,55 @@
         public int SourceId { get; set; }
         public string Type { get; set; }
     }
+
+    public class DeleteItemRequest
+    {
+        public string Type { get; set; }
+        public int Id { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class DeleteUnusedRequest
+    {
+        public string Type { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class RemoveGraficImageRequest
+    {
+        public int ItemId { get; set; }
+        public int CarId { get; set; }
+    }
+
+    public class MoveItemRequest
+    {
+        public int CarId { get; set; }
+        public string Block { get; set; }
+        public int ItemId { get; set; }
+        public string Direction { get; set; }
+    }
+
+    public class TemplateMoveItemRequest
+    {
+        public string Type { get; set; }
+        public int TemplateId { get; set; }
+        public int ItemId { get; set; }
+        public string Direction { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class TemplatePriceOptionDto
+    {
+        public int TemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public List<PriceOptionItemDto> Prices { get; set; } = new();
+    }
+
+    public class PriceOptionItemDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string BasePrice { get; set; }
+        public string ProPrice { get; set; }
+    }
 }

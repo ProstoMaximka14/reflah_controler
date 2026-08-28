@@ -1,4 +1,4 @@
-﻿﻿
+﻿
 @model List<reflah_controler.Models.NewsModel>
 @{
     ViewData["Title"] = "Управление новостями";
@@ -239,7 +239,7 @@
                                                 <span class="d-none d-sm-inline">Удалить</span>
                                             </button>
 
-                                            <a href="@Url.Action("News", "Home")" class="btn-cancel">
+                                            <a href="@Url.Action("News", "News")" class="btn-cancel">
                                                 <i class="bi bi-x-circle"></i>
                                                 <span class="d-none d-sm-inline">Отмена</span>
                                             </a>

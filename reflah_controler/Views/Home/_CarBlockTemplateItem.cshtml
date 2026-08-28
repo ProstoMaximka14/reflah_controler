@@ -8,7 +8,7 @@
             <span class="badge bg-primary item-badge">шаблон #@item.Id</span>
             <strong class="ms-2">@(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)</strong>
         </div>
-        <form method="post" action="@Url.Action("EditCarDetachItem", "Home")" onsubmit="return confirm('Отвязать шаблон от машины?');">
+        <form method="post" action="@Url.Action("EditCarDetachItem", "Cars")" onsubmit="return confirm('Отвязать шаблон от машины?');">
             <input type="hidden" name="carId" value="@Model.CarId" />
             <input type="hidden" name="block" value="@Model.Block" />
             <input type="hidden" name="itemId" value="@item.Id" />

@@ -4,7 +4,8 @@ using reflah_controler.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddRazorOptions(o => o.ViewLocationFormats.Add("/Views/Home/{0}.cshtml"));
 
 builder.Services.AddSignalR();
 
