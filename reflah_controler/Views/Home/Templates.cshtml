@@ -5256,6 +5256,57 @@
     });
 
     // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ DRAG-AND-DROP ДЛЯ ШАБЛОНОВ (КАРТОЧЕК)
+        // ==========================================
+        function initSortableForTemplates(container) {
+            if (!container || container.dataset.sortableInitialized) return;
+            container.dataset.sortableInitialized = 'true';
+
+            var type = container.dataset.type || 'about';
+
+            new Sortable(container, {
+                animation: 150,
+                handle: '.card-header',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    var items = container.querySelectorAll('.template-section');
+                    var orderedIds = [];
+                    
+                    items.forEach(function(item) {
+                        var id = item.dataset.templateId;
+                        if (id) orderedIds.push(parseInt(id));
+                    });
+
+                    if (orderedIds.length < 2) return;
+
+                    fetch('/Home/ReorderTemplates', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            type: type,
+                            templateIds: orderedIds
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showTempMessage('Порядок шаблонов сохранён ✓', 'success');
+                        } else {
+                            showTempMessage('Ошибка: ' + (data.message || 'неизвестная'), 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        showTempMessage('Ошибка при сохранении порядка шаблонов', 'error');
+                    });
+                }
+            });
+        }
+
+    // ==========================================
     // ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
     // ==========================================
 
@@ -5348,56 +5399,7 @@
             });
         }
 
-        // ==========================================
-        // ИНИЦИАЛИЗАЦИЯ DRAG-AND-DROP ДЛЯ ШАБЛОНОВ (КАРТОЧЕК)
-        // ==========================================
-        function initSortableForTemplates(container) {
-            if (!container || container.dataset.sortableInitialized) return;
-            container.dataset.sortableInitialized = 'true';
-
-            var type = container.dataset.type || 'about';
-
-            new Sortable(container, {
-                animation: 150,
-                handle: '.card-header',
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: function(evt) {
-                    var items = container.querySelectorAll('.template-section');
-                    var orderedIds = [];
-                    
-                    items.forEach(function(item) {
-                        var id = item.dataset.templateId;
-                        if (id) orderedIds.push(parseInt(id));
-                    });
-
-                    if (orderedIds.length < 2) return;
-
-                    fetch('/Home/ReorderTemplates', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            type: type,
-                            templateIds: orderedIds
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showTempMessage('Порядок шаблонов сохранён ✓', 'success');
-                        } else {
-                            showTempMessage('Ошибка: ' + (data.message || 'неизвестная'), 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        showTempMessage('Ошибка при сохранении порядка шаблонов', 'error');
-                    });
-                }
-            });
-        }
+        
 
         // Инициализация списков записей в шаблонах
         document.querySelectorAll('.items-list').forEach(function(list) {
