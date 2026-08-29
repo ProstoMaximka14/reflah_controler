@@ -395,23 +395,7 @@
         transform: scale(1.01);
     }
 
-    /* ===== АДАПТИВ ===== */
-    @@media (max-width: 768px) {
-        .list-item {
-            flex-wrap: wrap;
-        }
-        .list-item .item-actions {
-            width: 100%;
-            justify-content: flex-end;
-        }
-        .car-list-badge {
-            max-width: 120px;
-        }
-        .edit-modal {
-            padding: 16px;
-            margin: 10px;
-        }
-    }
+    
 </style>
 
 <div class="container py-4">
@@ -485,32 +469,32 @@
         <!-- ============================================ -->
         <div class="tab-pane fade @(activeTab == "about" ? "show active" : "")" id="tab-about">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('about')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('about')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('about')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="about" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="about" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('about')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('about')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('about')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="about" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="about" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-about" class="all-items-panel d-none">
@@ -551,7 +535,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                    
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -561,22 +544,21 @@
                                             <i class="bi bi-car-front-fill"></i> Во все
                                         </button>
                                     </form>
-                                    <!-- КНОПКА СО СПИСКОМ МАШИН -->
-    <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('about', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                    <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
+                                            onclick="showCarList('about', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('about', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -895,32 +877,32 @@
         <!-- ============================================ -->
         <div class="tab-pane fade @(activeTab == "result" ? "show active" : "")" id="tab-result">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('result')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('result')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('result')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="result" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="result" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('result')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('result')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('result')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="result" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="result" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-result" class="all-items-panel d-none">
@@ -961,7 +943,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                    
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -971,21 +952,21 @@
                                             <i class="bi bi-car-front-fill"></i> Во все
                                         </button>
                                     </form>
-                                     <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('result', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                    <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
+                                            onclick="showCarList('result', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('result', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -1285,32 +1266,32 @@
         <!-- ============================================ -->
         <div class="tab-pane fade @(activeTab == "engine" ? "show active" : "")" id="tab-engine">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('engine')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('engine')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('engine')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="engine" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="engine" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('engine')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('engine')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('engine')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="engine" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="engine" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-engine" class="all-items-panel d-none">
@@ -1351,7 +1332,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                    
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -1362,20 +1342,20 @@
                                         </button>
                                     </form>
                                     <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('engine', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                            onclick="showCarList('engine', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('engine', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -1675,32 +1655,32 @@
         <!-- ============================================ -->
         <div class="tab-pane fade @(activeTab == "price" ? "show active" : "")" id="tab-price">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('price')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('price')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('price')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="price" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="price" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('price')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('price')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('price')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="price" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="price" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-price" class="all-items-panel d-none">
@@ -1741,7 +1721,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                   
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -1752,20 +1731,20 @@
                                         </button>
                                     </form>
                                     <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('price', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                            onclick="showCarList('price', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('price', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -2174,32 +2153,32 @@
 
         <div class="tab-pane fade @(activeTab == "additional" ? "show active" : "")" id="tab-additional">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('additional')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('additional')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('additional')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="additional" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="additional" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('additional')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('additional')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('additional')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="additional" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="additional" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-additional" class="all-items-panel d-none">
@@ -2240,7 +2219,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                    
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -2251,20 +2229,20 @@
                                         </button>
                                     </form>
                                     <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('additional', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                            onclick="showCarList('additional', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('additional', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -2890,32 +2868,32 @@
         
         <div class="tab-pane fade @(activeTab == "grafic" ? "show active" : "")" id="tab-grafic">
             <div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
-    <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('grafic')">
-        <i class="bi bi-plus-lg"></i> Создать шаблон
-    </button>
-    <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('grafic')">
-        <i class="bi bi-list-ul"></i> Все записи
-    </button>
-    <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('grafic')">
-        <i class="bi bi-trash"></i> Удалить неиспользуемые
-    </button>
-    
-    <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
-    <div class="ms-auto position-relative" style="min-width: 250px;">
-        <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" 
-                   class="form-control border-start-0 tab-search-input" 
-                   placeholder="Поиск шаблонов..." 
-                   data-tab="grafic" />
-            <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="grafic" style="display:none;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-    </div>
-</div>
+                <button type="button" class="btn btn-success btn-sm" onclick="showCreateForm('grafic')">
+                    <i class="bi bi-plus-lg"></i> Создать шаблон
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAllItems('grafic')">
+                    <i class="bi bi-list-ul"></i> Все записи
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteUnusedItems('grafic')">
+                    <i class="bi bi-trash"></i> Удалить неиспользуемые
+                </button>
+                
+                <!-- ===== ПОИСК ВНУТРИ ВКЛАДКИ ===== -->
+                <div class="ms-auto position-relative" style="min-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-start-0 tab-search-input" 
+                               placeholder="Поиск шаблонов..." 
+                               data-tab="grafic" />
+                        <button type="button" class="btn btn-outline-secondary tab-clear-btn" data-tab="grafic" style="display:none;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ПАНЕЛЬ ВСЕХ ЗАПИСЕЙ ===== -->
             <div id="allItemsContainer-grafic" class="all-items-panel d-none">
@@ -2956,7 +2934,6 @@
                                     <strong>@template.Name</strong>
                                     <span class="badge bg-secondary">@template.Items.Count записей</span>
                                     <span class="badge bg-info">ID: #@template.Id</span>
-                                    
                                 </div>
                                 <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                     <form method="post" action="@Url.Action("AddTemplateToAllCars", "Templates")" style="display:inline;" onsubmit="return confirm('Добавить шаблон &quot;@template.Name&quot; во все машины?');">
@@ -2967,20 +2944,20 @@
                                         </button>
                                     </form>
                                     <button type="button" class="btn btn-sm @(hasCars ? "btn-outline-success" : "btn-outline-secondary")" 
-            onclick="showCarList('grafic', @template.Id, '@template.Name.Replace("'", "\\'")')" 
-            title="Показать машины, использующие этот шаблон">
-        <i class="bi bi-car-front"></i>
-        @if (hasCars)
-        {
-            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
-                @(template.UsedInCars.Split(',').Length)
-            </span>
-        }
-        else
-        {
-            <span style="font-size:10px;">0</span>
-        }
-    </button>
+                                            onclick="showCarList('grafic', @template.Id, '@template.Name.Replace("'", "\\'")')" 
+                                            title="Показать машины, использующие этот шаблон">
+                                        <i class="bi bi-car-front"></i>
+                                        @if (hasCars)
+                                        {
+                                            <span class="badge bg-danger text-white ms-1" style="font-size:10px; padding:1px 6px;">
+                                                @(template.UsedInCars.Split(',').Length)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:10px;">0</span>
+                                        }
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-success" onclick="showAddItemForm('grafic', @template.Id)">
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
@@ -5259,52 +5236,86 @@
         // ИНИЦИАЛИЗАЦИЯ DRAG-AND-DROP ДЛЯ ШАБЛОНОВ (КАРТОЧЕК)
         // ==========================================
         function initSortableForTemplates(container) {
-            if (!container || container.dataset.sortableInitialized) return;
-            container.dataset.sortableInitialized = 'true';
+    if (!container || container.dataset.sortableInitialized) return;
+    container.dataset.sortableInitialized = 'true';
 
-            var type = container.dataset.type || 'about';
+    // ===== БЕРЁМ ТИП ИЗ АТРИБУТА С ПРОВЕРКОЙ =====
+    var type = container.dataset.type || '';
+    
+    // ===== ЕСЛИ TYPE ПУСТОЙ, ПЫТАЕМСЯ ОПРЕДЕЛИТЬ ПО ID КОНТЕЙНЕРА =====
+    if (!type) {
+        // Пробуем определить по ID контейнера или по родительской вкладке
+        var tabContainer = container.closest('.tab-pane');
+        if (tabContainer) {
+            var tabId = tabContainer.id;
+            if (tabId) {
+                type = tabId.replace('tab-', '');
+            }
+        }
+    }
+    
+    // ===== ЕСЛИ ВСЁ ЕЩЁ ПУСТОЙ, ИСПОЛЬЗУЕМ ЗНАЧЕНИЕ ПО УМОЛЧАНИЮ =====
+    if (!type) {
+        type = 'about';
+        console.warn('⚠️ Тип не определён, используется "about"');
+    }
+    
+    console.log('🔵 Инициализация Sortable для типа:', type);
 
-            new Sortable(container, {
-                animation: 150,
-                handle: '.card-header',
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: function(evt) {
-                    var items = container.querySelectorAll('.template-section');
-                    var orderedIds = [];
-                    
-                    items.forEach(function(item) {
-                        var id = item.dataset.templateId;
-                        if (id) orderedIds.push(parseInt(id));
-                    });
+    new Sortable(container, {
+        animation: 150,
+        handle: '.card-header',
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        onEnd: function(evt) {
+            var items = container.querySelectorAll('.template-section');
+            var orderedIds = [];
+            
+            items.forEach(function(item) {
+                var id = item.dataset.templateId;
+                if (id) orderedIds.push(parseInt(id));
+            });
 
-                    if (orderedIds.length < 2) return;
+            console.log('🟡 Тип:', type, 'ID:', orderedIds);
 
-                    fetch('/Home/ReorderTemplates', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            type: type,
-                            templateIds: orderedIds
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showTempMessage('Порядок шаблонов сохранён ✓', 'success');
-                        } else {
-                            showTempMessage('Ошибка: ' + (data.message || 'неизвестная'), 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        showTempMessage('Ошибка при сохранении порядка шаблонов', 'error');
-                    });
+            if (orderedIds.length < 2) {
+                console.log('🟢 Меньше 2 шаблонов, порядок не меняется');
+                return;
+            }
+
+            // ===== ПОКАЗЫВАЕМ СООБЩЕНИЕ О СОХРАНЕНИИ =====
+            showTempMessage('⏳ Сохранение порядка шаблонов...', 'info');
+
+            fetch('/Home/ReorderTemplates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: type,
+                    templateIds: orderedIds
+                })
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера: ' + response.status);
                 }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    showTempMessage('✅ Порядок шаблонов сохранён!', 'success');
+                } else {
+                    showTempMessage('❌ Ошибка: ' + (data.message || 'неизвестная'), 'error');
+                }
+            })
+            .catch(function(error) {
+                console.error('❌ Ошибка:', error);
+                showTempMessage('❌ Ошибка при сохранении порядка: ' + error.message, 'error');
             });
         }
+    });
+}
 
     // ==========================================
     // ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ

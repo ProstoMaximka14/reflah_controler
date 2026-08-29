@@ -155,4 +155,10 @@
         public string BasePrice { get; set; }
         public string ProPrice { get; set; }
     }
+
+    public class ReorderTemplatesRequest
+    {
+        public string Type { get; set; }
+        public List<int> TemplateIds { get; set; }
+    }
 }

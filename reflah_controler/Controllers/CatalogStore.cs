@@ -1,4 +1,4 @@
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using reflah_controler.Models;
 using System;
 using System.Collections.Generic;
@@ -80,7 +80,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                OnError?.Invoke($"Ошибка MySQL при загрузке автомобилей: {ex.Message}");
+                OnError?.Invoke($"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ Р°РІС‚РѕРјРѕР±РёР»РµР№: {ex.Message}");
             }
 
             return cars;
@@ -89,7 +89,7 @@ namespace reflah_controler.Controllers
 
         private int GetNextSortOrderAndUpdate(List<ReflashCarModel> cars, string brand, string model, string generation, int carId)
         {
-            // Ищем максимальный sort_order среди уже добавленных машин с такими же brand, model, generation
+            // РС‰РµРј РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ sort_order СЃСЂРµРґРё СѓР¶Рµ РґРѕР±Р°РІР»РµРЅРЅС‹С… РјР°С€РёРЅ СЃ С‚Р°РєРёРјРё Р¶Рµ brand, model, generation
             int maxOrder = 0;
 
             foreach (var car in cars)
@@ -103,10 +103,10 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            // Новый sort_order = maxOrder + 1
+            // РќРѕРІС‹Р№ sort_order = maxOrder + 1
             int newSortOrder = maxOrder + 1;
 
-            // ОБНОВЛЯЕМ ЗНАЧЕНИЕ В БАЗЕ ДАННЫХ
+            // РћР‘РќРћР’Р›РЇР•Рњ Р—РќРђР§Р•РќРР• Р’ Р‘РђР—Р• Р”РђРќРќР«РҐ
             try
             {
                 string connectionString = GetConnectionString();
@@ -121,11 +121,11 @@ namespace reflah_controler.Controllers
                         command.ExecuteNonQuery();
                     }
                 }
-                Console.WriteLine($"✅ Обновлён sort_order для машины #{carId}: {newSortOrder}");
+                Console.WriteLine($"вњ… РћР±РЅРѕРІР»С‘РЅ sort_order РґР»СЏ РјР°С€РёРЅС‹ #{carId}: {newSortOrder}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Ошибка при обновлении sort_order для машины #{carId}: {ex.Message}");
+                Console.WriteLine($"вќЊ РћС€РёР±РєР° РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё sort_order РґР»СЏ РјР°С€РёРЅС‹ #{carId}: {ex.Message}");
             }
 
             return newSortOrder;
@@ -179,7 +179,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                OnError?.Invoke($"Ошибка MySQL при загрузке автомобиля: {ex.Message}");
+                OnError?.Invoke($"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ Р°РІС‚РѕРјРѕР±РёР»СЏ: {ex.Message}");
             }
 
             return car;
@@ -232,7 +232,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                OnError?.Invoke($"Ошибка MySQL: {ex.Message}");
+                OnError?.Invoke($"РћС€РёР±РєР° MySQL: {ex.Message}");
             }
             return prices;
         }
@@ -286,7 +286,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                OnError?.Invoke($"Ошибка MySQL: {ex.Message}");
+                OnError?.Invoke($"РћС€РёР±РєР° MySQL: {ex.Message}");
             }
             return price;
         }
@@ -300,7 +300,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM template_price ORDER BY id";
+                string query = "SELECT * FROM template_price ORDER BY sort_order ASC, id ASC";  
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -311,7 +311,9 @@ namespace reflah_controler.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
-                                Prices = reader.IsDBNull(reader.GetOrdinal("prices")) ? "" : reader.GetString("prices")
+                                Prices = reader.IsDBNull(reader.GetOrdinal("prices")) ? "" : reader.GetString("prices"),
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")  
                             });
                         }
                     }
@@ -482,7 +484,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM template_about ORDER BY sort_order ASC, id ASC";
+                string query = "SELECT * FROM template_about ORDER BY sort_order ASC, id ASC";  // ИЗМЕНЕНО
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -494,7 +496,8 @@ namespace reflah_controler.Controllers
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
                                 Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids"),
-                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")  // ДОБАВИТЬ
                             });
                         }
                     }
@@ -542,7 +545,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM template_result ORDER BY id";
+                string query = "SELECT * FROM template_result ORDER BY sort_order ASC, id ASC";  
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -553,7 +556,9 @@ namespace reflah_controler.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
-                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids")
+                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids"),
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")  
                             });
                         }
                     }
@@ -601,7 +606,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM template_engine_control ORDER BY id";
+                string query = "SELECT * FROM template_engine_control ORDER BY sort_order ASC, id ASC";  
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -612,7 +617,9 @@ namespace reflah_controler.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
-                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids")
+                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids"),
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order") 
                             });
                         }
                     }
@@ -699,7 +706,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM template_grafic ORDER BY id";
+                string query = "SELECT * FROM template_grafic ORDER BY sort_order ASC, id ASC";
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -710,7 +717,9 @@ namespace reflah_controler.Controllers
                             {
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
-                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids")
+                                Ids = reader.IsDBNull(reader.GetOrdinal("ids")) ? "" : reader.GetString("ids"),
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")  
                             });
                         }
                     }
@@ -754,7 +763,7 @@ namespace reflah_controler.Controllers
                                 InfoGer = reader.IsDBNull(reader.GetOrdinal("info_ger")) ? "" : reader.GetString("info_ger"),
                                 SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order"),
                                 PriceControler = reader.IsDBNull(reader.GetOrdinal("price_controler")) ? 0 : reader.GetInt32("price_controler"),
-                                // ===== НОВЫЕ ПОЛЯ =====
+                                // ===== РќРћР’Р«Р• РџРћР›РЇ =====
                                 FreePriceIds = reader.IsDBNull(reader.GetOrdinal("free_price_ids")) ? "" : reader.GetString("free_price_ids"),
                                 BasePriceIds = reader.IsDBNull(reader.GetOrdinal("base_price_ids")) ? "" : reader.GetString("base_price_ids"),
                                 ProPriceIds = reader.IsDBNull(reader.GetOrdinal("pro_price_ids")) ? "" : reader.GetString("pro_price_ids"),
@@ -804,7 +813,7 @@ namespace reflah_controler.Controllers
                                 InfoGer = reader.IsDBNull(reader.GetOrdinal("info_ger")) ? "" : reader.GetString("info_ger"),
                                 SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order"),
                                 PriceControler = reader.IsDBNull(reader.GetOrdinal("price_controler")) ? 0 : reader.GetInt32("price_controler"),
-                                // ===== НОВЫЕ ПОЛЯ =====
+                                // ===== РќРћР’Р«Р• РџРћР›РЇ =====
                                 FreePriceIds = reader.IsDBNull(reader.GetOrdinal("free_price_ids")) ? "" : reader.GetString("free_price_ids"),
                                 BasePriceIds = reader.IsDBNull(reader.GetOrdinal("base_price_ids")) ? "" : reader.GetString("base_price_ids"),
                                 ProPriceIds = reader.IsDBNull(reader.GetOrdinal("pro_price_ids")) ? "" : reader.GetString("pro_price_ids"),
@@ -826,8 +835,7 @@ namespace reflah_controler.Controllers
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT id, name, price_ids, used_in_cars FROM template_additional_prices ORDER BY id";
-
+                string query = "SELECT id, name, price_ids, used_in_cars, sort_order FROM template_additional_prices ORDER BY sort_order ASC, id ASC";  
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     using (MySqlDataReader reader = command.ExecuteReader())
@@ -839,7 +847,8 @@ namespace reflah_controler.Controllers
                                 Id = reader.GetInt32("id"),
                                 Name = reader.IsDBNull(reader.GetOrdinal("name")) ? "" : reader.GetString("name"),
                                 PriceIds = reader.IsDBNull(reader.GetOrdinal("price_ids")) ? "" : reader.GetString("price_ids"),
-                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars")
+                                UsedInCars = reader.IsDBNull(reader.GetOrdinal("used_in_cars")) ? "" : reader.GetString("used_in_cars"),
+                                SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")  
                             });
                         }
                     }
@@ -854,9 +863,9 @@ namespace reflah_controler.Controllers
             foreach (var v in values)
             {
                 if (!string.IsNullOrWhiteSpace(v))
-                    return v.Length > 120 ? v.Substring(0, 120) + "…" : v;
+                    return v.Length > 120 ? v.Substring(0, 120) + "вЂ¦" : v;
             }
-            return "(пусто)";
+            return "(РїСѓСЃС‚Рѕ)";
         }
 
 
@@ -1042,7 +1051,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(type))
             {
-                return ""; // ← Возвращаем пустую строку вместо исключения
+                return ""; // в†ђ Р’РѕР·РІСЂР°С‰Р°РµРј РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ РІРјРµСЃС‚Рѕ РёСЃРєР»СЋС‡РµРЅРёСЏ
             }
             return type switch
             {
@@ -1057,10 +1066,10 @@ namespace reflah_controler.Controllers
         }
 
 
-        // HomeController.EditCarBlocks.cs — добавить методы
+        // HomeController.EditCarBlocks.cs вЂ” РґРѕР±Р°РІРёС‚СЊ РјРµС‚РѕРґС‹
 
         /// <summary>
-        /// Обновляет порядок ID в строке
+        /// РћР±РЅРѕРІР»СЏРµС‚ РїРѕСЂСЏРґРѕРє ID РІ СЃС‚СЂРѕРєРµ
         /// </summary>
         public string ReorderIdsString(string idsString, List<int> newOrder)
         {
@@ -1070,7 +1079,7 @@ namespace reflah_controler.Controllers
             var existingIds = ParseIdList(idsString);
             var ordered = newOrder.Where(id => existingIds.Contains(id)).ToList();
 
-            // Добавляем ID, которые есть в существующем списке, но не были переданы
+            // Р”РѕР±Р°РІР»СЏРµРј ID, РєРѕС‚РѕСЂС‹Рµ РµСЃС‚СЊ РІ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРј СЃРїРёСЃРєРµ, РЅРѕ РЅРµ Р±С‹Р»Рё РїРµСЂРµРґР°РЅС‹
             foreach (var id in existingIds)
             {
                 if (!ordered.Contains(id))

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +17,7 @@ namespace reflah_controler.Controllers
     public partial class TemplatesController : AppController
     {
         // ============================================
-        // ЦЕНЫ (PRICE)
+        // Р¦Р•РќР« (PRICE)
         // ============================================
 
         [HttpGet("Prices")]
@@ -39,7 +39,7 @@ namespace reflah_controler.Controllers
             PriceModel price = GetPriceById(id);
             if (price == null)
             {
-                TempData["Error"] = "Цена не найдена";
+                TempData["Error"] = "Р¦РµРЅР° РЅРµ РЅР°Р№РґРµРЅР°";
                 return RedirectToAction("Prices");
             }
             return View(price);
@@ -83,13 +83,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Цена успешно добавлена";
+                TempData["Message"] = "Р¦РµРЅР° СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅР°";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Prices");
@@ -137,19 +137,19 @@ namespace reflah_controler.Controllers
                         int rowsAffected = await command.ExecuteNonQueryAsync();
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Цена успешно обновлена";
+                            TempData["Message"] = "Р¦РµРЅР° СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅР°";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Цена не найдена";
+                            TempData["Error"] = "Р¦РµРЅР° РЅРµ РЅР°Р№РґРµРЅР°";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Prices");
@@ -174,19 +174,19 @@ namespace reflah_controler.Controllers
 
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Цена успешно удалена";
+                TempData["Message"] = "Р¦РµРЅР° СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Prices");
         }
 
         // ============================================
-        // ШАБЛОНЫ ЦЕН (TEMPLATE_PRICE)
+        // РЁРђР‘Р›РћРќР« Р¦Р•Рќ (TEMPLATE_PRICE)
         // ============================================
 
         [HttpGet("TemplatePrices")]
@@ -208,7 +208,7 @@ namespace reflah_controler.Controllers
             TemplatePriceModel template = GetTemplatePriceById(id);
             if (template == null)
             {
-                TempData["Error"] = "Шаблон не найден";
+                TempData["Error"] = "РЁР°Р±Р»РѕРЅ РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("TemplatePrices");
             }
             return View(template);
@@ -234,13 +234,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон цен успешно добавлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ С†РµРЅ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplatePrices");
@@ -264,12 +264,12 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон цен успешно обновлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ С†РµРЅ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplatePrices");
@@ -293,19 +293,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Шаблон цен успешно удален";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ С†РµРЅ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplatePrices");
         }
 
         // ============================================
-        // ОПИСАНИЯ (ABOUT)
+        // РћРџРРЎРђРќРРЇ (ABOUT)
         // ============================================
 
         [HttpGet("Abouts")]
@@ -327,7 +327,7 @@ namespace reflah_controler.Controllers
             AboutModel about = GetAboutById(id);
             if (about == null)
             {
-                TempData["Error"] = "Описание не найдено";
+                TempData["Error"] = "РћРїРёСЃР°РЅРёРµ РЅРµ РЅР°Р№РґРµРЅРѕ";
                 return RedirectToAction("Abouts");
             }
             return View(about);
@@ -355,13 +355,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Описание успешно добавлено";
+                TempData["Message"] = "РћРїРёСЃР°РЅРёРµ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅРѕ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Abouts");
@@ -386,12 +386,12 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Описание успешно обновлено";
+                TempData["Message"] = "РћРїРёСЃР°РЅРёРµ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅРѕ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Abouts");
@@ -415,19 +415,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Описание успешно удалено";
+                TempData["Message"] = "РћРїРёСЃР°РЅРёРµ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅРѕ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Abouts");
         }
 
         // ============================================
-        // ШАБЛОНЫ ОПИСАНИЙ (TEMPLATE_ABOUT)
+        // РЁРђР‘Р›РћРќР« РћРџРРЎРђРќРР™ (TEMPLATE_ABOUT)
         // ============================================
 
         [HttpGet("TemplateAbouts")]
@@ -438,8 +438,18 @@ namespace reflah_controler.Controllers
         }
 
         [HttpPost("ReorderTemplates")]
-        public async Task<IActionResult> ReorderTemplates(string type, List<int> templateIds)
+        public async Task<IActionResult> ReorderTemplates([FromBody] ReorderTemplatesRequest request)
         {
+            if (request == null || string.IsNullOrEmpty(request.Type) || request.TemplateIds == null || request.TemplateIds.Count == 0)
+                return Json(new { success = false, message = "Некорректные данные" });
+
+            string type = request.Type;
+            List<int> templateIds = request.TemplateIds;
+            // ===== ЭТО ДОЛЖНО ПОЯВИТЬСЯ В OUTPUT =====
+            System.Diagnostics.Debug.WriteLine("=== ReorderTemplates ВЫЗВАН ===");
+            System.Diagnostics.Debug.WriteLine($"Type: {type}");
+            System.Diagnostics.Debug.WriteLine($"TemplateIds: {string.Join(", ", templateIds)}");
+            // =========================================
             try
             {
                 string table = GetTemplateTable(type);
@@ -490,13 +500,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон описаний успешно добавлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ РѕРїРёСЃР°РЅРёР№ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateAbouts");
@@ -520,19 +530,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Шаблон описаний успешно удален";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ РѕРїРёСЃР°РЅРёР№ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateAbouts");
         }
 
         // ============================================
-        // РЕЗУЛЬТАТЫ (RESULT)
+        // Р Р•Р—РЈР›Р¬РўРђРўР« (RESULT)
         // ============================================
 
         [HttpGet("Results")]
@@ -564,13 +574,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Результат успешно добавлен";
+                TempData["Message"] = "Р РµР·СѓР»СЊС‚Р°С‚ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Results");
@@ -594,19 +604,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Результат успешно удален";
+                TempData["Message"] = "Р РµР·СѓР»СЊС‚Р°С‚ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Results");
         }
 
         // ============================================
-        // ШАБЛОНЫ РЕЗУЛЬТАТОВ (TEMPLATE_RESULT)
+        // РЁРђР‘Р›РћРќР« Р Р•Р—РЈР›Р¬РўРђРўРћР’ (TEMPLATE_RESULT)
         // ============================================
 
         [HttpGet("TemplateResults")]
@@ -636,13 +646,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон результатов успешно добавлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateResults");
@@ -666,19 +676,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Шаблон результатов успешно удален";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateResults");
         }
 
         // ============================================
-        // БЛОКИ УПРАВЛЕНИЯ (ENGINE_CONTROL)
+        // Р‘Р›РћРљР РЈРџР РђР’Р›Р•РќРРЇ (ENGINE_CONTROL)
         // ============================================
 
         [HttpGet("EngineControls")]
@@ -710,13 +720,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Блок управления успешно добавлен";
+                TempData["Message"] = "Р‘Р»РѕРє СѓРїСЂР°РІР»РµРЅРёСЏ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("EngineControls");
@@ -740,19 +750,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Блок управления успешно удален";
+                TempData["Message"] = "Р‘Р»РѕРє СѓРїСЂР°РІР»РµРЅРёСЏ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("EngineControls");
         }
 
         // ============================================
-        // ШАБЛОНЫ БЛОКОВ УПРАВЛЕНИЯ (TEMPLATE_ENGINE_CONTROL)
+        // РЁРђР‘Р›РћРќР« Р‘Р›РћРљРћР’ РЈРџР РђР’Р›Р•РќРРЇ (TEMPLATE_ENGINE_CONTROL)
         // ============================================
 
         [HttpGet("TemplateEngineControls")]
@@ -782,13 +792,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон блоков управления успешно добавлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ Р±Р»РѕРєРѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateEngineControls");
@@ -812,19 +822,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Шаблон блоков управления успешно удален";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ Р±Р»РѕРєРѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateEngineControls");
         }
 
         // ============================================
-        // ГРАФИКИ (GRAFIC)
+        // Р“Р РђР¤РРљР (GRAFIC)
         // ============================================
 
         [HttpGet("Grafics")]
@@ -846,7 +856,7 @@ namespace reflah_controler.Controllers
             GraficModel grafic = GetGraficById(id);
             if (grafic == null)
             {
-                TempData["Error"] = "График не найден";
+                TempData["Error"] = "Р“СЂР°С„РёРє РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("Grafics");
             }
             return View(grafic);
@@ -872,14 +882,14 @@ namespace reflah_controler.Controllers
 
                 if (!allowedExtensions.Contains(fileExtension))
                 {
-                    TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                    TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                     DeleteGlobalId(globalId);
                     return RedirectToAction("Grafics");
                 }
 
                 if (imageFile.Length > 5 * 1024 * 1024)
                 {
-                    TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                    TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                     DeleteGlobalId(globalId);
                     return RedirectToAction("Grafics");
                 }
@@ -918,7 +928,7 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "График успешно добавлен";
+                TempData["Message"] = "Р“СЂР°С„РёРє СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
@@ -932,7 +942,7 @@ namespace reflah_controler.Controllers
                         try { System.IO.File.Delete(filePath); } catch { }
                     }
                 }
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Grafics");
@@ -958,13 +968,13 @@ namespace reflah_controler.Controllers
 
                 if (!allowedExtensions.Contains(fileExtension))
                 {
-                    TempData["Error"] = "Разрешены только файлы изображений";
+                    TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№";
                     return RedirectToAction("Grafics");
                 }
 
                 if (imageFile.Length > 5 * 1024 * 1024)
                 {
-                    TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                    TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                     return RedirectToAction("Grafics");
                 }
 
@@ -1014,12 +1024,12 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "График успешно обновлен";
+                TempData["Message"] = "Р“СЂР°С„РёРє СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Grafics");
@@ -1054,19 +1064,19 @@ namespace reflah_controler.Controllers
                     }
                 }
 
-                TempData["Message"] = "График успешно удален";
+                TempData["Message"] = "Р“СЂР°С„РёРє СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("Grafics");
         }
 
         // ============================================
-        // ШАБЛОНЫ ГРАФИКОВ (TEMPLATE_GRAFIC)
+        // РЁРђР‘Р›РћРќР« Р“Р РђР¤РРљРћР’ (TEMPLATE_GRAFIC)
         // ============================================
 
         [HttpGet("TemplateGrafics")]
@@ -1096,13 +1106,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Шаблон графиков успешно добавлен";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ РіСЂР°С„РёРєРѕРІ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateGrafics");
@@ -1126,19 +1136,19 @@ namespace reflah_controler.Controllers
                 }
                 DeleteGlobalId(id);
 
-                TempData["Message"] = "Шаблон графиков успешно удален";
+                TempData["Message"] = "РЁР°Р±Р»РѕРЅ РіСЂР°С„РёРєРѕРІ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("TemplateGrafics");
         }
 
         // ============================================
-        // ДОПОЛНИТЕЛЬНЫЕ ЦЕНЫ (ADDITIONAL PRICES)
+        // Р”РћРџРћР›РќРРўР•Р›Р¬РќР«Р• Р¦Р•РќР« (ADDITIONAL PRICES)
         // ============================================
 
         [HttpGet("AdditionalPrices")]
@@ -1160,7 +1170,7 @@ namespace reflah_controler.Controllers
             AdditionalPriceModel price = GetAdditionalPriceById(id);
             if (price == null)
             {
-                TempData["Error"] = "Цена не найдена";
+                TempData["Error"] = "Р¦РµРЅР° РЅРµ РЅР°Р№РґРµРЅР°";
                 return RedirectToAction("AdditionalPrices");
             }
             return View(price);
@@ -1201,7 +1211,7 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@info_ger", price.InfoGer ?? "");
                         command.Parameters.AddWithValue("@sort_order", price.SortOrder);
                         command.Parameters.AddWithValue("@price_controler", price.PriceControler);
-                        // ===== НОВЫЕ ПОЛЯ =====
+                        // ===== РќРћР’Р«Р• РџРћР›РЇ =====
                         command.Parameters.AddWithValue("@free_price_ids", price.FreePriceIds ?? "");
                         command.Parameters.AddWithValue("@base_price_ids", price.BasePriceIds ?? "");
                         command.Parameters.AddWithValue("@pro_price_ids", price.ProPriceIds ?? "");
@@ -1210,13 +1220,13 @@ namespace reflah_controler.Controllers
                         await command.ExecuteNonQueryAsync();
                     }
                 }
-                TempData["Message"] = "Дополнительная цена успешно добавлена";
+                TempData["Message"] = "Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ С†РµРЅР° СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅР°";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
                 DeleteGlobalId(globalId);
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("AdditionalPrices");
@@ -1262,7 +1272,7 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@info_ger", price.InfoGer ?? "");
                         command.Parameters.AddWithValue("@sort_order", price.SortOrder);
                         command.Parameters.AddWithValue("@price_controler", price.PriceControler);
-                        // ===== НОВЫЕ ПОЛЯ =====
+                        // ===== РќРћР’Р«Р• РџРћР›РЇ =====
                         command.Parameters.AddWithValue("@free_price_ids", price.FreePriceIds ?? "");
                         command.Parameters.AddWithValue("@base_price_ids", price.BasePriceIds ?? "");
                         command.Parameters.AddWithValue("@pro_price_ids", price.ProPriceIds ?? "");
@@ -1271,19 +1281,19 @@ namespace reflah_controler.Controllers
                         int rowsAffected = await command.ExecuteNonQueryAsync();
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = "Дополнительная цена успешно обновлена";
+                            TempData["Message"] = "Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ С†РµРЅР° СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅР°";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Дополнительная цена не найдена";
+                            TempData["Error"] = "Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ С†РµРЅР° РЅРµ РЅР°Р№РґРµРЅР°";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("AdditionalPrices");
@@ -1306,23 +1316,23 @@ namespace reflah_controler.Controllers
                     }
                 }
                 DeleteGlobalId(id);
-                TempData["Message"] = "Дополнительная цена успешно удалена";
+                TempData["Message"] = "Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ С†РµРЅР° СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°";
                 await NotifyReaderSite();
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL: {ex.Message}";
             }
 
             return RedirectToAction("AdditionalPrices");
         }
 
         // ============================================
-        // ШАБЛОНЫ ДОПОЛНИТЕЛЬНЫХ ЦЕН (TEMPLATE_ADDITIONAL_PRICES)
+        // РЁРђР‘Р›РћРќР« Р”РћРџРћР›РќРРўР•Р›Р¬РќР«РҐ Р¦Р•Рќ (TEMPLATE_ADDITIONAL_PRICES)
         // ============================================
 
         // ============================================
-        // МЕТОДЫ ДЛЯ ПОЛУЧЕНИЯ ITEMS ИЗ ШАБЛОНОВ (ДЛЯ Templates.cshtml)
+        // РњР•РўРћР”Р« Р”Р›РЇ РџРћР›РЈР§Р•РќРРЇ ITEMS РР— РЁРђР‘Р›РћРќРћР’ (Р”Р›РЇ Templates.cshtml)
         // ============================================
 
         private List<TemplateItemDetail> GetAboutItemsFromTemplate(int templateId)
@@ -1342,7 +1352,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = a.Id,
-                        DisplayText = a.TextRu ?? a.TextEng ?? a.TextGer ?? "(пусто)",
+                        DisplayText = a.TextRu ?? a.TextEng ?? a.TextGer ?? "(РїСѓСЃС‚Рѕ)",
                         TextRu = a.TextRu,
                         TextEng = a.TextEng,
                         TextGer = a.TextGer
@@ -1368,7 +1378,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = r.Id,
-                        DisplayText = r.TextRu ?? r.TextEng ?? r.TextGer ?? "(пусто)",
+                        DisplayText = r.TextRu ?? r.TextEng ?? r.TextGer ?? "(РїСѓСЃС‚Рѕ)",
                         TextRu = r.TextRu,
                         TextEng = r.TextEng,
                         TextGer = r.TextGer
@@ -1394,7 +1404,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = e.Id,
-                        DisplayText = e.TextRu ?? e.TextEng ?? e.TextGer ?? "(пусто)",
+                        DisplayText = e.TextRu ?? e.TextEng ?? e.TextGer ?? "(РїСѓСЃС‚Рѕ)",
                         TextRu = e.TextRu,
                         TextEng = e.TextEng,
                         TextGer = e.TextGer
@@ -1409,14 +1419,14 @@ namespace reflah_controler.Controllers
             if (template == null || string.IsNullOrEmpty(template.Prices))
                 return new List<TemplateItemDetail>();
 
-            // Получаем ID в порядке из шаблона
+            // РџРѕР»СѓС‡Р°РµРј ID РІ РїРѕСЂСЏРґРєРµ РёР· С€Р°Р±Р»РѕРЅР°
             var ids = template.Prices.Split(',').Select(int.Parse).ToList();
             var allPrices = GetPricesFromDatabase();
 
-            // Создаём словарь для быстрого доступа
+            // РЎРѕР·РґР°С‘Рј СЃР»РѕРІР°СЂСЊ РґР»СЏ Р±С‹СЃС‚СЂРѕРіРѕ РґРѕСЃС‚СѓРїР°
             var priceDict = allPrices.ToDictionary(p => p.Id);
 
-            // ИДЁМ В ПОРЯДКЕ ID ИЗ ШАБЛОНА!
+            // РР”РЃРњ Р’ РџРћР РЇР”РљР• ID РР— РЁРђР‘Р›РћРќРђ!
             return ids
                 .Where(id => priceDict.ContainsKey(id))
                 .Select(id => {
@@ -1424,7 +1434,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = p.Id,
-                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(без названия)",
+                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)",
                         NameRu = p.NameRu,
                         NameEng = p.NameEng,
                         NameGer = p.NameGer,
@@ -1459,7 +1469,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = g.Id,
-                        DisplayText = g.Name ?? "(без названия)",
+                        DisplayText = g.Name ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)",
                         GraficName = g.Name,
                         GraficNameEng = g.NameEng,
                         GraficNameGer = g.NameGer,
@@ -1489,7 +1499,7 @@ namespace reflah_controler.Controllers
                     return new TemplateItemDetail
                     {
                         Id = p.Id,
-                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(без названия)",
+                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)",
                         NameRu = p.NameRu,
                         NameEng = p.NameEng,
                         NameGer = p.NameGer,
@@ -1500,7 +1510,7 @@ namespace reflah_controler.Controllers
                         InfoEng = p.InfoEng,
                         InfoGer = p.InfoGer,
                         PriceControler = p.PriceControler,
-                        // ===== НОВЫЕ ПОЛЯ =====
+                        // ===== РќРћР’Р«Р• РџРћР›РЇ =====
                         FreePriceIds = p.FreePriceIds,
                         BasePriceIds = p.BasePriceIds,
                         ProPriceIds = p.ProPriceIds,
@@ -1511,7 +1521,7 @@ namespace reflah_controler.Controllers
         }
 
         // ============================================
-        // ПОЛУЧЕНИЕ ШАБЛОНОВ С ЗАПИСЯМИ ДЛЯ СТРАНИЦЫ TEMPLATES
+        // РџРћР›РЈР§Р•РќРР• РЁРђР‘Р›РћРќРћР’ РЎ Р—РђРџРРЎРЇРњР Р”Р›РЇ РЎРўР РђРќРР¦Р« TEMPLATES
         // ============================================
 
         private async Task<List<TemplateWithItems>> GetTemplatesWithItemsAsync(string type)
@@ -1521,7 +1531,9 @@ namespace reflah_controler.Controllers
             switch (type)
             {
                 case "about":
-                    var aboutTemplates = GetTemplateAboutsFromDatabase();
+                    var aboutTemplates = GetTemplateAboutsFromDatabase()
+                .OrderBy(t => t.SortOrder)
+                .ToList();
                     foreach (var t in aboutTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1539,7 +1551,9 @@ namespace reflah_controler.Controllers
                     break;
 
                 case "result":
-                    var resultTemplates = GetTemplateResultsFromDatabase();
+                    var resultTemplates = GetTemplateResultsFromDatabase()
+                .OrderBy(t => t.SortOrder)  
+                .ToList();
                     foreach (var t in resultTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1557,7 +1571,9 @@ namespace reflah_controler.Controllers
                     break;
 
                 case "engine":
-                    var engineTemplates = GetTemplateEngineControlsFromDatabase();
+                    var engineTemplates = GetTemplateEngineControlsFromDatabase()
+                .OrderBy(t => t.SortOrder)  
+                .ToList();
                     foreach (var t in engineTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1575,7 +1591,9 @@ namespace reflah_controler.Controllers
                     break;
 
                 case "price":
-                    var priceTemplates = GetTemplatePricesFromDatabase();
+                    var priceTemplates = GetTemplatePricesFromDatabase()
+                .OrderBy(t => t.SortOrder) 
+                .ToList();
                     foreach (var t in priceTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1593,7 +1611,9 @@ namespace reflah_controler.Controllers
                     break;
 
                 case "grafic":
-                    var graficTemplates = GetTemplateGraficsFromDatabase();
+                    var graficTemplates = GetTemplateGraficsFromDatabase()
+                .OrderBy(t => t.SortOrder) 
+                .ToList();
                     foreach (var t in graficTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1611,7 +1631,9 @@ namespace reflah_controler.Controllers
                     break;
 
                 case "additional":
-                    var additionalTemplates = GetTemplateAdditionalPricesFromDatabase();
+                    var additionalTemplates = GetTemplateAdditionalPricesFromDatabase()
+                .OrderBy(t => t.SortOrder)  // <-- ДОБАВИТЬ
+                .ToList();
                     foreach (var t in additionalTemplates)
                     {
                         var carNames = await GetCarNamesForTemplate(t.Id, type);
@@ -1633,7 +1655,7 @@ namespace reflah_controler.Controllers
         }
 
         // ==========================================
-        // ПОЛУЧЕНИЕ СПИСКА МАШИН, ИСПОЛЬЗУЮЩИХ ШАБЛОН
+        // РџРћР›РЈР§Р•РќРР• РЎРџРРЎРљРђ РњРђРЁРРќ, РРЎРџРћР›Р¬Р—РЈР®Р©РРҐ РЁРђР‘Р›РћРќ
         // ==========================================
 
         private async Task<List<int>> GetCarsUsingTemplate(int templateId, string type)
@@ -1669,7 +1691,7 @@ namespace reflah_controler.Controllers
         private async Task<string> GetCarNamesForTemplate(int templateId, string type)
         {
             var carIds = await GetCarsUsingTemplate(templateId, type);
-            if (carIds.Count == 0) return "Не используется";
+            if (carIds.Count == 0) return "РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ";
 
             string connectionString = GetConnectionString();
             var carNames = new List<string>();
@@ -1692,11 +1714,11 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            return carNames.Count > 0 ? string.Join(", ", carNames) : "Не используется";
+            return carNames.Count > 0 ? string.Join(", ", carNames) : "РќРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ";
         }
 
         // ============================================
-        // СОЗДАНИЕ ШАБЛОНОВ С ЗАПИСЯМИ (С ПОДДЕРЖКОЙ EXISTING_ID)
+        // РЎРћР—Р”РђРќРР• РЁРђР‘Р›РћРќРћР’ РЎ Р—РђРџРРЎРЇРњР (РЎ РџРћР”Р”Р•Р Р–РљРћР™ EXISTING_ID)
         // ============================================
 
         [HttpPost("CreateAboutTemplateWithItems")]
@@ -1704,7 +1726,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "about" });
             }
 
@@ -1720,10 +1742,10 @@ namespace reflah_controler.Controllers
                 {
                     int itemId;
 
-                    // ===== ПРОВЕРЯЕМ: ЕСЛИ УКАЗАН EXISTING_ID, ИСПОЛЬЗУЕМ СУЩЕСТВУЮЩУЮ ЗАПИСЬ =====
+                    // ===== РџР РћР’Р•Р РЇР•Рњ: Р•РЎР›Р РЈРљРђР—РђРќ EXISTING_ID, РРЎРџРћР›Р¬Р—РЈР•Рњ РЎРЈР©Р•РЎРўР’РЈР®Р©РЈР® Р—РђРџРРЎР¬ =====
                     if (item.ExistingId.HasValue && item.ExistingId.Value > 0)
                     {
-                        // Проверяем, существует ли запись с таким ID
+                        // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р·Р°РїРёСЃСЊ СЃ С‚Р°РєРёРј ID
                         string checkQuery = "SELECT COUNT(*) FROM about WHERE id = @id";
                         using (var checkCmd = new MySqlCommand(checkQuery, connection))
                         {
@@ -1732,15 +1754,15 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице about";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ about";
                                 return RedirectToAction("Templates", new { activeTab = "about" });
                             }
                         }
 
-                        // ===== ИСПОЛЬЗУЕМ СУЩЕСТВУЮЩУЮ ЗАПИСЬ =====
+                        // ===== РРЎРџРћР›Р¬Р—РЈР•Рњ РЎРЈР©Р•РЎРўР’РЈР®Р©РЈР® Р—РђРџРРЎР¬ =====
                         itemId = item.ExistingId.Value;
 
-                        // Обновляем запись, если переданы новые данные
+                        // РћР±РЅРѕРІР»СЏРµРј Р·Р°РїРёСЃСЊ, РµСЃР»Рё РїРµСЂРµРґР°РЅС‹ РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ
                         bool hasData = !string.IsNullOrEmpty(item.TextRu) || !string.IsNullOrEmpty(item.TextEng) || !string.IsNullOrEmpty(item.TextGer);
 
                         if (hasData)
@@ -1758,7 +1780,7 @@ namespace reflah_controler.Controllers
                     }
                     else
                     {
-                        // ===== СОЗДАЁМ НОВУЮ ЗАПИСЬ =====
+                        // ===== РЎРћР—Р”РђРЃРњ РќРћР’РЈР® Р—РђРџРРЎР¬ =====
                         itemId = CreateGlobalId("about");
                         string insertQuery = "INSERT INTO about (id, text_ru, text_eng, text_ger) VALUES (@id, @text_ru, @text_eng, @text_ger)";
                         using (var insertCmd = new MySqlCommand(insertQuery, connection))
@@ -1774,7 +1796,7 @@ namespace reflah_controler.Controllers
                     itemIds.Add(itemId);
                 }
 
-                // Сохраняем шаблон
+                // РЎРѕС…СЂР°РЅСЏРµРј С€Р°Р±Р»РѕРЅ
                 string ids = string.Join(",", itemIds);
                 string templateQuery = "INSERT INTO template_about (id, name, ids) VALUES (@id, @name, @ids)";
                 using (var cmd = new MySqlCommand(templateQuery, connection))
@@ -1786,7 +1808,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "about" });
         }
@@ -1796,7 +1818,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "result" });
             }
 
@@ -1822,7 +1844,7 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице result";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ result";
                                 return RedirectToAction("Templates", new { activeTab = "result" });
                             }
                         }
@@ -1872,7 +1894,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "result" });
         }
@@ -1882,7 +1904,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "engine" });
             }
 
@@ -1908,7 +1930,7 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице engine_control";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ engine_control";
                                 return RedirectToAction("Templates", new { activeTab = "engine" });
                             }
                         }
@@ -1958,7 +1980,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "engine" });
         }
@@ -1968,7 +1990,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "price" });
             }
 
@@ -1994,7 +2016,7 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице price";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ price";
                                 return RedirectToAction("Templates", new { activeTab = "price" });
                             }
                         }
@@ -2078,7 +2100,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "price" });
         }
@@ -2088,7 +2110,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "grafic" });
             }
 
@@ -2114,7 +2136,7 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице grafic";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ grafic";
                                 return RedirectToAction("Templates", new { activeTab = "grafic" });
                             }
                         }
@@ -2199,7 +2221,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "grafic" });
         }
@@ -2209,7 +2231,7 @@ namespace reflah_controler.Controllers
         {
             if (string.IsNullOrEmpty(templateName) || items == null || !items.Any())
             {
-                TempData["Error"] = "Заполните название шаблона и добавьте хотя бы одну запись";
+                TempData["Error"] = "Р—Р°РїРѕР»РЅРёС‚Рµ РЅР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° Рё РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ Р·Р°РїРёСЃСЊ";
                 return RedirectToAction("Templates", new { activeTab = "additional" });
             }
 
@@ -2226,11 +2248,11 @@ namespace reflah_controler.Controllers
                     int itemId;
 
                     // ============================================================
-                    // ВАРИАНТ 1: ИСПОЛЬЗУЕМ СУЩЕСТВУЮЩУЮ ЗАПИСЬ ПО ID
+                    // Р’РђР РРђРќРў 1: РРЎРџРћР›Р¬Р—РЈР•Рњ РЎРЈР©Р•РЎРўР’РЈР®Р©РЈР® Р—РђРџРРЎР¬ РџРћ ID
                     // ============================================================
                     if (item.ExistingId.HasValue && item.ExistingId.Value > 0)
                     {
-                        // Проверяем, существует ли запись
+                        // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё Р·Р°РїРёСЃСЊ
                         string checkQuery = "SELECT COUNT(*) FROM additional_prices WHERE id = @id";
                         using (var checkCmd = new MySqlCommand(checkQuery, connection))
                         {
@@ -2239,14 +2261,14 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Запись с ID {item.ExistingId.Value} не найдена в таблице additional_prices";
+                                TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {item.ExistingId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ additional_prices";
                                 return RedirectToAction("Templates", new { activeTab = "additional" });
                             }
                         }
 
                         itemId = item.ExistingId.Value;
 
-                        // Проверяем, есть ли данные для обновления
+                        // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РґР°РЅРЅС‹Рµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ
                         bool hasData = !string.IsNullOrEmpty(item.NameRu) || !string.IsNullOrEmpty(item.NameEng) ||
                                        !string.IsNullOrEmpty(item.NameGer) || !string.IsNullOrEmpty(item.PriceRubl) ||
                                        !string.IsNullOrEmpty(item.PriceDolar) || !string.IsNullOrEmpty(item.PriceEuro) ||
@@ -2257,7 +2279,7 @@ namespace reflah_controler.Controllers
 
                         if (hasData)
                         {
-                            // ===== ОЧИЩАЕМ ДУБЛИКАТЫ =====
+                            // ===== РћР§РР©РђР•Рњ Р”РЈР‘Р›РРљРђРўР« =====
                             string freeIds = CleanDuplicateIds(item.FreePriceIds ?? "");
                             string baseIds = CleanDuplicateIds(item.BasePriceIds ?? "");
                             string proIds = CleanDuplicateIds(item.ProPriceIds ?? "");
@@ -2301,11 +2323,11 @@ namespace reflah_controler.Controllers
                         }
                     }
                     // ============================================================
-                    // ВАРИАНТ 2: ДОБАВЛЯЕМ ВЛОЖЕННЫЙ ШАБЛОН
+                    // Р’РђР РРђРќРў 2: Р”РћР‘РђР’Р›РЇР•Рњ Р’Р›РћР–Р•РќРќР«Р™ РЁРђР‘Р›РћРќ
                     // ============================================================
                     else if (item.TemplateId.HasValue && item.TemplateId.Value > 0)
                     {
-                        // Проверяем, существует ли шаблон
+                        // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С€Р°Р±Р»РѕРЅ
                         string checkQuery = "SELECT COUNT(*) FROM template_additional_prices WHERE id = @id";
                         using (var checkCmd = new MySqlCommand(checkQuery, connection))
                         {
@@ -2314,22 +2336,22 @@ namespace reflah_controler.Controllers
 
                             if (count == 0)
                             {
-                                TempData["Error"] = $"Шаблон с ID {item.TemplateId.Value} не найден";
+                                TempData["Error"] = $"РЁР°Р±Р»РѕРЅ СЃ ID {item.TemplateId.Value} РЅРµ РЅР°Р№РґРµРЅ";
                                 return RedirectToAction("Templates", new { activeTab = "additional" });
                             }
                         }
 
-                        // Просто используем ID существующего шаблона
+                        // РџСЂРѕСЃС‚Рѕ РёСЃРїРѕР»СЊР·СѓРµРј ID СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ С€Р°Р±Р»РѕРЅР°
                         itemId = item.TemplateId.Value;
                     }
                     // ============================================================
-                    // ВАРИАНТ 3: СОЗДАЁМ НОВУЮ ЗАПИСЬ
+                    // Р’РђР РРђРќРў 3: РЎРћР—Р”РђРЃРњ РќРћР’РЈР® Р—РђРџРРЎР¬
                     // ============================================================
                     else
                     {
                         itemId = CreateGlobalId("additional_prices");
 
-                        // ===== ОЧИЩАЕМ ДУБЛИКАТЫ =====
+                        // ===== РћР§РР©РђР•Рњ Р”РЈР‘Р›РРљРђРўР« =====
                         string freeIds = CleanDuplicateIds(item.FreePriceIds ?? "");
                         string baseIds = CleanDuplicateIds(item.BasePriceIds ?? "");
                         string proIds = CleanDuplicateIds(item.ProPriceIds ?? "");
@@ -2370,14 +2392,14 @@ namespace reflah_controler.Controllers
                         }
                     }
 
-                    // Добавляем ID в список
+                    // Р”РѕР±Р°РІР»СЏРµРј ID РІ СЃРїРёСЃРѕРє
                     if (!itemIds.Contains(itemId))
                     {
                         itemIds.Add(itemId);
                     }
                 }
 
-                // Сохраняем шаблон
+                // РЎРѕС…СЂР°РЅСЏРµРј С€Р°Р±Р»РѕРЅ
                 string ids = string.Join(",", itemIds);
                 string templateQuery = "INSERT INTO template_additional_prices (id, name, price_ids) VALUES (@id, @name, @price_ids)";
                 using (var cmd = new MySqlCommand(templateQuery, connection))
@@ -2389,7 +2411,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = $"Шаблон '{templateName}' успешно создан с {itemIds.Count} записями";
+            TempData["Message"] = $"РЁР°Р±Р»РѕРЅ '{templateName}' СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ СЃ {itemIds.Count} Р·Р°РїРёСЃСЏРјРё";
             await NotifyReaderSite();
             return RedirectToAction("Templates", new { activeTab = "additional" });
         }
@@ -2404,7 +2426,7 @@ namespace reflah_controler.Controllers
         }
 
         // ==========================================
-        // УПРАВЛЕНИЕ ШАБЛОНАМИ
+        // РЈРџР РђР’Р›Р•РќРР• РЁРђР‘Р›РћРќРђРњР
         // ==========================================
 
         [HttpPost("UpdateTemplateName")]
@@ -2425,7 +2447,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = "Название шаблона обновлено";
+            TempData["Message"] = "РќР°Р·РІР°РЅРёРµ С€Р°Р±Р»РѕРЅР° РѕР±РЅРѕРІР»РµРЅРѕ";
             await NotifyReaderSite();
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
             return RedirectToAction("Templates", new { activeTab = activeTab });
@@ -2477,7 +2499,7 @@ namespace reflah_controler.Controllers
                 DeleteGlobalId(id);
             }
 
-            TempData["Message"] = "Шаблон удален";
+            TempData["Message"] = "РЁР°Р±Р»РѕРЅ СѓРґР°Р»РµРЅ";
             await NotifyReaderSite();
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
             return RedirectToAction("Templates", new { activeTab = activeTab });
@@ -2530,7 +2552,7 @@ namespace reflah_controler.Controllers
                 DeleteGlobalId(itemId);
             }
 
-            TempData["Message"] = "Запись удалена из шаблона";
+            TempData["Message"] = "Р—Р°РїРёСЃСЊ СѓРґР°Р»РµРЅР° РёР· С€Р°Р±Р»РѕРЅР°";
             await NotifyReaderSite();
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
             return RedirectToAction("Templates", new { activeTab = activeTab });
@@ -2567,11 +2589,11 @@ namespace reflah_controler.Controllers
             string priceRubl = "",
             string priceDolar = "",
             string priceEuro = "",
-            int priceControler = 0,                    // <-- ДОБАВИТЬ
+            int priceControler = 0,                    // <-- Р”РћР‘РђР’РРўР¬
             int unselectedPriceMode = 0,
             string unselectedPriceModeHidden = "",
-            string[] freePriceIds = null,      // ← ИЗМЕНЕНО НА МАССИВ
-            string[] basePriceIds = null,      // ← ИЗМЕНЕНО НА МАССИВ
+            string[] freePriceIds = null,      // в†ђ РР—РњР•РќР•РќРћ РќРђ РњРђРЎРЎРР’
+            string[] basePriceIds = null,      // в†ђ РР—РњР•РќР•РќРћ РќРђ РњРђРЎРЎРР’
             string[] proPriceIds = null)
         {
             string recordTable = GetRecordTable(type);
@@ -2630,21 +2652,21 @@ namespace reflah_controler.Controllers
                         int finalUnselectedMode = !string.IsNullOrEmpty(unselectedPriceModeHidden)
         ? int.Parse(unselectedPriceModeHidden)
         : unselectedPriceMode;
-                        // ===== ЕСЛИ PRICE CONTROLER НЕ 2 - ОЧИЩАЕМ ID =====
+                        // ===== Р•РЎР›Р PRICE CONTROLER РќР• 2 - РћР§РР©РђР•Рњ ID =====
                         string freeIds;
                         string baseIds;
                         string proIds;
 
                         if (priceControler != 2)
                         {
-                            // Сбрасываем все ID, если priceControler не 2
+                            // РЎР±СЂР°СЃС‹РІР°РµРј РІСЃРµ ID, РµСЃР»Рё priceControler РЅРµ 2
                             freeIds = "";
                             baseIds = "";
                             proIds = "";
                         }
                         else
                         {
-                            // Иначе используем переданные значения
+                            // РРЅР°С‡Рµ РёСЃРїРѕР»СЊР·СѓРµРј РїРµСЂРµРґР°РЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
                             freeIds = freePriceIds != null && freePriceIds.Length > 0
                                 ? string.Join(",", freePriceIds)
                                 : "";
@@ -2715,7 +2737,7 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            TempData["Message"] = "Запись обновлена";
+            TempData["Message"] = "Р—Р°РїРёСЃСЊ РѕР±РЅРѕРІР»РµРЅР°";
             await NotifyReaderSite();
 
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
@@ -2733,7 +2755,7 @@ namespace reflah_controler.Controllers
             {
                 await connection.OpenAsync();
 
-                // Получаем текущие ID
+                // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёРµ ID
                 string getQuery = $"SELECT {idsColumn} FROM {templateTable} WHERE id = @id";
                 string currentIds = "";
                 using (var getCmd = new MySqlCommand(getQuery, connection))
@@ -2759,10 +2781,10 @@ namespace reflah_controler.Controllers
         }
 
         // ==========================================
-        // ДОБАВЛЕНИЕ ЗАПИСИ В ШАБЛОН (ПО ID ИЛИ НОВАЯ)
+        // Р”РћР‘РђР’Р›Р•РќРР• Р—РђРџРРЎР Р’ РЁРђР‘Р›РћРќ (РџРћ ID РР›Р РќРћР’РђРЇ)
         // ==========================================
 
-        // HomeController.EditCarBlocks.cs — полный обновлённый метод
+        // HomeController.EditCarBlocks.cs вЂ” РїРѕР»РЅС‹Р№ РѕР±РЅРѕРІР»С‘РЅРЅС‹Р№ РјРµС‚РѕРґ
 
         [HttpPost("AddItemToTemplate")]
         public async Task<IActionResult> AddItemToTemplate(
@@ -2795,9 +2817,9 @@ namespace reflah_controler.Controllers
             string priceDolar = "",
             string priceEuro = "",
             int priceControler = 0,
-            int unselectedPriceMode = 0,              // <-- ДОБАВИТЬ
-            string[] freePriceIds = null,             // <-- ДОБАВИТЬ
-            string[] basePriceIds = null,             // <-- ДОБАВИТЬ
+            int unselectedPriceMode = 0,              // <-- Р”РћР‘РђР’РРўР¬
+            string[] freePriceIds = null,             // <-- Р”РћР‘РђР’РРўР¬
+            string[] basePriceIds = null,             // <-- Р”РћР‘РђР’РРўР¬
             string[] proPriceIds = null,
             string returnTab = null)
         {
@@ -2809,13 +2831,13 @@ namespace reflah_controler.Controllers
                 await connection.OpenAsync();
 
                 // ============================================================
-                // ВАРИАНТ 1: ДОБАВЛЕНИЕ ПО ID СУЩЕСТВУЮЩЕЙ ЗАПИСИ (КОПИРОВАНИЕ)
+                // Р’РђР РРђРќРў 1: Р”РћР‘РђР’Р›Р•РќРР• РџРћ ID РЎРЈР©Р•РЎРўР’РЈР®Р©Р•Р™ Р—РђРџРРЎР (РљРћРџРР РћР’РђРќРР•)
                 // ============================================================
                 if (existingItemId.HasValue && existingItemId.Value > 0)
                 {
                     string recordTable = GetRecordTable(type);
 
-                    // Проверяем, что запись существует
+                    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ Р·Р°РїРёСЃСЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     string checkQuery = $"SELECT COUNT(*) FROM {recordTable} WHERE id = @id";
                     using (var checkCmd = new MySqlCommand(checkQuery, connection))
                     {
@@ -2823,23 +2845,23 @@ namespace reflah_controler.Controllers
                         int count = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
                         if (count == 0)
                         {
-                            TempData["Error"] = $"Запись с ID {existingItemId.Value} не найдена в таблице {recordTable}";
+                            TempData["Error"] = $"Р—Р°РїРёСЃСЊ СЃ ID {existingItemId.Value} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ {recordTable}";
                             return RedirectToAction("Templates");
                         }
                     }
 
-                    // Копируем запись — создаём копию с новым ID
+                    // РљРѕРїРёСЂСѓРµРј Р·Р°РїРёСЃСЊ вЂ” СЃРѕР·РґР°С‘Рј РєРѕРїРёСЋ СЃ РЅРѕРІС‹Рј ID
                     newItemId = CopyRecord(existingItemId.Value, recordTable);
                 }
 
                 // ============================================================
-                // ВАРИАНТ 2: ДОБАВЛЕНИЕ ВЛОЖЕННОГО ШАБЛОНА
+                // Р’РђР РРђРќРў 2: Р”РћР‘РђР’Р›Р•РќРР• Р’Р›РћР–Р•РќРќРћР“Рћ РЁРђР‘Р›РћРќРђ
                 // ============================================================
                 else if (existingTemplateId.HasValue && existingTemplateId.Value > 0)
                 {
                     string templateTable = GetTemplateTable(type);
 
-                    // Проверяем, что шаблон существует
+                    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ С€Р°Р±Р»РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                     string checkQuery = $"SELECT COUNT(*) FROM {templateTable} WHERE id = @id";
                     using (var checkCmd = new MySqlCommand(checkQuery, connection))
                     {
@@ -2847,17 +2869,17 @@ namespace reflah_controler.Controllers
                         int count = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
                         if (count == 0)
                         {
-                            TempData["Error"] = $"Шаблон с ID {existingTemplateId.Value} не найден";
+                            TempData["Error"] = $"РЁР°Р±Р»РѕРЅ СЃ ID {existingTemplateId.Value} РЅРµ РЅР°Р№РґРµРЅ";
                             return RedirectToAction("Templates");
                         }
                     }
 
-                    // Просто используем ID существующего шаблона (он уже есть в global_ids)
+                    // РџСЂРѕСЃС‚Рѕ РёСЃРїРѕР»СЊР·СѓРµРј ID СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ С€Р°Р±Р»РѕРЅР° (РѕРЅ СѓР¶Рµ РµСЃС‚СЊ РІ global_ids)
                     newItemId = existingTemplateId.Value;
                 }
 
                 // ============================================================
-                // ВАРИАНТ 3: СОЗДАНИЕ НОВОЙ ЗАПИСИ
+                // Р’РђР РРђРќРў 3: РЎРћР—Р”РђРќРР• РќРћР’РћР™ Р—РђРџРРЎР
                 // ============================================================
                 else
                 {
@@ -2915,7 +2937,7 @@ namespace reflah_controler.Controllers
 
                         default:
                             DeleteGlobalId(newItemId);
-                            TempData["Error"] = $"Неизвестный тип: {type}";
+                            TempData["Error"] = $"РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї: {type}";
                             return RedirectToAction("Templates");
                     }
 
@@ -2968,9 +2990,9 @@ namespace reflah_controler.Controllers
                                 insertCmd.Parameters.AddWithValue("@info_eng", infoEng ?? "");
                                 insertCmd.Parameters.AddWithValue("@info_ger", infoGer ?? "");
                                 insertCmd.Parameters.AddWithValue("@price_controler", priceControler);
-                                insertCmd.Parameters.AddWithValue("@unselected_price_mode", unselectedPriceMode);                          // <-- ДОБАВИТЬ
-                                insertCmd.Parameters.AddWithValue("@free_price_ids", freePriceIds != null ? string.Join(",", freePriceIds) : "");   // <-- ДОБАВИТЬ
-                                insertCmd.Parameters.AddWithValue("@base_price_ids", basePriceIds != null ? string.Join(",", basePriceIds) : "");   // <-- ДОБАВИТЬ
+                                insertCmd.Parameters.AddWithValue("@unselected_price_mode", unselectedPriceMode);                          // <-- Р”РћР‘РђР’РРўР¬
+                                insertCmd.Parameters.AddWithValue("@free_price_ids", freePriceIds != null ? string.Join(",", freePriceIds) : "");   // <-- Р”РћР‘РђР’РРўР¬
+                                insertCmd.Parameters.AddWithValue("@base_price_ids", basePriceIds != null ? string.Join(",", basePriceIds) : "");   // <-- Р”РћР‘РђР’РРўР¬
                                 insertCmd.Parameters.AddWithValue("@pro_price_ids", proPriceIds != null ? string.Join(",", proPriceIds) : "");
                                 break;
                         }
@@ -2980,12 +3002,12 @@ namespace reflah_controler.Controllers
                 }
 
                 // ============================================================
-                // ДОБАВЛЯЕМ ID В ШАБЛОН
+                // Р”РћР‘РђР’Р›РЇР•Рњ ID Р’ РЁРђР‘Р›РћРќ
                 // ============================================================
                 string templateTableName = GetTemplateTable(type);
                 string idsColumn = type == "price" ? "prices" : (type == "additional" ? "price_ids" : "ids");
 
-                // Получаем текущий список ID в шаблоне
+                // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёР№ СЃРїРёСЃРѕРє ID РІ С€Р°Р±Р»РѕРЅРµ
                 string getQuery = $"SELECT {idsColumn} FROM {templateTableName} WHERE id = @id";
                 string currentIds = "";
                 using (var getCmd = new MySqlCommand(getQuery, connection))
@@ -2995,7 +3017,7 @@ namespace reflah_controler.Controllers
                     currentIds = result?.ToString() ?? "";
                 }
 
-                // Добавляем новый ID, если его ещё нет
+                // Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Р№ ID, РµСЃР»Рё РµРіРѕ РµС‰С‘ РЅРµС‚
                 var idsList = string.IsNullOrEmpty(currentIds)
                     ? new List<int>()
                     : currentIds.Split(',').Select(int.Parse).ToList();
@@ -3007,7 +3029,7 @@ namespace reflah_controler.Controllers
 
                 string newIds = string.Join(",", idsList);
 
-                // Обновляем шаблон
+                // РћР±РЅРѕРІР»СЏРµРј С€Р°Р±Р»РѕРЅ
                 string updateQuery = $"UPDATE {templateTableName} SET {idsColumn} = @ids WHERE id = @id";
                 using (var updateCmd = new MySqlCommand(updateQuery, connection))
                 {
@@ -3017,19 +3039,19 @@ namespace reflah_controler.Controllers
                 }
             }
 
-            // Определяем сообщение в зависимости от способа добавления
+            // РћРїСЂРµРґРµР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЃРїРѕСЃРѕР±Р° РґРѕР±Р°РІР»РµРЅРёСЏ
             string message;
             if (existingItemId.HasValue && existingItemId.Value > 0)
             {
-                message = $"Запись #{existingItemId.Value} скопирована в шаблон (новая ID: {newItemId})";
+                message = $"Р—Р°РїРёСЃСЊ #{existingItemId.Value} СЃРєРѕРїРёСЂРѕРІР°РЅР° РІ С€Р°Р±Р»РѕРЅ (РЅРѕРІР°СЏ ID: {newItemId})";
             }
             else if (existingTemplateId.HasValue && existingTemplateId.Value > 0)
             {
-                message = $"Вложенный шаблон #{existingTemplateId.Value} добавлен в шаблон";
+                message = $"Р’Р»РѕР¶РµРЅРЅС‹Р№ С€Р°Р±Р»РѕРЅ #{existingTemplateId.Value} РґРѕР±Р°РІР»РµРЅ РІ С€Р°Р±Р»РѕРЅ";
             }
             else
             {
-                message = "Новая запись создана и добавлена в шаблон";
+                message = "РќРѕРІР°СЏ Р·Р°РїРёСЃСЊ СЃРѕР·РґР°РЅР° Рё РґРѕР±Р°РІР»РµРЅР° РІ С€Р°Р±Р»РѕРЅ";
             }
 
             TempData["Message"] = message;
@@ -3040,7 +3062,7 @@ namespace reflah_controler.Controllers
         }
 
         // ==========================================
-        // ДОБАВЛЕНИЕ ШАБЛОНА ВО ВСЕ МАШИНЫ
+        // Р”РћР‘РђР’Р›Р•РќРР• РЁРђР‘Р›РћРќРђ Р’Рћ Р’РЎР• РњРђРЁРРќР«
         // ==========================================
 
         [HttpPost("AddTemplateToAllCars")]
@@ -3051,7 +3073,7 @@ namespace reflah_controler.Controllers
                 string connectionString = GetConnectionString();
                 var carIds = new List<int>();
 
-                // Получаем все ID машин
+                // РџРѕР»СѓС‡Р°РµРј РІСЃРµ ID РјР°С€РёРЅ
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     await connection.OpenAsync();
@@ -3068,7 +3090,7 @@ namespace reflah_controler.Controllers
 
                 if (carIds.Count == 0)
                 {
-                    TempData["Error"] = "Нет машин в базе данных";
+                    TempData["Error"] = "РќРµС‚ РјР°С€РёРЅ РІ Р±Р°Р·Рµ РґР°РЅРЅС‹С…";
                     return RedirectToAction("Templates", new { activeTab = type });
                 }
 
@@ -3081,7 +3103,7 @@ namespace reflah_controler.Controllers
                     "price" => "price_ru",
                     "grafic" => "grafic",
                     "additional" => "additional_price_ru",
-                    _ => throw new ArgumentException($"Неизвестный тип: {type}")
+                    _ => throw new ArgumentException($"РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї: {type}")
                 };
 
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -3090,7 +3112,7 @@ namespace reflah_controler.Controllers
 
                     foreach (var carId in carIds)
                     {
-                        // Получаем текущее значение поля
+                        // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ
                         string getQuery = $"SELECT {columnName} FROM reflash_cars WHERE id = @id";
                         string currentValue = "";
                         using (var getCmd = new MySqlCommand(getQuery, connection))
@@ -3100,7 +3122,7 @@ namespace reflah_controler.Controllers
                             currentValue = result?.ToString() ?? "";
                         }
 
-                        // Проверяем, есть ли уже этот шаблон в списке
+                        // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё СѓР¶Рµ СЌС‚РѕС‚ С€Р°Р±Р»РѕРЅ РІ СЃРїРёСЃРєРµ
                         var idsList = string.IsNullOrEmpty(currentValue)
                             ? new List<int>()
                             : currentValue.Split(',').Select(int.Parse).ToList();
@@ -3110,7 +3132,7 @@ namespace reflah_controler.Controllers
                             idsList.Add(templateId);
                             string newValue = string.Join(",", idsList);
 
-                            // Обновляем запись
+                            // РћР±РЅРѕРІР»СЏРµРј Р·Р°РїРёСЃСЊ
                             string updateQuery = $"UPDATE reflash_cars SET {columnName} = @value WHERE id = @id";
                             using (var updateCmd = new MySqlCommand(updateQuery, connection))
                             {
@@ -3122,16 +3144,16 @@ namespace reflah_controler.Controllers
                         }
                     }
 
-                    // Обновляем used_in_cars в шаблоне
+                    // РћР±РЅРѕРІР»СЏРµРј used_in_cars РІ С€Р°Р±Р»РѕРЅРµ
                     await UpdateUsedInCarsForAllCars(templateId, type, carIds);
                 }
 
                 await NotifyReaderSite();
-                TempData["Message"] = $"Шаблон добавлен в {addedCount} машин из {carIds.Count}";
+                TempData["Message"] = $"РЁР°Р±Р»РѕРЅ РґРѕР±Р°РІР»РµРЅ РІ {addedCount} РјР°С€РёРЅ РёР· {carIds.Count}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при добавлении шаблона во все машины: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё С€Р°Р±Р»РѕРЅР° РІРѕ РІСЃРµ РјР°С€РёРЅС‹: {ex.Message}";
             }
 
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
@@ -3139,7 +3161,7 @@ namespace reflah_controler.Controllers
         }
 
         // ==========================================
-        // ОБНОВЛЕНИЕ USED_IN_CARS ДЛЯ ВСЕХ МАШИН
+        // РћР‘РќРћР’Р›Р•РќРР• USED_IN_CARS Р”Р›РЇ Р’РЎР•РҐ РњРђРЁРРќ
         // ==========================================
 
         private async Task UpdateUsedInCarsForAllCars(int templateId, string type, List<int> carIds)
@@ -3152,7 +3174,7 @@ namespace reflah_controler.Controllers
                 "price" => "template_price",
                 "grafic" => "template_grafic",
                 "additional" => "template_additional_prices",
-                _ => throw new ArgumentException($"Неизвестный тип: {type}")
+                _ => throw new ArgumentException($"РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї: {type}")
             };
 
             string connectionString = GetConnectionString();
@@ -3161,7 +3183,7 @@ namespace reflah_controler.Controllers
             {
                 await connection.OpenAsync();
 
-                // Получаем текущее значение used_in_cars
+                // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ used_in_cars
                 string getQuery = $"SELECT used_in_cars FROM {templateTable} WHERE id = @id";
                 string currentUsed = "";
                 using (var getCmd = new MySqlCommand(getQuery, connection))
@@ -3175,7 +3197,7 @@ namespace reflah_controler.Controllers
                     ? new List<int>()
                     : currentUsed.Split(',').Select(int.Parse).ToList();
 
-                // Добавляем все ID машин, которых еще нет в списке
+                // Р”РѕР±Р°РІР»СЏРµРј РІСЃРµ ID РјР°С€РёРЅ, РєРѕС‚РѕСЂС‹С… РµС‰Рµ РЅРµС‚ РІ СЃРїРёСЃРєРµ
                 foreach (var carId in carIds)
                 {
                     if (!existingCarIds.Contains(carId))
@@ -3186,7 +3208,7 @@ namespace reflah_controler.Controllers
 
                 string newUsed = existingCarIds.Any() ? string.Join(",", existingCarIds) : "";
 
-                // Сохраняем обновленное значение
+                // РЎРѕС…СЂР°РЅСЏРµРј РѕР±РЅРѕРІР»РµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
                 string updateQuery = $"UPDATE {templateTable} SET used_in_cars = @used_in_cars WHERE id = @id";
                 using (var updateCmd = new MySqlCommand(updateQuery, connection))
                 {
@@ -3196,10 +3218,10 @@ namespace reflah_controler.Controllers
                 }
             }
         }
-        // HomeController.EditCarBlocks.cs — добавить метод
+        // HomeController.EditCarBlocks.cs вЂ” РґРѕР±Р°РІРёС‚СЊ РјРµС‚РѕРґ
 
         /// <summary>
-        /// Копирует запись по ID и возвращает ID новой копии
+        /// РљРѕРїРёСЂСѓРµС‚ Р·Р°РїРёСЃСЊ РїРѕ ID Рё РІРѕР·РІСЂР°С‰Р°РµС‚ ID РЅРѕРІРѕР№ РєРѕРїРёРё
         /// </summary>
         private int CopyRecord(int sourceId, string recordTable)
         {
@@ -3210,7 +3232,7 @@ namespace reflah_controler.Controllers
             {
                 connection.Open();
 
-                // 1. Получаем данные исходной записи
+                // 1. РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РёСЃС…РѕРґРЅРѕР№ Р·Р°РїРёСЃРё
                 string selectQuery = $"SELECT * FROM `{recordTable}` WHERE id = @id";
                 List<string> columnNames = null;
                 Dictionary<string, object> values = null;
@@ -3221,7 +3243,7 @@ namespace reflah_controler.Controllers
                     using (var reader = cmd.ExecuteReader())
                     {
                         if (!reader.Read())
-                            throw new Exception($"Запись с ID {sourceId} не найдена в таблице {recordTable}");
+                            throw new Exception($"Р—Р°РїРёСЃСЊ СЃ ID {sourceId} РЅРµ РЅР°Р№РґРµРЅР° РІ С‚Р°Р±Р»РёС†Рµ {recordTable}");
 
                         columnNames = Enumerable.Range(0, reader.FieldCount)
                             .Select(i => reader.GetName(i))
@@ -3236,7 +3258,7 @@ namespace reflah_controler.Controllers
                     }
                 }
 
-                // 2. СОЗДАЁМ НОВЫЙ ID И ПРОВЕРЯЕМ, ЧТО ОН СВОБОДЕН
+                // 2. РЎРћР—Р”РђРЃРњ РќРћР’Р«Р™ ID Р РџР РћР’Р•Р РЇР•Рњ, Р§РўРћ РћРќ РЎР’РћР‘РћР”Р•Рќ
                 bool created = false;
                 int attempts = 0;
 
@@ -3245,7 +3267,7 @@ namespace reflah_controler.Controllers
                     attempts++;
                     newId = CreateGlobalId(recordTable);
 
-                    // Проверяем, что ID не занят в таблице
+                    // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ ID РЅРµ Р·Р°РЅСЏС‚ РІ С‚Р°Р±Р»РёС†Рµ
                     string checkFree = $"SELECT COUNT(*) FROM `{recordTable}` WHERE id = @id";
                     using (var checkCmd = new MySqlCommand(checkFree, connection))
                     {
@@ -3254,13 +3276,13 @@ namespace reflah_controler.Controllers
 
                         if (count > 0)
                         {
-                            // ID занят — удаляем из global_ids и пробуем новый
+                            // ID Р·Р°РЅСЏС‚ вЂ” СѓРґР°Р»СЏРµРј РёР· global_ids Рё РїСЂРѕР±СѓРµРј РЅРѕРІС‹Р№
                             DeleteGlobalId(newId);
                             continue;
                         }
                     }
 
-                    // 3. ВСТАВЛЯЕМ КОПИЮ С УКАЗАНИЕМ ID
+                    // 3. Р’РЎРўРђР’Р›РЇР•Рњ РљРћРџРР® РЎ РЈРљРђР—РђРќРР•Рњ ID
                     var insertQuery = $"INSERT INTO `{recordTable}` (id, {string.Join(", ", columnNames)}) VALUES (@id, {string.Join(", ", columnNames.Select(c => $"@{c}"))})";
 
                     using (var insertCmd = new MySqlCommand(insertQuery, connection))
@@ -3277,24 +3299,24 @@ namespace reflah_controler.Controllers
                 }
 
                 if (!created)
-                    throw new Exception("Не удалось создать копию записи");
+                    throw new Exception("РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РєРѕРїРёСЋ Р·Р°РїРёСЃРё");
             }
 
             return newId;
         }
         // ==========================================
-        // КЛАСС ДЛЯ ЗАПРОСА ПЕРЕМЕЩЕНИЯ В ШАБЛОНЕ
+        // РљР›РђРЎРЎ Р”Р›РЇ Р—РђРџР РћРЎРђ РџР•Р Р•РњР•Р©Р•РќРРЇ Р’ РЁРђР‘Р›РћРќР•
         // ==========================================
 
         // ==========================================
-        // ПЕРЕМЕЩЕНИЕ ЗАПИСИ В ШАБЛОНЕ (ВВЕРХ/ВНИЗ)
+        // РџР•Р Р•РњР•Р©Р•РќРР• Р—РђРџРРЎР Р’ РЁРђР‘Р›РћРќР• (Р’Р’Р•Р РҐ/Р’РќРР—)
         // ==========================================
         [HttpPost("TemplateMoveItem")]
         public async Task<IActionResult> TemplateMoveItem([FromBody] TemplateMoveItemRequest request)
         {
             try
             {
-                // Добавляем логирование для отладки
+                // Р”РѕР±Р°РІР»СЏРµРј Р»РѕРіРёСЂРѕРІР°РЅРёРµ РґР»СЏ РѕС‚Р»Р°РґРєРё
                 System.Diagnostics.Debug.WriteLine($"=== TemplateMoveItem ===");
                 System.Diagnostics.Debug.WriteLine($"Type: '{request.Type}'");
                 System.Diagnostics.Debug.WriteLine($"TemplateId: {request.TemplateId}");
@@ -3317,7 +3339,7 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
 
-                    // Получаем текущие ID
+                    // РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РёРµ ID
                     string getQuery = $"SELECT {idsColumn} FROM {templateTable} WHERE id = @id";
                     string currentIds = "";
                     using (var getCmd = new MySqlCommand(getQuery, connection))
@@ -3330,15 +3352,15 @@ namespace reflah_controler.Controllers
                     System.Diagnostics.Debug.WriteLine($"Current IDs: '{currentIds}'");
 
                     if (string.IsNullOrEmpty(currentIds))
-                        return Json(new { success = false, message = "Нет записей в шаблоне" });
+                        return Json(new { success = false, message = "РќРµС‚ Р·Р°РїРёСЃРµР№ РІ С€Р°Р±Р»РѕРЅРµ" });
 
                     var ids = ParseIdList(currentIds);
                     var index = ids.IndexOf(request.ItemId);
 
                     if (index == -1)
-                        return Json(new { success = false, message = $"Запись {request.ItemId} не найдена в шаблоне" });
+                        return Json(new { success = false, message = $"Р—Р°РїРёСЃСЊ {request.ItemId} РЅРµ РЅР°Р№РґРµРЅР° РІ С€Р°Р±Р»РѕРЅРµ" });
 
-                    // Перемещаем
+                    // РџРµСЂРµРјРµС‰Р°РµРј
                     if (request.Direction == "up" && index > 0)
                     {
                         (ids[index], ids[index - 1]) = (ids[index - 1], ids[index]);
@@ -3349,7 +3371,7 @@ namespace reflah_controler.Controllers
                     }
                     else
                     {
-                        return Json(new { success = true, message = "Перемещение не требуется" });
+                        return Json(new { success = true, message = "РџРµСЂРµРјРµС‰РµРЅРёРµ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ" });
                     }
 
                     string newValue = string.Join(",", ids);
@@ -3367,13 +3389,13 @@ namespace reflah_controler.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "Запись перемещена",
-                    returnTab = request.ReturnTab ?? request.Type  // <<< ИЗМЕНЕНО
+                    message = "Р—Р°РїРёСЃСЊ РїРµСЂРµРјРµС‰РµРЅР°",
+                    returnTab = request.ReturnTab ?? request.Type  // <<< РР—РњР•РќР•РќРћ
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ ERROR: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"вќЊ ERROR: {ex.Message}");
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -3386,44 +3408,44 @@ namespace reflah_controler.Controllers
                     .Select(a => new TemplateItemDetail
                     {
                         Id = a.Id,
-                        DisplayText = a.TextRu ?? a.TextEng ?? a.TextGer ?? "(пусто)"
+                        DisplayText = a.TextRu ?? a.TextEng ?? a.TextGer ?? "(РїСѓСЃС‚Рѕ)"
                     }).ToList(),
                 "result" => GetResultsFromDatabase()
                     .Select(r => new TemplateItemDetail
                     {
                         Id = r.Id,
-                        DisplayText = r.TextRu ?? r.TextEng ?? r.TextGer ?? "(пусто)"
+                        DisplayText = r.TextRu ?? r.TextEng ?? r.TextGer ?? "(РїСѓСЃС‚Рѕ)"
                     }).ToList(),
                 "engine" => GetEngineControlsFromDatabase()
                     .Select(e => new TemplateItemDetail
                     {
                         Id = e.Id,
-                        DisplayText = e.TextRu ?? e.TextEng ?? e.TextGer ?? "(пусто)"
+                        DisplayText = e.TextRu ?? e.TextEng ?? e.TextGer ?? "(РїСѓСЃС‚Рѕ)"
                     }).ToList(),
                 "price" => GetPricesFromDatabase()
                     .Select(p => new TemplateItemDetail
                     {
                         Id = p.Id,
-                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(без названия)"
+                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)"
                     }).ToList(),
                 "grafic" => GetGraficsFromDatabase()
                     .Select(g => new TemplateItemDetail
                     {
                         Id = g.Id,
-                        DisplayText = g.Name ?? "(без названия)"
+                        DisplayText = g.Name ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)"
                     }).ToList(),
                 "additional" => GetAdditionalPricesFromDatabase()
                     .Select(p => new TemplateItemDetail
                     {
                         Id = p.Id,
-                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(без названия)"
+                        DisplayText = p.NameRu ?? p.NameEng ?? p.NameGer ?? "(Р±РµР· РЅР°Р·РІР°РЅРёСЏ)"
                     }).ToList(),
                 _ => new List<TemplateItemDetail>()
             };
         }
 
         // ==========================================
-        // УДАЛЕНИЕ ЗАПИСИ ИЗ БД (С ПРОВЕРКОЙ)
+        // РЈР”РђР›Р•РќРР• Р—РђРџРРЎР РР— Р‘Р” (РЎ РџР РћР’Р•Р РљРћР™)
         // ==========================================
 
         [HttpPost("DeleteItemFromTemplate")]
@@ -3438,7 +3460,7 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
 
-                    // ===== 1. Удаляем запись из таблицы =====
+                    // ===== 1. РЈРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ РёР· С‚Р°Р±Р»РёС†С‹ =====
                     string deleteQuery = $"DELETE FROM {recordTable} WHERE id = @id";
                     using (var deleteCmd = new MySqlCommand(deleteQuery, connection))
                     {
@@ -3446,11 +3468,11 @@ namespace reflah_controler.Controllers
                         await deleteCmd.ExecuteNonQueryAsync();
                     }
 
-                    // ===== 2. Удаляем ID из шаблонов =====
+                    // ===== 2. РЈРґР°Р»СЏРµРј ID РёР· С€Р°Р±Р»РѕРЅРѕРІ =====
                     string templateTable = GetTemplateTable(type);
                     string idsColumn = type == "price" ? "prices" : (type == "additional" ? "price_ids" : "ids");
 
-                    // Получаем все шаблоны
+                    // РџРѕР»СѓС‡Р°РµРј РІСЃРµ С€Р°Р±Р»РѕРЅС‹
                     string getAllTemplatesQuery = $"SELECT id, {idsColumn} FROM {templateTable}";
                     var templates = new List<(int Id, string Ids)>();
 
@@ -3467,7 +3489,7 @@ namespace reflah_controler.Controllers
                         }
                     }
 
-                    // ===== 3. Обновляем шаблоны (уже НЕ внутри DataReader) =====
+                    // ===== 3. РћР±РЅРѕРІР»СЏРµРј С€Р°Р±Р»РѕРЅС‹ (СѓР¶Рµ РќР• РІРЅСѓС‚СЂРё DataReader) =====
                     foreach (var template in templates)
                     {
                         if (!string.IsNullOrEmpty(template.Ids))
@@ -3487,16 +3509,16 @@ namespace reflah_controler.Controllers
                         }
                     }
 
-                    // ===== 4. Удаляем из глобальных ID =====
+                    // ===== 4. РЈРґР°Р»СЏРµРј РёР· РіР»РѕР±Р°Р»СЊРЅС‹С… ID =====
                     DeleteGlobalId(itemId);
                 }
 
-                TempData["Message"] = $"Запись #{itemId} удалена из базы данных";
+                TempData["Message"] = $"Р—Р°РїРёСЃСЊ #{itemId} СѓРґР°Р»РµРЅР° РёР· Р±Р°Р·С‹ РґР°РЅРЅС‹С…";
                 await NotifyReaderSite();
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при удалении записи: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё Р·Р°РїРёСЃРё: {ex.Message}";
             }
 
             var activeTab = string.IsNullOrEmpty(returnTab) ? type : returnTab;
