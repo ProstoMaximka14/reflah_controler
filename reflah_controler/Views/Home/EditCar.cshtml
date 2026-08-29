@@ -1,0 +1,2213 @@
+﻿@model reflah_controler.Models.EditCarViewModel
+@{
+    ViewData["Title"] = $"Редактирование: {Model.Car.Brand} {Model.Car.Model}";
+    var car = Model.Car;
+    var hasImage = !string.IsNullOrEmpty(car.Image);
+    
+    // Получаем список цен для мультиселектов
+    var allPrices = ViewBag.AllPrices as List<reflah_controler.Models.PriceModel> ?? new List<reflah_controler.Models.PriceModel>();
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<style>
+    .block-card { border: 1px solid #dee2e6; border-radius: 12px; margin-bottom: 1.5rem; background: #fff; }
+    .block-card .block-header { padding: 1rem 1.25rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; cursor: pointer; user-select: none; transition: background 0.2s; }
+    .block-card .block-header:hover { background: #f8f9fa; }
+    .block-card .block-body { padding: 1.25rem; display: none; }
+    .block-card .block-body.show { display: block; }
+    .block-header .toggle-icon { transition: transform 0.3s ease; display: inline-block; margin-left: 8px; font-size: 12px; color: #6c757d; }
+    .block-header .toggle-icon.collapsed { transform: rotate(-90deg); }
+
+    .item-card { border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 10px; background: #fafbfc; overflow: hidden; transition: border-color 0.2s; }
+    .item-card:hover { border-color: var(--accent-color, #0d6efd); }
+    .item-card.template { background: #f3f8ff; border-color: #cfe2ff; }
+    .item-card.nested-template { background: #fff8f0; border-color: #ffd8a8; }
+    .item-badge { font-size: 12px; font-family: monospace; }
+    .template-child { font-size: 14px; padding: .35rem 0; border-bottom: 1px solid #e9ecef; }
+    .template-child:last-child { border-bottom: none; }
+    .template-child.nested { padding-left: 20px; border-left: 2px solid #ffa94d; }
+
+    /* ===== СОСТАВ ШАБЛОНА ===== */
+    .template-children {
+        width: 100%;
+        margin-top: 4px;
+        padding: 6px 8px 6px 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 3px solid #0d6efd;
+    }
+    .template-child-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 0;
+        font-size: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .template-child-item:last-child { border-bottom: none; }
+    .template-child-item .badge { font-size: 10px; }
+    .template-empty { font-style: italic; color: #6c757d; font-size: 12px; }
+
+    .message-box { padding: 12px 16px; margin-bottom: 1rem; border-radius: 8px; }
+    .message-success { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+    .message-error { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+    .add-panel { display: none; border: 1px dashed #adb5bd; border-radius: 10px; padding: 1rem; margin-top: 1rem; background: #fff; }
+    .add-panel.show { display: block; }
+
+    .car-image-preview { max-height: 220px; object-fit: contain; background: #f8f9fa; border-radius: 8px; padding: 8px; }
+    .placeholder-image { display: flex; align-items: center; justify-content: center; height: 160px; background: #f8f9fa; border-radius: 8px; color: #6c757d; }
+    .photo-preview { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; }
+    .grafic-image-preview { max-height: 80px; max-width: 100%; border-radius: 4px; object-fit: contain; }
+
+    .items-list { min-height: 30px; }
+    .list-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; margin-bottom: 4px; transition: background 0.2s; flex-wrap: wrap; }
+    .list-item:hover { background: #f1f3f5; }
+    .list-item .item-content { flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+    .list-item .item-actions { display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .btn-delete { background: #dc3545; color: white; padding: 6px 14px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; font-family: 'Inter', sans-serif; font-weight: 600; text-decoration: none; }
+    .btn-delete:hover { background: #bb2d3b; transform: translateY(-2px); color: white; text-decoration: none; }
+
+    .move-btn { padding: 2px 6px !important; font-size: 12px !important; line-height: 1.2 !important; min-width: 24px; }
+    .move-btn:hover { background: var(--accent-color, #0d6efd) !important; color: white !important; border-color: var(--accent-color, #0d6efd) !important; }
+
+    .item-preview-text { color: #4a4a5e; font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .item-detail { padding: 12px 16px 12px 40px; background: #f8f9fa; border-radius: 6px; margin-bottom: 4px; display: none; }
+
+    #tempMessageContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 350px; }
+    .temp-message { padding: 12px 20px; margin-bottom: 10px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .temp-message .close-btn { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; padding: 0; line-height: 1; }
+    .temp-message.success { background: #198754; color: #fff; }
+    .temp-message.error { background: #dc3545; color: #fff; }
+    .temp-message.warning { background: #ffc107; color: #000; }
+    .temp-message.info { background: #0d6efd; color: #fff; }
+
+    @@keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .extended-price-fields { background: #f0f7ff; border: 1px solid #cfe2ff; border-radius: 8px; padding: 12px; margin-top: 8px; }
+    .extended-price-fields select[multiple] { height: 120px; }
+    .price-controler-badge { font-size: 11px; padding: 2px 10px; border-radius: 12px; }
+    .price-controler-badge.basic { background: #cfe2ff; color: #084298; }
+    .price-controler-badge.pro { background: #ffd8a8; color: #7b4a00; }
+    .price-controler-badge.extended { background: #d1e7dd; color: #0f5132; }
+    
+    .unselected-mode-badge { font-size: 10px; padding: 1px 8px; border-radius: 10px; }
+    .unselected-mode-badge.base { background: #cfe2ff; color: #084298; }
+    .unselected-mode-badge.disabled { background: #e9ecef; color: #6c757d; }
+</style>
+
+@if (TempData["Message"] != null)
+{
+    <div class="message-box message-success"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="message-box message-error"><i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["Error"]</div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="h3 mb-1"><i class="bi bi-pencil-square text-primary"></i> Редактирование автомобиля</h1>
+        <div class="text-muted">@car.Brand @car.Model · ID: @car.Id</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("PreviewCar", new { id = car.Id })" class="btn btn-info"><i class="bi bi-eye"></i> Превью</a>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete(@car.Id, '@car.Brand @car.Model')">
+            <i class="bi bi-trash"></i> Удалить
+        </button>
+        <a href="@Url.Action("Cars")" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> К списку</a>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- БЛОК: ОСНОВНЫЕ ДАННЫЕ -->
+<!-- ========================================== -->
+<div class="block-card">
+    <div class="block-header" onclick="toggleBlock(this)">
+        <h5 class="mb-0">
+            <i class="bi bi-car-front text-primary"></i> 
+            Основные данные
+            <span class="toggle-icon">▼</span>
+        </h5>
+    </div>
+    <div class="block-body show">
+        <form method="post" action="@Url.Action("UpdateCar")" enctype="multipart/form-data" id="mainForm">
+            <input type="hidden" name="Id" value="@car.Id" />
+            <input type="hidden" name="AboutRu" value="@car.AboutRu" />
+            <input type="hidden" name="ResultRu" value="@car.ResultRu" />
+            <input type="hidden" name="EngineControlRu" value="@car.EngineControlRu" />
+            <input type="hidden" name="PriceRu" value="@car.PriceRu" />
+            <input type="hidden" name="grafic" value="@car.grafic" />
+            <input type="hidden" name="additional_price_ru" value="@car.additional_price_ru" />
+            
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div id="noImageMessage" style="@(hasImage ? "display:none;" : null)">
+                        <div class="placeholder-image"><i class="bi bi-image fs-2"></i></div>
+                    </div>
+                    <img id="previewImg" class="img-fluid car-image-preview photo-preview" 
+                         src="@(hasImage ? $"/shared-fotos/cars/{car.Image}" : null)" 
+                         style="@(hasImage ? null : "display:none;")" 
+                         alt="preview" />
+                </div>
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">Выберите фото на компьютере</label>
+                        <input type="file" class="form-control" name="imageFile" id="imageFile" accept="image/*" onchange="previewFile(this)" />
+                        <div class="form-text">Поддерживаемые форматы: JPG, PNG, GIF, WebP. Максимальный размер: 5MB</div>
+                    </div>
+                    @if (hasImage)
+                    {
+                        <!-- ============================================================ -->
+                        <!-- ИСПРАВЛЕННАЯ КНОПКА "УДАЛИТЬ" (ВАРИАНТ 1)                      -->
+                        <!-- ============================================================ -->
+                        <div class="mt-2 text-muted small">
+                            <i class="bi bi-info-circle"></i> Текущее изображение: @car.Image
+                            <button type="submit" name="removeImage" value="true" class="btn btn-sm btn-outline-danger ms-2"
+                                    onclick="return confirm('Удалить текущее изображение?');">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        </div>
+                        <!-- ============================================================ -->
+                    }
+                </div>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Марка*</label>
+                    <input class="form-control" name="Brand" value="@car.Brand" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Модель*</label>
+                    <input class="form-control" name="Model" value="@car.Model" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Поколение</label>
+                    <input class="form-control" name="Generation" value="@car.Generation" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Двигатель</label>
+                    <input class="form-control" name="Engine" value="@car.Engine" />
+                </div>
+                <div class="row mb-3">
+    <div class="col-md-3">
+        <label for="SortOrder" class="form-label">Порядок сортировки</label>
+        <input type="number" class="form-control" id="SortOrder" name="SortOrder" value="@Model.Car.SortOrder" min="0" />
+        <div class="form-text text-muted small">
+            <i class="bi bi-info-circle"></i>
+            Чем меньше число, тем выше будет отображаться автомобиль в списке
+        </div>
+    </div>
+</div>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Сохранить основные данные</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- НОВЫЙ БЛОК: СТАРЫЙ URL -->
+<!-- ========================================== -->
+<div class="block-card" id="block-old-url">
+    <div class="block-header" onclick="toggleBlock(this)">
+        <h5 class="mb-0">
+            <i class="bi bi-link-45deg text-warning"></i> 
+            Старый URL (для обратной совместимости)
+            <span class="toggle-icon collapsed">▼</span>
+        </h5>
+        
+    </div>
+    <div class="block-body">
+        <form method="post" action="@Url.Action("UpdateCarOldUrl")" id="oldUrlForm">
+            <input type="hidden" name="id" value="@car.Id" />
+            
+            <div class="mb-3">
+                <label class="form-label">Старый URL</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">/cars/</span>
+                    <input type="text" class="form-control" name="old_url" id="oldUrlInput" 
+                           value="@car.old_url" 
+                           placeholder="ru/cars/honda/honda-accord-7-24-cl9-cm2-eurojdm" />
+                </div>
+                <div class="form-text text-muted mt-2">
+                    <i class="bi bi-info-circle"></i>
+                    Введите полный путь после <strong>/cars/</strong>. 
+                    Например: <strong>ru/cars/honda/honda-accord-7-24-cl9-cm2-eurojdm</strong>
+                    <br>
+                    <i class="bi bi-lightbulb"></i>
+                    Если оставить пустым — старый URL не будет работать.
+                </div>
+            </div>
+
+            <div class="mt-2">
+                
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="bi bi-check-lg"></i> Сохранить старый URL
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearOldUrl()">
+                    <i class="bi bi-trash"></i> Очистить
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(car.old_url))
+            {
+                <div class="alert alert-success mt-3">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <strong>Текущий старый URL:</strong> 
+                    <code>/cars/@car.old_url</code>
+                    <br>
+                    <small class="text-muted">
+                        При переходе по этой ссылке будет выполняться перенаправление на текущую машину.
+                    </small>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary mt-3">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Старый URL не задан.</strong>
+                    <br>
+                    <small class="text-muted">
+                        Переход по старой ссылке для этой машины будет недоступен.
+                    </small>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- БЛОКИ: ОПИСАНИЯ, РЕЗУЛЬТАТЫ, УПРАВЛЕНИЕ -->
+<!-- ========================================== -->
+@{ RenderTextBlock("about", "Описания", "bi-file-text", Model.AboutItems, Model.AboutTemplates, car.Id); RenderTextBlock("result", "Результаты тюнинга", "bi-graph-up-arrow", Model.ResultItems, Model.ResultTemplates, car.Id); RenderTextBlock("engine", "Блоки управления", "bi-cpu", Model.EngineItems, Model.EngineTemplates, car.Id); }
+
+<!-- ========================================== -->
+<!-- БЛОК: ДОПОЛНИТЕЛЬНЫЕ ЦЕНЫ -->
+<!-- ========================================== -->
+<div class="block-card" id="block-additional-price">
+    <div class="block-header" onclick="toggleBlock(this)">
+        <h5 class="mb-0">
+            <i class="bi bi-tags text-primary"></i> 
+            Дополнительные цены
+            <span class="toggle-icon collapsed">▼</span>
+        </h5>
+        <div class="d-flex gap-2" onclick="event.stopPropagation();">
+            <button type="button" class="btn btn-sm btn-success" onclick="togglePanel('add-additional-price')">
+                <i class="bi bi-plus-lg"></i> Добавить запись
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-additional-price">
+                <i class="bi bi-collection"></i> Выбрать шаблон
+            </button>
+        </div>
+    </div>
+    <div class="block-body">
+        <div class="items-list" id="car-list-additional">
+            @if (Model.AdditionalPriceItems.Count == 0)
+            {
+                <div class="text-muted">Пока ничего не привязано</div>
+            }
+            @foreach (var item in Model.AdditionalPriceItems)
+            {
+                var itemIndex = Model.AdditionalPriceItems.IndexOf(item);
+                var isFirst = itemIndex == 0;
+                var isLast = itemIndex == Model.AdditionalPriceItems.Count - 1;
+                
+                <div class="list-item" data-item-id="@item.Id">
+                    <div class="item-content">
+                        @if (item.IsTemplate)
+                        {
+                            <span class="badge bg-primary item-badge">шаблон #@item.Id</span>
+                            <strong>@(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)</strong>
+                            <span class="badge bg-info">@(item.TemplateChildren?.Count ?? 0) записей</span>
+                            
+                            <!-- ===== СОСТАВ ШАБЛОНА ===== -->
+                            @if (item.TemplateChildren != null && item.TemplateChildren.Count > 0)
+                            {
+                                <div class="template-children">
+                                    <span class="fw-semibold small">Состав шаблона:</span>
+                                    @foreach (var child in item.TemplateChildren)
+                                    {
+                                        <div class="template-child-item">
+                                            <span class="badge bg-light text-dark border">#@child.Id</span>
+                                            @child.Title
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="template-children">
+                                    <span class="template-empty">Пустой шаблон</span>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary item-badge">цена #@item.Id</span>
+                            <span>@(!string.IsNullOrEmpty(item.NameRu) ? item.NameRu : "(без названия)")</span>
+                            
+                            @if (item.PriceControler == 0)
+                            {
+                                <span class="badge price-controler-badge basic">Базовые цены</span>
+                            }
+                            else if (item.PriceControler == 1)
+                            {
+                                <span class="badge price-controler-badge pro">PRO цены</span>
+                            }
+                            else if (item.PriceControler == 2)
+                            {
+                                <span class="badge price-controler-badge extended">Расширенный выбор</span>
+                            }
+                            
+                            <!-- ===== ПОЛЕ unselected_price_mode - отображается только при PriceControler == 2 ===== -->
+                            @if (item.PriceControler == 2)
+                            {
+                                if (item.UnselectedPriceMode == 0)
+                                {
+                                    <span class="badge unselected-mode-badge base">Невыбранные → Базовые</span>
+                                }
+                                else
+                                {
+                                    <span class="badge unselected-mode-badge disabled">Невыбранные → С тюнингом</span>
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="item-actions">
+                        @if (item.IsTemplate)
+                        {
+                            @if (!isFirst)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary move-btn" onclick="moveItem(@car.Id, 'additional', @item.Id, 'up')" title="Вверх">
+                                    <i class="bi bi-chevron-up"></i>
+                                </button>
+                            }
+                            @if (!isLast)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary move-btn" onclick="moveItem(@car.Id, 'additional', @item.Id, 'down')" title="Вниз">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            }
+                            <form method="post" action="@Url.Action("EditCarDetachAdditionalPrice")" onsubmit="return confirm('Отвязать шаблон от машины?');">
+                                <input type="hidden" name="carId" value="@car.Id" />
+                                <input type="hidden" name="itemId" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-link-45deg"></i></button>
+                            </form>
+                        }
+                        else
+                        {
+                            @if (!isFirst)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary move-btn" onclick="moveItem(@car.Id, 'additional', @item.Id, 'up')" title="Вверх">
+                                    <i class="bi bi-chevron-up"></i>
+                                </button>
+                            }
+                            @if (!isLast)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary move-btn" onclick="moveItem(@car.Id, 'additional', @item.Id, 'down')" title="Вниз">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            }
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleItemDetail(this)"><i class="bi bi-pencil"></i></button>
+                            <form method="post" action="@Url.Action("EditCarDetachAdditionalPrice")" onsubmit="return confirm('Отвязать запись от машины? (Запись будет удалена из БД)');">
+                                <input type="hidden" name="carId" value="@car.Id" />
+                                <input type="hidden" name="itemId" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></button>
+                            </form>
+                        }
+                    </div>
+                </div>
+                @if (!item.IsTemplate)
+                {
+                    var freeIds = string.IsNullOrEmpty(item.FreePriceIds) ? new List<string>() : item.FreePriceIds.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    var baseIds = string.IsNullOrEmpty(item.BasePriceIds) ? new List<string>() : item.BasePriceIds.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    var proIds = string.IsNullOrEmpty(item.ProPriceIds) ? new List<string>() : item.ProPriceIds.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    
+                    <div class="item-detail">
+                        <form method="post" action="@Url.Action("EditCarSaveAdditionalPriceRecord")" onsubmit="saveAdditionalPriceRecord(event, this)">
+                            <input type="hidden" name="carId" value="@car.Id" />
+                            <input type="hidden" name="id" value="@item.Id" />
+                            
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Название RU</label>
+                                    <input class="form-control" name="nameRu" value="@item.NameRu" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Название EN</label>
+                                    <input class="form-control" name="nameEng" value="@item.NameEng" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Название DE</label>
+                                    <input class="form-control" name="nameGer" value="@item.NameGer" />
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Цена (RUB)</label>
+                                    <input class="form-control" name="priceRubl" value="@item.PriceRubl" placeholder="Например: 15000" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Цена (USD)</label>
+                                    <input class="form-control" name="priceDolar" value="@item.PriceDolar" placeholder="Например: 200" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Цена (EUR)</label>
+                                    <input class="form-control" name="priceEuro" value="@item.PriceEuro" placeholder="Например: 170" />
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Информация RU</label>
+                                    <textarea class="form-control" name="infoRu" rows="2">@item.InfoRu</textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Информация EN</label>
+                                    <textarea class="form-control" name="infoEng" rows="2">@item.InfoEng</textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Информация DE</label>
+                                    <textarea class="form-control" name="infoGer" rows="2">@item.InfoGer</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Price Controler</label>
+                                    <select class="form-select" name="priceControler" id="priceControler_@item.Id" onchange="togglePriceControlerFields(@item.Id)">
+                                        <option value="0" selected="@(item.PriceControler == 0)">0 — базовые цены опций</option>
+                                        <option value="1" selected="@(item.PriceControler == 1)">1 — PRO цены опций</option>
+                                        <option value="2" selected="@(item.PriceControler == 2)">2 — Расширенный выбор</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" id="unselectedModeContainer_@item.Id" style="@(item.PriceControler == 2 ? "" : "display:none;")">
+                                    <label class="form-label">Unselected Price Mode</label>
+                                    <select class="form-select" name="unselectedPriceMode">
+                                        <option value="0" selected="@(item.UnselectedPriceMode == 0)">0 — Невыбранные цены → Базовые</option>
+                                        <option value="1" selected="@(item.UnselectedPriceMode == 1)">1 — Невыбранные цены → С тюнингом</option>
+                                    </select>
+                                    <div class="form-text small text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        Определяет, что делать с невыбранными ценами опций на основном сайте
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== БЛОКИ ДЛЯ PRICE_CONTROLER = 2 ===== -->
+                            <div class="extended-price-fields mt-2" id="extendedPriceFields_@item.Id" style="@(item.PriceControler == 2 ? "" : "display:none;")">
+                                <div class="row g-2">
+                                    <div class="col-md-12">
+                                        <h6 class="text-info"><i class="bi bi-list-ul"></i> Выбор ID цен опций</h6>
+                                        <div class="alert alert-info small">
+                                            <i class="bi bi-info-circle"></i> 
+                                            Выберите ID цен опций из таблицы <strong>price</strong>. 
+                                            Для множественного выбора зажмите <kbd>Ctrl</kbd> и кликайте.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Бесплатные опции (цена 0)</label>
+                                        <select class="form-select" name="freePriceIds" multiple>
+                                            @foreach (var price in allPrices)
+                                            {
+                                                var isSelected = freeIds.Contains(price.Id.ToString());
+                                                if (isSelected)
+                                                {
+                                                    <option value="@price.Id" selected>
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@price.Id">
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Опции с базовой ценой (base_price)</label>
+                                        <select class="form-select" name="basePriceIds" multiple>
+                                            @foreach (var price in allPrices)
+                                            {
+                                                var isSelected = baseIds.Contains(price.Id.ToString());
+                                                if (isSelected)
+                                                {
+                                                    <option value="@price.Id" selected>
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@price.Id">
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Опции с PRO ценой (pro_price)</label>
+                                        <select class="form-select" name="proPriceIds" multiple>
+                                            @foreach (var price in allPrices)
+                                            {
+                                                var isSelected = proIds.Contains(price.Id.ToString());
+                                                if (isSelected)
+                                                {
+                                                    <option value="@price.Id" selected>
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@price.Id">
+                                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-sm btn-primary mt-2">Сохранить запись</button>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="toggleItemDetail(this)">Закрыть</button>
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- ===== ПАНЕЛЬ ДОБАВЛЕНИЯ ===== -->
+        <div id="add-additional-price" class="add-panel">
+            <h6>Новая дополнительная цена</h6>
+            <form method="post" action="@Url.Action("EditCarAddAdditionalPriceRecord")" onsubmit="addAdditionalPriceRecord(event, this)">
+                <input type="hidden" name="carId" value="@car.Id" />
+                
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small">Название RU</label>
+                        <input class="form-control" name="nameRu" placeholder="Название RU" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Название EN</label>
+                        <input class="form-control" name="nameEng" placeholder="Name EN" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Название DE</label>
+                        <input class="form-control" name="nameGer" placeholder="Name DE" />
+                    </div>
+                </div>
+                
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label small">Цена (RUB)</label>
+                        <input class="form-control" name="priceRubl" placeholder="Например: 15000" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Цена (USD)</label>
+                        <input class="form-control" name="priceDolar" placeholder="Например: 200" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Цена (EUR)</label>
+                        <input class="form-control" name="priceEuro" placeholder="Например: 170" />
+                    </div>
+                </div>
+                
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label small">Информация RU</label>
+                        <textarea class="form-control" name="infoRu" rows="2" placeholder="Описание цены на русском"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Информация EN</label>
+                        <textarea class="form-control" name="infoEng" rows="2" placeholder="Package description in English"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Информация DE</label>
+                        <textarea class="form-control" name="infoGer" rows="2" placeholder="Paketbeschreibung auf Deutsch"></textarea>
+                    </div>
+                </div>
+                
+                <div class="row g-2 mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label small">Price Controler</label>
+                        <select class="form-select form-select-sm" name="priceControler" id="addPriceControler" onchange="toggleAddPriceControlerFields()">
+                            <option value="0">0 — базовые цены опций</option>
+                            <option value="1">1 — PRO цены опций</option>
+                            <option value="2">2 — Расширенный выбор</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="addUnselectedModeContainer" style="display:none;">
+                        <label class="form-label small">Unselected Price Mode</label>
+                        <select class="form-select form-select-sm" name="unselectedPriceMode">
+                            <option value="0">0 — Не менять (оставить как есть)</option>
+                            <option value="1">1 — Невыбранные цены → Базовые</option>
+                        </select>
+                        <div class="form-text small text-muted">
+                            <i class="bi bi-info-circle"></i> 
+                            Определяет, что делать с невыбранными ценами опций
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== БЛОКИ ДЛЯ PRICE_CONTROLER = 2 (при создании) ===== -->
+                <div class="extended-price-fields mt-2" id="addExtendedPriceFields" style="display:none;">
+                    <div class="row g-2">
+                        <div class="col-md-12">
+                            <h6 class="text-info"><i class="bi bi-list-ul"></i> Выбор ID цен опций</h6>
+                            <div class="alert alert-info small">
+                                <i class="bi bi-info-circle"></i> 
+                                Выберите ID цен опций из таблицы <strong>price</strong>. 
+                                Для множественного выбора зажмите <kbd>Ctrl</kbd> и кликайте.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Бесплатные опции (цена 0)</label>
+                            <select class="form-select form-select-sm" name="freePriceIds" multiple>
+                                @foreach (var price in allPrices)
+                                {
+                                    <option value="@price.Id">
+                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                    </option>
+                                }
+                            </select>
+                            <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Опции с базовой ценой (base_price)</label>
+                            <select class="form-select form-select-sm" name="basePriceIds" multiple>
+                                @foreach (var price in allPrices)
+                                {
+                                    <option value="@price.Id">
+                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                    </option>
+                                }
+                            </select>
+                            <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">Опции с PRO ценой (pro_price)</label>
+                            <select class="form-select form-select-sm" name="proPriceIds" multiple>
+                                @foreach (var price in allPrices)
+                                {
+                                    <option value="@price.Id">
+                                        #@price.Id - @price.NameRu (@(string.IsNullOrEmpty(price.BasePrice) ? "—" : price.BasePrice) / @(string.IsNullOrEmpty(price.ProPrice) ? "—" : price.ProPrice))
+                                    </option>
+                                }
+                            </select>
+                            <div class="form-text">Ctrl+Клик для множественного выбора</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-success btn-sm">Создать и добавить</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="togglePanel('add-additional-price')">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-3">
+            <button type="button" class="btn btn-sm btn-success" onclick="scrollToAddPanel('additional-price')">
+                <i class="bi bi-plus-lg"></i> Добавить запись
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ ДОПОЛНИТЕЛЬНЫХ ЦЕН ===== -->
+<div class="modal fade" id="modal-additional-price" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Шаблоны дополнительных цен</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (Model.AdditionalPriceTemplates == null || Model.AdditionalPriceTemplates.Count == 0)
+                {
+                    <div class="text-muted">Шаблонов дополнительных цен пока нет</div>
+                }
+                else
+                {
+                    <div class="list-group">
+                        @foreach (var t in Model.AdditionalPriceTemplates)
+                        {
+                            <form method="post" action="@Url.Action("EditCarAttachAdditionalPriceTemplate")" 
+                                  class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">@t.Name</div>
+                                    <small class="text-muted">ID #@t.Id · цены: @(string.IsNullOrEmpty(t.IdsPreview) ? "—" : t.IdsPreview)</small>
+                                </div>
+                                <input type="hidden" name="carId" value="@car.Id" />
+                                <input type="hidden" name="templateId" value="@t.Id" />
+                                <button type="submit" class="btn btn-sm btn-primary">Выбрать</button>
+                            </form>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- БЛОК: ЦЕНЫ ОПЦИЙ -->
+<!-- ========================================== -->
+@{ RenderPriceBlock(car.Id, Model.PriceItems, Model.PriceTemplates); }
+
+<!-- ========================================== -->
+<!-- БЛОК: ГРАФИКИ -->
+<!-- ========================================== -->
+@{ RenderGraficBlock(car.Id, Model.GraficItems, Model.GraficTemplates); }
+
+@functions {
+    // ============================================================
+    // РЕНДЕРИНГ ТЕКСТОВОГО БЛОКА (about, result, engine)
+    // ============================================================
+    void RenderTextBlock(string block, string title, string icon, List<reflah_controler.Models.CarBlockItem> items, List<reflah_controler.Models.TemplateOption> templates, int carId)
+    {
+        WriteLiteral($@"
+<div class=""block-card"" id=""block-{block}"">
+    <div class=""block-header"" onclick=""toggleBlock(this)"">
+        <h5 class=""mb-0"">
+            <i class=""bi {icon} text-primary""></i> {System.Net.WebUtility.HtmlEncode(title)}
+            <span class=""toggle-icon collapsed"">▼</span>
+        </h5>
+        <div class=""d-flex gap-2"" onclick=""event.stopPropagation();"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""togglePanel('add-{block}')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+            <button type=""button"" class=""btn btn-sm btn-outline-primary"" data-bs-toggle=""modal"" data-bs-target=""#modal-{block}"">
+                <i class=""bi bi-collection""></i> Выбрать шаблон
+            </button>
+        </div>
+    </div>
+    <div class=""block-body"">
+        <div class=""items-list"" id=""car-list-{block}"">");
+
+        if (items.Count == 0)
+        {
+            WriteLiteral("<div class=\"text-muted\">Пока ничего не привязано</div>");
+        }
+
+        foreach (var item in items)
+        {
+            var itemIndex = items.IndexOf(item);
+            var isFirst = itemIndex == 0;
+            var isLast = itemIndex == items.Count - 1;
+            
+            WriteLiteral($@"
+        <div class=""list-item"" data-item-id=""{item.Id}"">
+            <div class=""item-content"">");
+
+            if (item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-primary item-badge"">шаблон #{item.Id}</span>
+                <strong>{System.Net.WebUtility.HtmlEncode(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)}</strong>
+                <span class=""badge bg-info"">{item.TemplateChildren?.Count ?? 0} записей</span>");
+                
+                // ===== СОСТАВ ШАБЛОНА =====
+                if (item.TemplateChildren != null && item.TemplateChildren.Count > 0)
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""fw-semibold small"">Состав шаблона:</span>");
+                    foreach (var child in item.TemplateChildren)
+                    {
+                        WriteLiteral($@"
+                    <div class=""template-child-item"">
+                        <span class=""badge bg-light text-dark border"">#{child.Id}</span>
+                        {System.Net.WebUtility.HtmlEncode(child.Title)}
+                    </div>");
+                    }
+                    WriteLiteral(@"
+                </div>");
+                }
+                else
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""template-empty"">Пустой шаблон</span>
+                </div>");
+                }
+            }
+            else
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-secondary item-badge"">запись #{item.Id}</span>
+                <span class=""item-preview-text"">{(!string.IsNullOrEmpty(item.TextRu) ? System.Net.WebUtility.HtmlEncode(item.TextRu.Length > 60 ? item.TextRu.Substring(0, 60) + "..." : item.TextRu) : (!string.IsNullOrEmpty(item.TextEng) ? System.Net.WebUtility.HtmlEncode(item.TextEng.Length > 60 ? item.TextEng.Substring(0, 60) + "..." : item.TextEng) : (!string.IsNullOrEmpty(item.TextGer) ? System.Net.WebUtility.HtmlEncode(item.TextGer.Length > 60 ? item.TextGer.Substring(0, 60) + "..." : item.TextGer) : "(пусто)")))}</span>");
+            }
+
+            WriteLiteral($@"
+            </div>
+            <div class=""item-actions"">");
+
+            if (!isFirst)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, '{block}', {item.Id}, 'up')"" title=""Вверх"">
+                    <i class=""bi bi-chevron-up""></i>
+                </button>");
+            }
+            if (!isLast)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, '{block}', {item.Id}, 'down')"" title=""Вниз"">
+                    <i class=""bi bi-chevron-down""></i>
+                </button>");
+            }
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-primary"" onclick=""toggleItemDetail(this)""><i class=""bi bi-pencil""></i></button>");
+            }
+
+            WriteLiteral($@"
+                <form method=""post"" action=""{Url.Action("EditCarDetachItem")}"" onsubmit=""return confirm('Отвязать запись от машины?');"">
+                    <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                    <input type=""hidden"" name=""block"" value=""{block}"" />
+                    <input type=""hidden"" name=""itemId"" value=""{item.Id}"" />
+                    <button type=""submit"" class=""btn btn-sm btn-outline-danger""><i class=""bi bi-x-lg""></i></button>
+                </form>
+            </div>
+        </div>");
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+        <div class=""item-detail"">
+            <form method=""post"" action=""{Url.Action("EditCarSaveTextRecord")}"" onsubmit=""saveTextRecord(event, this, '{block}')"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <input type=""hidden"" name=""block"" value=""{block}"" />
+                <input type=""hidden"" name=""id"" value=""{item.Id}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">RU</label>
+                        <textarea class=""form-control"" name=""textRu"" rows=""2"">{System.Net.WebUtility.HtmlEncode(item.TextRu)}</textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">EN</label>
+                        <textarea class=""form-control"" name=""textEng"" rows=""2"">{System.Net.WebUtility.HtmlEncode(item.TextEng)}</textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">DE</label>
+                        <textarea class=""form-control"" name=""textGer"" rows=""2"">{System.Net.WebUtility.HtmlEncode(item.TextGer)}</textarea>
+                    </div>
+                </div>
+                <button type=""submit"" class=""btn btn-sm btn-primary mt-2"">Сохранить запись</button>
+                <button type=""button"" class=""btn btn-sm btn-secondary mt-2"" onclick=""toggleItemDetail(this)"">Закрыть</button>
+            </form>
+        </div>");
+            }
+        }
+
+        WriteLiteral($@"
+        </div>
+
+        <div id=""add-{block}"" class=""add-panel"">
+            <h6>Новая запись</h6>
+            <form method=""post"" action=""{Url.Action("EditCarAddTextRecord")}"" onsubmit=""addTextRecord(event, this, '{block}')"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <input type=""hidden"" name=""block"" value=""{block}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Текст RU *</label>
+                        <textarea class=""form-control"" name=""textRu"" rows=""2"" placeholder=""Текст RU""></textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Текст EN</label>
+                        <textarea class=""form-control"" name=""textEng"" rows=""2"" placeholder=""Text EN""></textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Текст DE</label>
+                        <textarea class=""form-control"" name=""textGer"" rows=""2"" placeholder=""Text DE""></textarea>
+                    </div>
+                </div>
+                <div class=""mt-2 d-flex gap-2"">
+                    <button type=""submit"" class=""btn btn-success btn-sm"">Создать и добавить</button>
+                    <button type=""button"" class=""btn btn-outline-secondary btn-sm"" onclick=""togglePanel('add-{block}')"">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class=""mt-3"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""scrollToAddPanel('{block}')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+        </div>
+    </div>
+</div>");
+
+        RenderTemplateModal(block, $"Шаблоны: {title}", templates, carId);
+    }
+
+    // ============================================================
+    // РЕНДЕРИНГ БЛОКА ЦЕН ОПЦИЙ
+    // ============================================================
+    void RenderPriceBlock(int carId, List<reflah_controler.Models.CarBlockItem> items, List<reflah_controler.Models.TemplateOption> templates)
+    {
+        WriteLiteral($@"
+<div class=""block-card"" id=""block-price"">
+    <div class=""block-header"" onclick=""toggleBlock(this)"">
+        <h5 class=""mb-0"">
+            <i class=""bi bi-currency-dollar text-primary""></i> 
+            Цены опций
+            <span class=""toggle-icon collapsed"">▼</span>
+        </h5>
+        <div class=""d-flex gap-2"" onclick=""event.stopPropagation();"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""togglePanel('add-price')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+            <button type=""button"" class=""btn btn-sm btn-outline-primary"" data-bs-toggle=""modal"" data-bs-target=""#modal-price"">
+                <i class=""bi bi-collection""></i> Выбрать шаблон
+            </button>
+        </div>
+    </div>
+    <div class=""block-body"">
+        <div class=""items-list"" id=""car-list-price"">");
+
+        if (items.Count == 0)
+        {
+            WriteLiteral("<div class=\"text-muted\">Пока ничего не привязано</div>");
+        }
+
+        foreach (var item in items)
+        {
+            var itemIndex = items.IndexOf(item);
+            var isFirst = itemIndex == 0;
+            var isLast = itemIndex == items.Count - 1;
+            
+            WriteLiteral($@"
+        <div class=""list-item"" data-item-id=""{item.Id}"">
+            <div class=""item-content"">");
+
+            if (item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-primary item-badge"">шаблон #{item.Id}</span>
+                <strong>{System.Net.WebUtility.HtmlEncode(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)}</strong>
+                <span class=""badge bg-info"">{item.TemplateChildren?.Count ?? 0} записей</span>");
+                
+                // ===== СОСТАВ ШАБЛОНА =====
+                if (item.TemplateChildren != null && item.TemplateChildren.Count > 0)
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""fw-semibold small"">Состав шаблона:</span>");
+                    foreach (var child in item.TemplateChildren)
+                    {
+                        WriteLiteral($@"
+                    <div class=""template-child-item"">
+                        <span class=""badge bg-light text-dark border"">#{child.Id}</span>
+                        {System.Net.WebUtility.HtmlEncode(child.Title)}
+                    </div>");
+                    }
+                    WriteLiteral(@"
+                </div>");
+                }
+                else
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""template-empty"">Пустой шаблон</span>
+                </div>");
+                }
+            }
+            else
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-secondary item-badge"">цена #{item.Id}</span>
+                <span>{(!string.IsNullOrEmpty(item.NameRu) ? item.NameRu : "(без названия)")}</span>
+                <span class=""text-muted small"">база: {(!string.IsNullOrEmpty(item.BasePrice) ? item.BasePrice : "—")} / pro: {(!string.IsNullOrEmpty(item.ProPrice) ? item.ProPrice : "—")}</span>");
+            }
+
+            WriteLiteral($@"
+            </div>
+            <div class=""item-actions"">");
+
+            if (!isFirst)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, 'price', {item.Id}, 'up')"" title=""Вверх"">
+                    <i class=""bi bi-chevron-up""></i>
+                </button>");
+            }
+            if (!isLast)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, 'price', {item.Id}, 'down')"" title=""Вниз"">
+                    <i class=""bi bi-chevron-down""></i>
+                </button>");
+            }
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-primary"" onclick=""toggleItemDetail(this)""><i class=""bi bi-pencil""></i></button>");
+            }
+
+            WriteLiteral($@"
+                <form method=""post"" action=""{Url.Action("EditCarDetachItem")}"" onsubmit=""return confirm('Отвязать запись от машины?');"">
+                    <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                    <input type=""hidden"" name=""block"" value=""price"" />
+                    <input type=""hidden"" name=""itemId"" value=""{item.Id}"" />
+                    <button type=""submit"" class=""btn btn-sm btn-outline-danger""><i class=""bi bi-x-lg""></i></button>
+                </form>
+            </div>
+        </div>");
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+        <div class=""item-detail"">
+            <form method=""post"" action=""{Url.Action("EditCarSavePriceRecord")}"" onsubmit=""savePriceRecord(event, this)"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <input type=""hidden"" name=""id"" value=""{item.Id}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название RU</label>
+                        <input class=""form-control"" name=""nameRu"" value=""{item.NameRu}"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название EN</label>
+                        <input class=""form-control"" name=""nameEng"" value=""{item.NameEng}"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название DE</label>
+                        <input class=""form-control"" name=""nameGer"" value=""{item.NameGer}"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">База (RU)</label>
+                        <input class=""form-control"" name=""basePrice"" value=""{item.BasePrice}"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">Pro (RU)</label>
+                        <input class=""form-control"" name=""proPrice"" value=""{item.ProPrice}"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">База (EN)</label>
+                        <input class=""form-control"" name=""basePriceEng"" value=""{item.BasePriceEng}"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">Pro (EN)</label>
+                        <input class=""form-control"" name=""proPriceEng"" value=""{item.ProPriceEng}"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">База (DE)</label>
+                        <input class=""form-control"" name=""basePriceGer"" value=""{item.BasePriceGer}"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label"">Pro (DE)</label>
+                        <input class=""form-control"" name=""proPriceGer"" value=""{item.ProPriceGer}"" />
+                    </div>
+                    <div class=""col-md-6"">
+                        <label class=""form-label"">Info</label>
+                        <input class=""form-control"" name=""infoRu"" value=""{item.InfoRu}"" placeholder=""Info RU"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-6"">
+                        <input class=""form-control"" name=""infoEng"" value=""{item.InfoEng}"" placeholder=""Info EN"" />
+                    </div>
+                    <div class=""col-md-6"">
+                        <input class=""form-control"" name=""infoGer"" value=""{item.InfoGer}"" placeholder=""Info DE"" />
+                    </div>
+                </div>
+                <button type=""submit"" class=""btn btn-sm btn-primary mt-2"">Сохранить запись</button>
+                <button type=""button"" class=""btn btn-sm btn-secondary mt-2"" onclick=""toggleItemDetail(this)"">Закрыть</button>
+            </form>
+        </div>");
+            }
+        }
+
+        WriteLiteral($@"
+        </div>
+
+        <div id=""add-price"" class=""add-panel"">
+            <h6>Новая цена опции</h6>
+            <form method=""post"" action=""{Url.Action("EditCarAddPriceRecord")}"" onsubmit=""addRecord(event, this, 'price')"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название RU *</label>
+                        <input class=""form-control"" name=""nameRu"" placeholder=""Название RU"" required />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название EN</label>
+                        <input class=""form-control"" name=""nameEng"" placeholder=""Name EN"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название DE</label>
+                        <input class=""form-control"" name=""nameGer"" placeholder=""Name DE"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">База (RU)</label>
+                        <input class=""form-control"" name=""basePrice"" placeholder=""0"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">Pro (RU)</label>
+                        <input class=""form-control"" name=""proPrice"" placeholder=""0"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">База (EN)</label>
+                        <input class=""form-control"" name=""basePriceEng"" placeholder=""0"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">Pro (EN)</label>
+                        <input class=""form-control"" name=""proPriceEng"" placeholder=""0"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">База (DE)</label>
+                        <input class=""form-control"" name=""basePriceGer"" placeholder=""0"" />
+                    </div>
+                    <div class=""col-md-3"">
+                        <label class=""form-label small"">Pro (DE)</label>
+                        <input class=""form-control"" name=""proPriceGer"" placeholder=""0"" />
+                    </div>
+                    <div class=""col-md-6"">
+                        <label class=""form-label small"">Info</label>
+                        <input class=""form-control"" name=""infoRu"" placeholder=""Info RU"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-6"">
+                        <input class=""form-control"" name=""infoEng"" placeholder=""Info EN"" />
+                    </div>
+                    <div class=""col-md-6"">
+                        <input class=""form-control"" name=""infoGer"" placeholder=""Info DE"" />
+                    </div>
+                </div>
+                <div class=""mt-2 d-flex gap-2"">
+                    <button type=""submit"" class=""btn btn-success btn-sm"">Создать и добавить</button>
+                    <button type=""button"" class=""btn btn-outline-secondary btn-sm"" onclick=""togglePanel('add-price')"">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class=""mt-3"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""scrollToAddPanel('price')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+        </div>
+    </div>
+</div>");
+
+        RenderTemplateModal("price", "Шаблоны цен опций", templates, carId);
+    }
+
+    // ============================================================
+    // РЕНДЕРИНГ БЛОКА ГРАФИКОВ
+    // ============================================================
+    void RenderGraficBlock(int carId, List<reflah_controler.Models.CarBlockItem> items, List<reflah_controler.Models.TemplateOption> templates)
+    {
+        WriteLiteral($@"
+<div class=""block-card"" id=""block-grafic"">
+    <div class=""block-header"" onclick=""toggleBlock(this)"">
+        <h5 class=""mb-0"">
+            <i class=""bi bi-bar-chart text-primary""></i> 
+            Графики
+            <span class=""toggle-icon collapsed"">▼</span>
+        </h5>
+        <div class=""d-flex gap-2"" onclick=""event.stopPropagation();"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""togglePanel('add-grafic')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+            <button type=""button"" class=""btn btn-sm btn-outline-primary"" data-bs-toggle=""modal"" data-bs-target=""#modal-grafic"">
+                <i class=""bi bi-collection""></i> Выбрать шаблон
+            </button>
+        </div>
+    </div>
+    <div class=""block-body"">
+        <div class=""items-list"" id=""car-list-grafic"">");
+
+        if (items.Count == 0)
+        {
+            WriteLiteral("<div class=\"text-muted\">Пока ничего не привязано</div>");
+        }
+
+        foreach (var item in items)
+        {
+            var itemIndex = items.IndexOf(item);
+            var isFirst = itemIndex == 0;
+            var isLast = itemIndex == items.Count - 1;
+            
+            WriteLiteral($@"
+        <div class=""list-item"" data-item-id=""{item.Id}"">
+            <div class=""item-content"">");
+
+            if (item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-primary item-badge"">шаблон #{item.Id}</span>
+                <strong>{System.Net.WebUtility.HtmlEncode(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)}</strong>
+                <span class=""badge bg-info"">{item.TemplateChildren?.Count ?? 0} записей</span>");
+                
+                // ===== СОСТАВ ШАБЛОНА =====
+                if (item.TemplateChildren != null && item.TemplateChildren.Count > 0)
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""fw-semibold small"">Состав шаблона:</span>");
+                    foreach (var child in item.TemplateChildren)
+                    {
+                        WriteLiteral($@"
+                    <div class=""template-child-item"">
+                        <span class=""badge bg-light text-dark border"">#{child.Id}</span>
+                        {System.Net.WebUtility.HtmlEncode(child.Title)}
+                    </div>");
+                    }
+                    WriteLiteral(@"
+                </div>");
+                }
+                else
+                {
+                    WriteLiteral(@"
+                <div class=""template-children"">
+                    <span class=""template-empty"">Пустой шаблон</span>
+                </div>");
+                }
+            }
+            else
+            {
+                WriteLiteral($@"
+                <span class=""badge bg-secondary item-badge"">график #{item.Id}</span>
+                <span>{(!string.IsNullOrEmpty(item.Name) ? item.Name : "(без названия)")}</span>");
+                if (!string.IsNullOrEmpty(item.Image))
+                {
+                    WriteLiteral($"<img src=\"/shared-fotos/grafics/{item.Image}\" class=\"grafic-image-preview\" style=\"max-height:30px;\" />");
+                }
+            }
+
+            WriteLiteral($@"
+            </div>
+            <div class=""item-actions"">");
+
+            if (!isFirst)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, 'grafic', {item.Id}, 'up')"" title=""Вверх"">
+                    <i class=""bi bi-chevron-up""></i>
+                </button>");
+            }
+            if (!isLast)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-secondary move-btn"" onclick=""moveItem({carId}, 'grafic', {item.Id}, 'down')"" title=""Вниз"">
+                    <i class=""bi bi-chevron-down""></i>
+                </button>");
+            }
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+                <button type=""button"" class=""btn btn-sm btn-outline-primary"" onclick=""toggleItemDetail(this)""><i class=""bi bi-pencil""></i></button>");
+            }
+
+            WriteLiteral($@"
+                <form method=""post"" action=""{Url.Action("EditCarDetachItem")}"" onsubmit=""return confirm('Отвязать запись от машины?');"">
+                    <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                    <input type=""hidden"" name=""block"" value=""grafic"" />
+                    <input type=""hidden"" name=""itemId"" value=""{item.Id}"" />
+                    <button type=""submit"" class=""btn btn-sm btn-outline-danger""><i class=""bi bi-x-lg""></i></button>
+                </form>
+            </div>
+        </div>");
+
+            if (!item.IsTemplate)
+            {
+                WriteLiteral($@"
+        <div class=""item-detail"">
+            <form method=""post"" action=""{Url.Action("EditCarSaveGraficRecord")}"" enctype=""multipart/form-data"" onsubmit=""saveGraficRecord(event, this)"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <input type=""hidden"" name=""id"" value=""{item.Id}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название RU</label>
+                        <input class=""form-control"" name=""name"" value=""{item.Name}"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название EN</label>
+                        <input class=""form-control"" name=""nameEng"" value=""{item.NameEng}"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Название DE</label>
+                        <input class=""form-control"" name=""nameGer"" value=""{item.NameGer}"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Описание RU</label>
+                        <textarea class=""form-control"" name=""descriptionRu"" rows=""2"">{item.DescriptionRu}</textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Описание EN</label>
+                        <textarea class=""form-control"" name=""descriptionEng"" rows=""2"">{item.DescriptionEng}</textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label"">Описание DE</label>
+                        <textarea class=""form-control"" name=""descriptionGer"" rows=""2"">{item.DescriptionGer}</textarea>
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-6"">
+                        <label class=""form-label"">Текущее изображение</label>
+                        {(string.IsNullOrEmpty(item.Image) ? "<div class=\"text-muted small\">Нет изображения</div>" : $"<img src=\"/shared-fotos/grafics/{item.Image}\" class=\"grafic-image-preview\" /><div class=\"small text-muted\">{item.Image}</div>")}
+                        <input type=""file"" class=""form-control form-control-sm mt-1"" name=""imageFile"" accept=""image/*"" />
+                    </div>
+                </div>
+                <button type=""submit"" class=""btn btn-sm btn-primary mt-2"">Сохранить запись</button>
+                <button type=""button"" class=""btn btn-sm btn-secondary mt-2"" onclick=""toggleItemDetail(this)"">Закрыть</button>
+            </form>
+        </div>");
+            }
+        }
+
+        WriteLiteral($@"
+        </div>
+
+        <div id=""add-grafic"" class=""add-panel"">
+            <h6>Новый график</h6>
+            <form method=""post"" action=""{Url.Action("EditCarAddGraficRecord")}"" enctype=""multipart/form-data"" onsubmit=""addGraficRecord(event, this)"">
+                <input type=""hidden"" name=""carId"" value=""{carId}"" />
+                <div class=""row g-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название RU *</label>
+                        <input class=""form-control"" name=""name"" placeholder=""Название на русском"" required />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название EN</label>
+                        <input class=""form-control"" name=""nameEng"" placeholder=""Name in English"" />
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Название DE</label>
+                        <input class=""form-control"" name=""nameGer"" placeholder=""Name auf Deutsch"" />
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Описание RU</label>
+                        <textarea class=""form-control"" name=""descriptionRu"" rows=""2"" placeholder=""Описание на русском""></textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Описание EN</label>
+                        <textarea class=""form-control"" name=""descriptionEng"" rows=""2"" placeholder=""Description in English""></textarea>
+                    </div>
+                    <div class=""col-md-4"">
+                        <label class=""form-label small"">Описание DE</label>
+                        <textarea class=""form-control"" name=""descriptionGer"" rows=""2"" placeholder=""Beschreibung auf Deutsch""></textarea>
+                    </div>
+                </div>
+                <div class=""row g-2 mt-2"">
+                    <div class=""col-md-12"">
+                        <label class=""form-label small"">Изображение</label>
+                        <input type=""file"" class=""form-control"" name=""imageFile"" accept=""image/*"" />
+                    </div>
+                </div>
+                <div class=""mt-2 d-flex gap-2"">
+                    <button type=""submit"" class=""btn btn-success btn-sm"">Создать и добавить</button>
+                    <button type=""button"" class=""btn btn-outline-secondary btn-sm"" onclick=""togglePanel('add-grafic')"">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class=""mt-3"">
+            <button type=""button"" class=""btn btn-sm btn-success"" onclick=""scrollToAddPanel('grafic')"">
+                <i class=""bi bi-plus-lg""></i> Добавить запись
+            </button>
+        </div>
+    </div>
+</div>");
+
+        RenderTemplateModal("grafic", "Шаблоны графиков", templates, carId);
+    }
+
+    // ============================================================
+    // РЕНДЕРИНГ МОДАЛЬНОГО ОКНА
+    // ============================================================
+    void RenderTemplateModal(string block, string title, List<reflah_controler.Models.TemplateOption> templates, int carId)
+    {
+        WriteLiteral($@"
+<div class=""modal fade"" id=""modal-{block}"" tabindex=""-1"">
+    <div class=""modal-dialog modal-lg modal-dialog-scrollable"">
+        <div class=""modal-content"">
+            <div class=""modal-header"">
+                <h5 class=""modal-title"">{System.Net.WebUtility.HtmlEncode(title)}</h5>
+                <button type=""button"" class=""btn-close"" data-bs-dismiss=""modal""></button>
+            </div>
+            <div class=""modal-body"">");
+
+        if (templates == null || templates.Count == 0)
+        {
+            WriteLiteral("<div class=\"text-muted\">Шаблонов пока нет</div>");
+        }
+        else
+        {
+            WriteLiteral("<div class=\"list-group\">");
+            foreach (var t in templates)
+            {
+                WriteLiteral($"<form method=\"post\" action=\"{Url.Action("EditCarAttachTemplate")}\" class=\"list-group-item list-group-item-action d-flex justify-content-between align-items-center\">");
+                WriteLiteral("<div>");
+                WriteLiteral($"<div class=\"fw-semibold\">{System.Net.WebUtility.HtmlEncode(t.Name)}</div>");
+                WriteLiteral($"<small class=\"text-muted\">ID #{t.Id} · записи: {System.Net.WebUtility.HtmlEncode(string.IsNullOrEmpty(t.IdsPreview) ? "—" : t.IdsPreview)}</small>");
+                WriteLiteral("</div>");
+                WriteLiteral($"<input type=\"hidden\" name=\"carId\" value=\"{carId}\" />");
+                WriteLiteral($"<input type=\"hidden\" name=\"block\" value=\"{block}\" />");
+                WriteLiteral($"<input type=\"hidden\" name=\"templateId\" value=\"{t.Id}\" />");
+                WriteLiteral("<button type=\"submit\" class=\"btn btn-sm btn-primary\">Выбрать</button></form>");
+            }
+            WriteLiteral("</div>");
+        }
+
+        WriteLiteral("</div></div></div></div>");
+    }
+}
+
+@section Scripts {
+<script>
+    // ==========================================
+    // ПЕРЕКЛЮЧЕНИЕ ВИДИМОСТИ БЛОКА
+    // ==========================================
+    function toggleBlock(headerElement) {
+        const block = headerElement.closest('.block-card');
+        const body = block.querySelector('.block-body');
+        const icon = headerElement.querySelector('.toggle-icon');
+        
+        if (body) {
+            body.classList.toggle('show');
+            if (icon) {
+                icon.classList.toggle('collapsed');
+            }
+        }
+    }
+
+    // ==========================================
+    // ПЕРЕКЛЮЧЕНИЕ ДЕТАЛЕЙ ЗАПИСИ
+    // ==========================================
+    function toggleItemDetail(btn) {
+        var parent = btn.closest('.list-item');
+        if (!parent) return;
+        var detail = parent.nextElementSibling;
+        while (detail && !detail.classList.contains('item-detail')) {
+            detail = detail.nextElementSibling;
+        }
+        if (detail) {
+            if (detail.style.display === 'none' || detail.style.display === '') {
+                detail.style.display = 'block';
+                btn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+            } else {
+                detail.style.display = 'none';
+                btn.innerHTML = '<i class="bi bi-pencil"></i>';
+            }
+        }
+    }
+
+    // ==========================================
+    // ПЕРЕКЛЮЧЕНИЕ ПАНЕЛИ ДОБАВЛЕНИЯ
+    // ==========================================
+    function togglePanel(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('show');
+    }
+
+    // ==========================================
+    // ПРОКРУТКА К ПАНЕЛИ ДОБАВЛЕНИЯ
+    // ==========================================
+    function scrollToAddPanel(block) {
+        var panel = document.getElementById('add-' + block);
+        if (panel) {
+            panel.classList.add('show');
+            setTimeout(function() {
+                panel.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 100);
+        }
+    }
+
+    // ==========================================
+    // ПРЕВЬЮ ЗАГРУЖЕННОГО ФАЙЛА (АВТОМОБИЛЬ)
+    // ==========================================
+    function previewFile(input) {
+        const preview = document.getElementById('previewImg');
+        const noImage = document.getElementById('noImageMessage');
+        const file = input.files[0];
+        
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Файл слишком большой! Максимум 5MB.');
+                input.value = '';
+                return;
+            }
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите изображение.');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                noImage.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // ==========================================
+    // УДАЛЕНИЕ ИЗОБРАЖЕНИЯ (АВТОМОБИЛЬ) - БОЛЬШЕ НЕ НУЖЕН, НО ОСТАВЛЯЮ ДЛЯ СОВМЕСТИМОСТИ
+    // ==========================================
+    // function removeImage() {
+    //     if (confirm('Удалить текущее изображение?')) {
+    //         document.getElementById('removeImage').value = 'true';
+    //         document.getElementById('previewImg').style.display = 'none';
+    //         document.getElementById('noImageMessage').style.display = 'block';
+    //         document.getElementById('imageFile').value = '';
+    //     }
+    // }
+
+    // ==========================================
+    // ПЕРЕКЛЮЧЕНИЕ ПОЛЕЙ ДЛЯ PRICE_CONTROLER == 2
+    // ==========================================
+    function togglePriceControlerFields(id) {
+        var select = document.getElementById('priceControler_' + id);
+        var extendedFields = document.getElementById('extendedPriceFields_' + id);
+        var unselectedContainer = document.getElementById('unselectedModeContainer_' + id);
+        
+        if (select && extendedFields) {
+            if (select.value === '2') {
+                extendedFields.style.display = '';
+                if (unselectedContainer) {
+                    unselectedContainer.style.display = '';
+                }
+            } else {
+                extendedFields.style.display = 'none';
+                if (unselectedContainer) {
+                    unselectedContainer.style.display = 'none';
+                    // Сбрасываем значение на 0, когда поле скрыто
+                    var unselectedSelect = unselectedContainer.querySelector('select');
+                    if (unselectedSelect) {
+                        unselectedSelect.value = '0';
+                    }
+                }
+            }
+        }
+    }
+
+    function toggleAddPriceControlerFields() {
+        var select = document.getElementById('addPriceControler');
+        var extendedFields = document.getElementById('addExtendedPriceFields');
+        var unselectedContainer = document.getElementById('addUnselectedModeContainer');
+        
+        if (select && extendedFields) {
+            if (select.value === '2') {
+                extendedFields.style.display = '';
+                if (unselectedContainer) {
+                    unselectedContainer.style.display = '';
+                }
+            } else {
+                extendedFields.style.display = 'none';
+                if (unselectedContainer) {
+                    unselectedContainer.style.display = 'none';
+                    // Сбрасываем значение на 0
+                    var unselectedSelect = unselectedContainer.querySelector('select');
+                    if (unselectedSelect) {
+                        unselectedSelect.value = '0';
+                    }
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // ПЕРЕМЕЩЕНИЕ ЗАПИСИ В БЛОКЕ АВТОМОБИЛЯ
+    // ==========================================
+    function moveItem(carId, blockName, itemId, direction) {
+        showTempMessage('Перемещение...', 'info');
+        
+        fetch('/Home/EditCarMoveItem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                carId: carId,
+                block: blockName,
+                itemId: itemId,
+                direction: direction
+            })
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Ошибка сервера: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                showTempMessage('Запись перемещена ✓', 'success');
+                location.reload();
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || 'неизвестная'), 'error');
+            }
+        })
+        .catch(function(error) {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка: ' + error.message, 'error');
+        });
+    }
+
+    // ==========================================
+    // УДАЛЕНИЕ ИЗОБРАЖЕНИЯ ГРАФИКА
+    // ==========================================
+    function removeGraficImage(itemId, carId) {
+        if (confirm('Удалить изображение графика?')) {
+            fetch('/Home/RemoveGraficImage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ itemId: itemId, carId: carId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showTempMessage('Изображение удалено', 'success');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Ошибка при удалении изображения');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при удалении изображения');
+            });
+        }
+    }
+
+    // ==========================================
+    // СОХРАНЕНИЕ ТЕКСТОВОЙ ЗАПИСИ
+    // ==========================================
+    function saveTextRecord(event, form, block) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var itemCard = form.closest('.list-item');
+                if (itemCard) {
+                    var preview = itemCard.querySelector('.item-preview-text');
+                    if (preview) {
+                        var textRu = form.querySelector('textarea[name="textRu"]')?.value || '';
+                        var textEng = form.querySelector('textarea[name="textEng"]')?.value || '';
+                        var textGer = form.querySelector('textarea[name="textGer"]')?.value || '';
+                        var newText = textRu || textEng || textGer || '(пусто)';
+                        if (newText.length > 60) newText = newText.substring(0, 60) + '...';
+                        preview.textContent = newText;
+                    }
+                }
+                var detail = form.closest('.item-detail');
+                if (detail) detail.style.display = 'none';
+                var btn = detail?.previousElementSibling?.querySelector('.btn-outline-primary');
+                if (btn) btn.innerHTML = '<i class="bi bi-pencil"></i>';
+                showTempMessage('Запись сохранена', 'success');
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при сохранении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // СОХРАНЕНИЕ ЦЕНЫ ОПЦИИ
+    // ==========================================
+    function savePriceRecord(event, form) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var itemCard = form.closest('.list-item');
+                if (itemCard) {
+                    var preview = itemCard.querySelector('.item-content span:last-child');
+                    if (preview) {
+                        var nameRu = form.querySelector('input[name="nameRu"]')?.value || '(без названия)';
+                        preview.textContent = nameRu;
+                    }
+                }
+                var detail = form.closest('.item-detail');
+                if (detail) detail.style.display = 'none';
+                var btn = detail?.previousElementSibling?.querySelector('.btn-outline-primary');
+                if (btn) btn.innerHTML = '<i class="bi bi-pencil"></i>';
+                showTempMessage('Цена опции сохранена', 'success');
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при сохранении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // СОХРАНЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЦЕНЫ
+    // ==========================================
+    function saveAdditionalPriceRecord(event, form) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var itemCard = form.closest('.list-item');
+                if (itemCard) {
+                    var preview = itemCard.querySelector('.item-content span:last-child');
+                    if (preview) {
+                        var nameRu = form.querySelector('input[name="nameRu"]')?.value || '(без названия)';
+                        preview.textContent = nameRu;
+                    }
+                }
+                var detail = form.closest('.item-detail');
+                if (detail) detail.style.display = 'none';
+                var btn = detail?.previousElementSibling?.querySelector('.btn-outline-primary');
+                if (btn) btn.innerHTML = '<i class="bi bi-pencil"></i>';
+                showTempMessage('Цена сохранена', 'success');
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при сохранении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // СОХРАНЕНИЕ ГРАФИКА
+    // ==========================================
+    function saveGraficRecord(event, form) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var detail = form.closest('.item-detail');
+                if (detail) detail.style.display = 'none';
+                var btn = detail?.previousElementSibling?.querySelector('.btn-outline-primary');
+                if (btn) btn.innerHTML = '<i class="bi bi-pencil"></i>';
+                showTempMessage('График сохранён', 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при сохранении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // ДОБАВЛЕНИЕ ТЕКСТОВОЙ ЗАПИСИ
+    // ==========================================
+    function addTextRecord(event, form, block) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Добавление...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var panel = form.closest('.add-panel');
+                if (panel) {
+                    panel.classList.remove('show');
+                }
+                form.querySelectorAll('textarea').forEach(function(textarea) {
+                    textarea.value = '';
+                });
+                showTempMessage('Запись добавлена', 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при добавлении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // ДОБАВЛЕНИЕ ЗАПИСИ (ОБЩАЯ)
+    // ==========================================
+    function addRecord(event, form, block) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Добавление...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var panel = form.closest('.add-panel');
+                if (panel) {
+                    panel.classList.remove('show');
+                }
+                form.querySelectorAll('input, textarea').forEach(function(input) {
+                    if (input.type !== 'file') {
+                        input.value = '';
+                    }
+                });
+                showTempMessage('Запись добавлена', 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при добавлении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЦЕНЫ
+    // ==========================================
+    function addAdditionalPriceRecord(event, form) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Добавление...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch('/Home/EditCarAddAdditionalPriceRecord', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var panel = form.closest('.add-panel');
+                if (panel) panel.classList.remove('show');
+                form.querySelectorAll('input, textarea').forEach(function(input) {
+                    input.value = '';
+                });
+                showTempMessage('Цена добавлена!', 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                showTempMessage('Ошибка: ' + data.message, 'error');
+            }
+        })
+        .catch(function(error) {
+            showTempMessage('Ошибка: ' + error.message, 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // ДОБАВЛЕНИЕ ГРАФИКА
+    // ==========================================
+    function addGraficRecord(event, form) {
+        event.preventDefault();
+        
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Добавление...';
+        btn.disabled = true;
+        
+        var formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var panel = form.closest('.add-panel');
+                if (panel) {
+                    panel.classList.remove('show');
+                }
+                form.querySelectorAll('input, textarea').forEach(function(input) {
+                    if (input.type !== 'file') {
+                        input.value = '';
+                    } else {
+                        input.value = '';
+                    }
+                });
+                showTempMessage('График добавлен', 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                showTempMessage('Ошибка: ' + (data.message || ''), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showTempMessage('Ошибка при добавлении', 'error');
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+        
+        return false;
+    }
+
+    // ==========================================
+    // УДАЛЕНИЕ АВТОМОБИЛЯ
+    // ==========================================
+    function confirmDelete(id, name) {
+        if (confirm(`Вы уверены, что хотите удалить автомобиль "${name}"?`)) {
+            if (confirm('Это действие НЕЛЬЗЯ будет отменить! Продолжить?')) {
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/Home/DeleteCar';
+                
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = id;
+                form.appendChild(input);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    }
+
+    // ==========================================
+    // ВРЕМЕННЫЕ СООБЩЕНИЯ
+    // ==========================================
+    function showTempMessage(message, type) {
+        var container = document.getElementById('tempMessageContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'tempMessageContainer';
+            document.body.appendChild(container);
+        }
+        
+        var msg = document.createElement('div');
+        msg.className = 'temp-message ' + (type || 'info');
+        msg.innerHTML = `
+            <span>${message}</span>
+            <button type="button" class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        container.appendChild(msg);
+        
+        setTimeout(function() {
+            if (msg.parentNode) {
+                msg.style.opacity = '0';
+                msg.style.transition = 'opacity 0.3s ease';
+                setTimeout(function() {
+                    if (msg.parentNode) msg.remove();
+                }, 300);
+            }
+        }, 3000);
+    }
+
+
+
+
+function clearOldUrl() {
+    if (confirm('Очистить старый URL?')) {
+        document.getElementById('oldUrlInput').value = '';
+        showTempMessage('Поле очищено. Нажмите "Сохранить"', 'info');
+    }
+}
+
+    // ==========================================
+    // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Состояние блоков
+        document.querySelectorAll('.block-card').forEach(card => {
+            const id = card.id;
+            if (id) {
+                const isOpen = localStorage.getItem('block_' + id);
+                const body = card.querySelector('.block-body');
+                const icon = card.querySelector('.toggle-icon');
+                
+                if (isOpen === 'false') {
+                    if (body) body.classList.remove('show');
+                    if (icon) icon.classList.add('collapsed');
+                } else if (isOpen === 'true') {
+                    if (body) body.classList.add('show');
+                    if (icon) icon.classList.remove('collapsed');
+                }
+            }
+        });
+        
+        document.querySelectorAll('.block-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const section = this.closest('.block-card');
+                if (section && section.id) {
+                    const body = section.querySelector('.block-body');
+                    const isOpen = body && body.classList.contains('show');
+                    localStorage.setItem('block_' + section.id, isOpen ? 'true' : 'false');
+                }
+            });
+        });
+
+        // Авто-скрытие сообщений
+        const messages = document.querySelectorAll('.message-box');
+        messages.forEach(message => {
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 500);
+            }, 5000);
+        });
+    });
+</script>
+}

@@ -1,0 +1,164 @@
+﻿namespace reflah_controler.Models
+{
+    // ==========================================
+    // ОПИСАНИЯ (ABOUT)
+    // ==========================================
+    public class AboutItemDto
+    {
+        public string TextRu { get; set; }
+        public string TextEng { get; set; }
+        public string TextGer { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+    }
+
+    // ==========================================
+    // РЕЗУЛЬТАТЫ (RESULT)
+    // ==========================================
+    public class ResultItemDto
+    {
+        public string TextRu { get; set; }
+        public string TextEng { get; set; }
+        public string TextGer { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+    }
+
+    // ==========================================
+    // БЛОКИ УПРАВЛЕНИЯ (ENGINE CONTROL)
+    // ==========================================
+    public class EngineItemDto
+    {
+        public string TextRu { get; set; }
+        public string TextEng { get; set; }
+        public string TextGer { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+    }
+
+    // ==========================================
+    // ЦЕНЫ ОПЦИЙ (PRICE)
+    // ==========================================
+    public class PriceItemDto
+    {
+        public string NameRu { get; set; }
+        public string NameEng { get; set; }
+        public string NameGer { get; set; }
+        public string BasePrice { get; set; }
+        public string ProPrice { get; set; }
+        public string BasePriceEng { get; set; }
+        public string ProPriceEng { get; set; }
+        public string BasePriceGer { get; set; }
+        public string ProPriceGer { get; set; }
+        public string InfoRu { get; set; }
+        public string InfoEng { get; set; }
+        public string InfoGer { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+    }
+
+    // ==========================================
+    // ГРАФИКИ (GRAFIC)
+    // ==========================================
+    public class GraficItemDto
+    {
+        public string GraficName { get; set; }
+        public string GraficNameEng { get; set; }
+        public string GraficNameGer { get; set; }
+        public string GraficDescriptionRu { get; set; }
+        public string GraficDescriptionEng { get; set; }
+        public string GraficDescriptionGer { get; set; }
+        public IFormFile GraficImageFile { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+    }
+
+    // ==========================================
+    // ДОПОЛНИТЕЛЬНЫЕ ЦЕНЫ (ADDITIONAL PRICES)
+    // ==========================================
+    public class AdditionalPriceItemDto
+    {
+        public string NameRu { get; set; }
+        public string NameEng { get; set; }
+        public string NameGer { get; set; }
+        public string PriceRubl { get; set; }
+        public string PriceDolar { get; set; }
+        public string PriceEuro { get; set; }
+        public string InfoRu { get; set; }
+        public string InfoEng { get; set; }
+        public string InfoGer { get; set; }
+        public int PriceControler { get; set; }
+        public int UnselectedPriceMode { get; set; }
+        public int? ExistingId { get; set; }
+        public int? TemplateId { get; set; }  // <<< НОВОЕ ПОЛЕ
+        public string FreePriceIds { get; set; }
+        public string BasePriceIds { get; set; }
+        public string ProPriceIds { get; set; }
+    }
+
+    // ==========================================
+    // КОПИРОВАНИЕ ЗАПИСИ
+    // ==========================================
+    public class CopyItemDto
+    {
+        public int SourceId { get; set; }
+        public string Type { get; set; }
+    }
+
+    public class DeleteItemRequest
+    {
+        public string Type { get; set; }
+        public int Id { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class DeleteUnusedRequest
+    {
+        public string Type { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class RemoveGraficImageRequest
+    {
+        public int ItemId { get; set; }
+        public int CarId { get; set; }
+    }
+
+    public class MoveItemRequest
+    {
+        public int CarId { get; set; }
+        public string Block { get; set; }
+        public int ItemId { get; set; }
+        public string Direction { get; set; }
+    }
+
+    public class TemplateMoveItemRequest
+    {
+        public string Type { get; set; }
+        public int TemplateId { get; set; }
+        public int ItemId { get; set; }
+        public string Direction { get; set; }
+        public string ReturnTab { get; set; }
+    }
+
+    public class TemplatePriceOptionDto
+    {
+        public int TemplateId { get; set; }
+        public string TemplateName { get; set; }
+        public List<PriceOptionItemDto> Prices { get; set; } = new();
+    }
+
+    public class PriceOptionItemDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string BasePrice { get; set; }
+        public string ProPrice { get; set; }
+    }
+
+    public class ReorderTemplatesRequest
+    {
+        public string Type { get; set; }
+        public List<int> TemplateIds { get; set; }
+    }
+}

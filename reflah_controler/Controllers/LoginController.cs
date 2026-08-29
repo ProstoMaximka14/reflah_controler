@@ -69,9 +69,7 @@ namespace reflah_controler.Controllers
 
                 if (isAuthenticated)
                 {
-                    
-                    ViewBag.Message = "Вход выполнен успешно!";
-                    
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {

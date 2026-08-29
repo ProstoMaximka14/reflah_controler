@@ -1,8 +1,323 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<reflah_controler.Models.AdminsModel>
+@{
+    ViewData["Title"] = "Управление администраторами";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .admin-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+            .admin-input:focus {
+                border-color: #86b7fe;
+                outline: 0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 2px;
+        }
+
+        .btn-save {
+            background-color: #198754;
+            color: white;
+        }
+
+            .btn-save:hover {
+                background-color: #157347;
+            }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+            .btn-delete:hover {
+                background-color: #bb2d3b;
+            }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 2px;
+        }
+
+            .btn-cancel:hover {
+                background-color: #5c636a;
+                color: white;
+                text-decoration: none;
+            }
+
+        .message-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .message-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Сообщения -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="message-box message-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Message"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="message-box message-error">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <h1 class="mb-4">
+            <i class="bi bi-people-fill text-primary"></i>
+            Управление администраторами
+        </h1>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+                <div class="mb-3 mb-md-0">
+                    <span class="text-muted">Всего администраторов:</span>
+                    <span class="badge bg-info ms-2">@Model.Count</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Логин</th>
+                            <th>Пароль</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var admin = Model[i];
+
+                            <form method="post" action="/Home/UpdateAdmin">
+                            <tr>
+                                <td class="fw-bold text-center">@(i + 1)</td>
+
+                                <td>
+                                    <input type="text"
+                                           name="login"
+                                           value="@admin.Login"
+                                           required
+                                           class="admin-input"
+                                           placeholder="Логин">
+                                </td>
+
+                                <td>
+                                    <div class="position-relative">
+                                        <input type="password"
+                                               name="password"
+                                               value="@admin.Password"
+                                               required
+                                               class="admin-input"
+                                               placeholder="Пароль"
+                                               id="password-@i">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
+                                                onclick="togglePassword('password-@i', this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <input type="hidden" name="id" value="@admin.Id">
+
+                                    <div class="d-flex flex-column flex-sm-row gap-2">
+                                        <!-- Кнопка сохранения -->
+                                        <button type="submit" class="btn-action btn-save">
+                                            <i class="bi bi-check-circle"></i>
+                                            <span class="d-none d-sm-inline">Сохранить</span>
+                                        </button>
+
+                                        <!-- Кнопка удаления -->
+                                        <button type="submit"
+                                                formaction="/Home/DeleteAdmin"
+                                                class="btn-action btn-delete"
+                                                onclick="return confirm('Вы уверены, что хотите удалить администратора @admin.Login?')">
+                                            <i class="bi bi-trash"></i>
+                                            <span class="d-none d-sm-inline">Удалить</span>
+                                        </button>
+
+                                        <!-- Кнопка отмены -->
+                                        <a href="@Url.Action("Index", "Home")" class="btn-cancel">
+                                            <i class="bi bi-x-circle"></i>
+                                            <span class="d-none d-sm-inline">Отмена</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </form>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Форма добавления нового администратора -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-plus text-success"></i>
+                        Добавить нового администратора
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/Home/AddAdmin">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label for="newLogin" class="form-label">Логин</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="newLogin"
+                                       name="login"
+                                       placeholder="Введите логин"
+                                       required>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="newPassword" class="form-label">Пароль</label>
+                                <div class="position-relative">
+                                    <input type="password"
+                                           class="form-control"
+                                           id="newPassword"
+                                           name="password"
+                                           placeholder="Введите пароль"
+                                           required>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
+                                            onclick="togglePassword('newPassword', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Добавить администратора
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Если вдруг нет администраторов -->
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle"></i> Нет администраторов</h5>
+                <p class="mb-3">Добавьте первого администратора для управления системой.</p>
+
+                <form method="post" action="/Home/AddAdmin">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-4">
+                            <input type="text" name="login" class="form-control" placeholder="Логин" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i>
+                                Добавить администратора
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
+
+    
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Функция для показа/скрытия пароля
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Автоматически скрываем сообщения через 5 секунд
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message-box');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

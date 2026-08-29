@@ -1,0 +1,497 @@
+﻿﻿
+@model List<reflah_controler.Models.PartnersModel>
+@{
+    ViewData["Title"] = "Предпросмотр партнёров";
+    var language = "ru";
+    var currentTheme = "dark";
+}
+
+<!DOCTYPE html>
+<html lang="@language" data-theme="@currentTheme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>@ViewData["Title"] — ReFlash Official</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #14141C;
+            --bg-card: #111118;
+            --bg-input: #1a1a24;
+            --bg-overlay: rgba(10, 10, 15, 0.9);
+            --bg-map-control: rgba(18, 18, 26, 0.95);
+            --text-primary: #E8E8F0;
+            --text-secondary: #C0C0D0;
+            --text-muted: #88889a;
+            --border-color: #2A2A35;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --accent-color: #FF3A2F;
+            --accent-hover: #D62B1F;
+            --gradient-start: #111118;
+            --gradient-end: #0D0D14;
+            --map-header-start: #FF3A2F;
+            --map-header-end: #B8251A;
+            --partner-border: #252530;
+            --partner-bg: #111118;
+            --partner-hover-border: #FF3A2F;
+            --partner-address-bg: #0C0C14;
+            --empty-bg: #111118;
+            --empty-border: #252530;
+            --logo-color-start: #FFB5A0;
+            --logo-color-end: #FFD4C4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.5;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+
+        .preview-header {
+            background: var(--accent-color);
+            padding: 12px 24px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .preview-header h4 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 16px;
+        }
+        .preview-header a {
+            color: white;
+            text-decoration: underline;
+            margin-left: 12px;
+        }
+        .preview-header a:hover { color: #fff; opacity: 0.8; }
+
+        .main-container { max-width: 1400px; margin: 0 auto; padding: 0 24px 60px; }
+
+        .page-header { margin-bottom: 40px; text-align: center; }
+        .page-title {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--logo-color-start) 0%, var(--logo-color-end) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+            transition: background 0.3s ease;
+        }
+        .page-subtitle { color: var(--text-muted); font-size: 16px; margin-top: 12px; }
+
+        .map-section { margin-bottom: 50px; }
+        .map-card {
+            background: var(--bg-card);
+            border-radius: 28px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.25s;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        .map-header {
+            padding: 20px 28px;
+            background: linear-gradient(135deg, var(--map-header-start), var(--map-header-end));
+            border-bottom: none;
+            transition: background 0.3s ease;
+        }
+        .map-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+        }
+        .map-header h3 i { font-size: 20px; }
+        .map-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-container .map-placeholder {
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .map-container .map-placeholder i {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        .map-footer {
+            padding: 14px 28px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-muted);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .partners-section { margin-top: 20px; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+        .section-title i { color: var(--accent-color); font-size: 28px; }
+        .partners-count {
+            background: rgba(255, 58, 47, 0.15);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--accent-color);
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+        }
+
+        .partner-card {
+            background: var(--partner-bg);
+            border-radius: 24px;
+            border: 1px solid var(--partner-border);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: default;
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+        .partner-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--partner-hover-border);
+            box-shadow: 0 20px 30px -12px var(--shadow-hover);
+        }
+
+        .partner-photo-container {
+            width: 100%;
+            height: 240px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+        .partner-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .partner-card:hover .partner-photo { transform: scale(1.05); }
+        .no-photo-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+        }
+        .no-photo-icon { font-size: 64px; color: var(--text-muted); }
+
+        .partner-info { padding: 22px; }
+        .partner-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .contact-info { margin-bottom: 16px; }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        .contact-item:last-child { border-bottom: none; }
+        .contact-icon {
+            width: 28px;
+            color: var(--accent-color);
+            text-align: center;
+            font-size: 14px;
+        }
+        .contact-text {
+            flex: 1;
+            color: var(--text-secondary);
+        }
+        .contact-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .contact-link:hover { color: var(--accent-color); }
+        .no-contact { color: var(--text-muted); font-style: italic; }
+
+        .partner-address {
+            padding: 14px 22px;
+            background: var(--partner-address-bg);
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .partner-address i { color: var(--accent-color); font-size: 14px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--empty-bg);
+            border-radius: 28px;
+            border: 1px solid var(--empty-border);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .empty-icon { font-size: 64px; color: var(--text-muted); margin-bottom: 20px; }
+        .empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        .empty-text { color: var(--text-muted); }
+
+        @@media (max-width: 992px) {
+            .partners-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        }
+
+        @@media (max-width: 768px) {
+            .main-container { padding: 0 12px 30px; }
+            .page-title { font-size: 28px; }
+            .page-subtitle { font-size: 13px; }
+            .map-container { height: 280px; }
+            .map-header h3 { font-size: 15px; }
+            .map-header { padding: 12px 16px; }
+            .map-footer { padding: 10px 16px; font-size: 11px; }
+            .section-title { font-size: 22px; }
+            .partners-count { font-size: 12px; padding: 4px 12px; }
+            .partners-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .partner-card { border-radius: 16px; }
+            .partner-photo-container { height: 140px; }
+            .no-photo-icon { font-size: 40px; }
+            .partner-info { padding: 12px 14px; }
+            .partner-name { font-size: 14px; margin-bottom: 10px; }
+            .contact-item { font-size: 12px; padding: 4px 0; gap: 8px; }
+            .contact-icon { width: 20px; font-size: 12px; }
+            .partner-address { padding: 10px 14px; font-size: 11px; gap: 8px; }
+            .partner-address i { font-size: 12px; }
+        }
+
+        @@media (max-width: 480px) {
+            .main-container { padding: 0 8px 20px; }
+            .page-title { font-size: 24px; }
+            .section-title { font-size: 18px; }
+            .section-header { margin-bottom: 16px; }
+            .partners-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .partner-photo-container { height: 110px; }
+            .no-photo-icon { font-size: 30px; }
+            .partner-info { padding: 8px 10px; }
+            .partner-name { font-size: 12px; margin-bottom: 6px; }
+            .contact-item { font-size: 10px; padding: 3px 0; gap: 6px; }
+            .contact-icon { width: 16px; font-size: 10px; }
+            .contact-text { font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .partner-address { padding: 6px 10px; font-size: 9px; gap: 4px; }
+            .partner-address i { font-size: 10px; }
+            .map-container { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="preview-header">
+        <h4>
+            <i class="fas fa-eye"></i> ПРЕДПРОСМОТР СТРАНИЦЫ ПАРТНЁРОВ
+            <a href="@Url.Action("Partners")" ><i class="fas fa-edit"></i> Редактировать</a>
+        </h4>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-handshake" style="color: var(--accent-color); margin-right: 12px;"></i>
+                Партнёры
+            </h1>
+            <div class="page-subtitle">Наши официальные представители в вашем регионе</div>
+        </div>
+
+        <!-- Карта -->
+        <div class="map-section">
+            <div class="map-card">
+                <div class="map-header">
+                    <h3>
+                        <i class="fas fa-map-marker-alt"></i>
+                        Расположение представителей
+                    </h3>
+                </div>
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map"></i>
+                        <p>Карта загружается...</p>
+                        <p style="font-size: 12px; opacity: 0.5;">(в предпросмотре карта неактивна)</p>
+                    </div>
+                </div>
+                <div class="map-footer">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                    Кликните по карточке партнера — карта приблизится к его локации
+                </div>
+            </div>
+        </div>
+
+        <!-- Список партнеров -->
+        <div class="partners-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Представители
+                </h2>
+                <span class="partners-count">@(Model?.Count ?? 0) партнёров</span>
+            </div>
+
+            @if (Model != null && Model.Count > 0)
+            {
+                <div class="partners-grid">
+                    @foreach (var partner in Model)
+                    {
+                        var address = string.Join(", ", new[] { partner.city, partner.street, partner.house }
+                        .Where(s => !string.IsNullOrEmpty(s)));
+
+                        <div class="partner-card">
+                            <div class="partner-photo-container">
+                                @if (!string.IsNullOrEmpty(partner.photo))
+                                {
+                                    <img src="/shared-fotos/partners/@partner.photo"
+                                         class="partner-photo"
+                                         alt="@partner.name"
+                                         onerror="this.onerror=null; this.src='/images/default-partner.jpg';">
+                                }
+                                else
+                                {
+                                    <div class="no-photo-container">
+                                        <i class="fas fa-user-circle no-photo-icon"></i>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="partner-info">
+                                <div class="partner-name">
+                                    @if (!string.IsNullOrEmpty(partner.vk))
+                                    {
+                                        <a href="@partner.vk" target="_blank" style="color: var(--accent-color); text-decoration: none;">
+                                            <i class="fab fa-vk" style="margin-right: 8px;"></i>
+                                            @partner.name
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        @partner.name
+                                    }
+                                </div>
+
+                                <div class="contact-info">
+                                    @if (!string.IsNullOrEmpty(partner.phone))
+                                    {
+                                        <div class="contact-item">
+                                            <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+                                            <div class="contact-text">
+                                                <a href="tel:@partner.phone" class="contact-link">@partner.phone</a>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(partner.website))
+                                    {
+                                        <div class="contact-item">
+                                            <div class="contact-icon"><i class="fas fa-globe"></i></div>
+                                            <div class="contact-text">
+                                                <a href="@partner.website" target="_blank" class="contact-link">
+                                                    @(partner.website.Length > 35 ? partner.website.Substring(0, 35) + "..." : partner.website)
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(partner.vk))
+                                    {
+                                        <div class="contact-item">
+                                            <div class="contact-icon"><i class="fab fa-vk"></i></div>
+                                            <div class="contact-text">
+                                                <a href="@partner.vk" target="_blank" class="contact-link">
+                                                    Страница VK
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (string.IsNullOrEmpty(partner.phone) && string.IsNullOrEmpty(partner.website) && string.IsNullOrEmpty(partner.vk))
+                                    {
+                                        <div class="contact-item">
+                                            <div class="contact-icon"><i class="fas fa-info-circle"></i></div>
+                                            <div class="contact-text no-contact">
+                                                Контактная информация не указана
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(address))
+                            {
+                                <div class="partner-address">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span>@address</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="empty-title">Список партнёров пуст</div>
+                    <div class="empty-text">На данный момент нет активных представителей</div>
+                </div>
+            }
+        </div>
+    </div>
+
+</body>
+</html>

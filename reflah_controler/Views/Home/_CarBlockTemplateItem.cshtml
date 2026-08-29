@@ -1,0 +1,33 @@
+@model reflah_controler.Models.CarBlockTemplatePartialModel
+@{
+    var item = Model.Item;
+}
+<div class="item-card template">
+    <div class="d-flex justify-content-between mb-2">
+        <div>
+            <span class="badge bg-primary item-badge">шаблон #@item.Id</span>
+            <strong class="ms-2">@(string.IsNullOrEmpty(item.TemplateName) ? "Без названия" : item.TemplateName)</strong>
+        </div>
+        <form method="post" action="@Url.Action("EditCarDetachItem", "Cars")" onsubmit="return confirm('Отвязать шаблон от машины?');">
+            <input type="hidden" name="carId" value="@Model.CarId" />
+            <input type="hidden" name="block" value="@Model.Block" />
+            <input type="hidden" name="itemId" value="@item.Id" />
+            <button type="submit" class="btn btn-sm btn-outline-danger">Отвязать</button>
+        </form>
+    </div>
+    <div class="small text-muted mb-1">Состав шаблона (только просмотр):</div>
+    @if (item.TemplateChildren == null || item.TemplateChildren.Count == 0)
+    {
+        <div class="text-muted">Пустой шаблон</div>
+    }
+    else
+    {
+        @foreach (var child in item.TemplateChildren)
+        {
+            <div class="template-child">
+                <span class="badge bg-light text-dark border item-badge">#@child.Id</span>
+                @child.Title
+            </div>
+        }
+    }
+</div>

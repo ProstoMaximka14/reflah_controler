@@ -1,0 +1,957 @@
+﻿﻿
+@model reflah_controler.Models.PartnersModel
+@{
+    ViewData["Title"] = $"Редактирование партнёра: {Model.name}";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* Стили для карты */
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* Анимация для сообщений */
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Дополнительные стили для карты */
+        .ymaps-2-1-79-map {
+            border-radius: 8px;
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @@media (max-width: 768px) {
+            #map {
+                height: 300px;
+            }
+
+            .d-flex.gap-2 {
+                flex-direction: column;
+            }
+
+            .d-flex.gap-2 .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+
+        /* Общие стили */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* Стили для форм */
+        .form-control, .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Стили для сообщений */
+        .message-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* Стили для карточек */
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .card-header h5 {
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        /* Стили для кнопок */
+        .btn {
+            border-radius: 8px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-danger:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Стили для меток */
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Адаптивность */
+        @@media (max-width: 768px) {
+            .btn {
+                padding: 6px 16px;
+            }
+
+            .card-header {
+                padding: 12px 15px;
+            }
+        }
+
+        .btn-preview {
+            background-color: #0dcaf0;
+            color: #000;
+            border: none;
+        }
+        .btn-preview:hover {
+            background-color: #0bb5d6;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Подключение Яндекс.Карт (замените ВАШ_API_КЛЮЧ на реальный) -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ВАШ_API_КЛЮЧ&lang=ru_RU" type="text/javascript"></script>
+    <div class="container py-4">
+        <!-- Сообщения -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="message-box message-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Message"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="message-box message-error">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="mb-0">
+                    <i class="bi bi-building text-primary"></i>
+                    Редактирование партнёра
+                </h1>
+                <div class="text-muted mt-1">
+                    <i class="bi bi-hash"></i> ID: #@Model.Id | 
+                    <i class="bi bi-building"></i> @Model.name |
+                    <i class="bi bi-geo-alt"></i> @Model.city
+                </div>
+            </div>
+            <div>
+                <a href="@Url.Action("PreviewPartners")" class="btn btn-preview" >
+                    <i class="bi bi-eye"></i>
+                    Предпросмотр всех
+                </a>
+                <a href="@Url.Action("Partners")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Назад к списку
+                </a>
+            </div>
+        </div>
+
+        <form method="post" action="/Home/UpdatePartner" enctype="multipart/form-data">
+            <input type="hidden" name="Id" value="@Model.Id">
+
+            <!-- Блок с изображением -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-image text-primary"></i> Фото партнёра</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-start">
+                        <!-- Левая колонка - фото -->
+                        <div class="col-md-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.photo))
+                            {
+                                <img id="photoPreview" 
+                                     src="/shared-fotos/partners/@Model.photo" 
+                                     class="img-fluid rounded" 
+                                     alt="Фото партнера"
+                                     style="width: 100%; max-width: 200px; height: auto; object-fit: cover; border-radius: 8px;"
+                                     onerror="this.onerror=null; this.src='/images/default-partner.jpg'">
+                            }
+                            else
+                            {
+                                <div id="photoPreview" 
+                                     class="bg-light d-flex align-items-center justify-content-center rounded"
+                                     style="width: 100%; max-width: 200px; height: 150px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Правая колонка - кнопки действий -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Выбрать новое фото</label>
+                                <input type="file"
+                                       id="photoFile"
+                                       name="photoFile"
+                                       class="form-control"
+                                       accept="image/*"
+                                       onchange="previewImage(this)">
+                                <div class="form-text">Поддерживаемые форматы: JPG, PNG, GIF. Максимальный размер: 5MB</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <!-- Скрытое поле для хранения текущего имени фото -->
+                                <input type="hidden" name="photo" value="@Model.photo" id="photoName">
+
+                                <button type="button" 
+                                        class="btn btn-outline-danger" 
+                                        onclick="clearPhoto()">
+                                    <i class="bi bi-trash"></i> Удалить фото
+                                </button>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.photo))
+                            {
+                                <div class="mt-3 text-muted small">
+                                    <i class="bi bi-info-circle"></i>
+                                    Текущее фото: @Model.photo
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основная информация -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle text-primary"></i> Основная информация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Название партнёра *</label>
+                            <input type="text" class="form-control" name="name" value="@Model.name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Телефон *</label>
+                            <input type="tel" class="form-control" name="phone" value="@Model.phone" 
+                                   placeholder="+7 (XXX) XXX-XX-XX" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">VK / Соцсети</label>
+                            <input type="url" class="form-control" name="vk" value="@Model.vk" 
+                                   placeholder="https://vk.com/...">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Веб-сайт</label>
+                            <input type="url" class="form-control" name="website" value="@Model.website" 
+                                   placeholder="https://...">
+                        </div>
+
+                        <!-- ===== НОВЫЕ ПОЛЯ ДЛЯ ПАРТНЁРОВ ===== -->
+<div class="col-md-12">
+    <label class="form-label">Название точки (офиса)</label>
+    <input type="text" class="form-control" name="point_name" value="@Model.point_name" placeholder="Например: Офис на Ленина">
+</div>
+
+<div class="col-md-6">
+    <label class="form-label">Telegram (username)</label>
+    <input type="text" class="form-control" name="telegram" value="@Model.telegram" placeholder="username">
+</div>
+
+<div class="col-md-6">
+    <label class="form-label">WhatsApp (номер)</label>
+    <input type="text" class="form-control" name="whatsapp" value="@Model.whatsapp" placeholder="79991234567">
+</div>
+
+<div class="col-md-6">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" name="email" value="@Model.email" placeholder="partner@mail.ru">
+</div>
+
+<div class="col-md-6">
+    <label class="form-label">Группа ВКонтакте</label>
+    <input type="url" class="form-control" name="vk_group" value="@Model.vk_group" placeholder="https://vk.com/...">
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Адрес -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-geo-alt text-primary"></i> Адрес</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Город</label>
+                            <input type="text" class="form-control" name="city" value="@Model.city" 
+                                   placeholder="Например: Москва">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Улица</label>
+                            <input type="text" class="form-control" name="street" value="@Model.street" 
+                                   placeholder="ул. Тверская">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Дом</label>
+                            <input type="text" class="form-control" name="house" value="@Model.house" 
+                                   placeholder="15">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Координаты для карты -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-map text-primary"></i> Координаты (выберите на карте)</h5>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="longitude" id="longitude" value="@Model.longitude">
+                    <input type="hidden" name="latitude" id="latitude" value="@Model.latitude">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Долгота:</label>
+                            <input type="text" class="form-control" id="longitudeDisplay" readonly 
+                                   value="@(!string.IsNullOrEmpty(Model.longitude) ? Model.longitude : "Не выбрано")">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Широта:</label>
+                            <input type="text" class="form-control" id="latitudeDisplay" readonly 
+                                   value="@(!string.IsNullOrEmpty(Model.latitude) ? Model.latitude : "Не выбрано")">
+                        </div>
+                    </div>
+
+                    <div id="map" style="width: 100%; height: 400px; border-radius: 8px;"></div>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <small>👆 Кликните на карту, чтобы установить метку. Метку можно перетаскивать.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-check-circle"></i>
+                        Сохранить изменения
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Сбросить
+                    </button>
+                </div>
+
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i>
+                    Удалить партнёра
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить партнёра <strong>@Model.name</strong>?</p>
+                    <p class="text-danger"><small>Это действие нельзя отменить! Будут удалены все связанные данные.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form method="post" action="/Home/DeletePartner" style="display: inline;">
+                        <input type="hidden" name="id" value="@Model.Id">
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Автоматически скрываем сообщения через 5 секунд
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message-box');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }, 5000);
+            });
+        });
+
+        // Функция предпросмотра изображения
+        function previewImage(input) {
+            const previewContainer = document.getElementById('photoPreview');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Файл слишком большой! Максимальный размер 5MB.');
+                    input.value = '';
+                    return;
+                }
+
+                if (!file.type.match('image.*')) {
+                    alert('Пожалуйста, выберите изображение (JPG, PNG, GIF)');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    if (previewContainer.tagName === 'IMG') {
+                        previewContainer.src = e.target.result;
+                    } else {
+                        const newImg = document.createElement('img');
+                        newImg.id = 'photoPreview';
+                        newImg.className = 'img-fluid rounded';
+                        newImg.style.width = '100%';
+                        newImg.style.maxWidth = '200px';
+                        newImg.style.height = 'auto';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.borderRadius = '8px';
+                        newImg.src = e.target.result;
+                        newImg.alt = 'Предпросмотр';
+
+                        previewContainer.parentNode.replaceChild(newImg, previewContainer);
+                    }
+                };
+
+                reader.readAsDataURL(file);
+
+                const hiddenPhoto = document.getElementById('photoName');
+                if (hiddenPhoto) {
+                    hiddenPhoto.value = '';
+                }
+
+                showTempMessage('Файл выбран. Не забудьте сохранить изменения.', 'info');
+            }
+        }
+
+        // Функция очистки фото
+        function clearPhoto() {
+            if (confirm('Вы уверены, что хотите удалить фото?')) {
+                const previewContainer = document.getElementById('photoPreview');
+
+                const newDiv = document.createElement('div');
+                newDiv.id = 'photoPreview';
+                newDiv.className = 'bg-light d-flex align-items-center justify-content-center rounded';
+                newDiv.style.width = '100%';
+                newDiv.style.maxWidth = '200px';
+                newDiv.style.height = '150px';
+                newDiv.innerHTML = '<i class="bi bi-image text-muted" style="font-size: 3rem;"></i>';
+
+                previewContainer.parentNode.replaceChild(newDiv, previewContainer);
+
+                const fileInput = document.getElementById('photoFile');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+
+                const hiddenPhoto = document.getElementById('photoName');
+                if (hiddenPhoto) {
+                    hiddenPhoto.value = '';
+                }
+
+                showTempMessage('Фото удалено. Не забудьте сохранить изменения.', 'info');
+            }
+        }
+
+        // Функция для отображения временных сообщений
+        function showTempMessage(message, type) {
+            let messageContainer = document.getElementById('tempMessageContainer');
+            if (!messageContainer) {
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'tempMessageContainer';
+                messageContainer.style.position = 'fixed';
+                messageContainer.style.top = '20px';
+                messageContainer.style.right = '20px';
+                messageContainer.style.zIndex = '9999';
+                document.body.appendChild(messageContainer);
+            }
+
+            const messageBox = document.createElement('div');
+            let alertClass = 'info';
+            if (type === 'success') alertClass = 'success';
+            if (type === 'error') alertClass = 'danger';
+
+            messageBox.className = `alert alert-${alertClass} alert-dismissible fade show`;
+            messageBox.style.animation = 'slideInRight 0.5s ease';
+            messageBox.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            messageContainer.appendChild(messageBox);
+
+            setTimeout(() => {
+                messageBox.remove();
+            }, 3000);
+        }
+
+        // Добавляем CSS анимацию для сообщений
+        if (!document.getElementById('customStyles')) {
+            const style = document.createElement('style');
+            style.id = 'customStyles';
+            style.textContent = `
+                @@keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                .alert {
+                    animation: slideInRight 0.5s ease;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        let map;
+        let placemark;
+
+        ymaps.ready(init);
+
+        function init() {
+            let defaultCenter = [55.751574, 37.573856];
+            let defaultZoom = 12;
+
+            let savedLng = document.getElementById('longitude').value;
+            let savedLat = document.getElementById('latitude').value;
+
+            if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
+                defaultCenter = [parseFloat(savedLat), parseFloat(savedLng)];
+                defaultZoom = 15;
+            }
+
+            map = new ymaps.Map("map", {
+                center: defaultCenter,
+                zoom: defaultZoom,
+                controls: ['zoomControl', 'fullscreenControl']
+            });
+
+            if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
+                addPlacemark([parseFloat(savedLat), parseFloat(savedLng)]);
+            }
+
+            map.events.add('click', function(e) {
+                const coords = e.get('coords');
+                addPlacemark(coords);
+                updateCoordinates(coords[1], coords[0]);
+            });
+        }
+
+        function addPlacemark(coords) {
+            if (placemark) {
+                map.geoObjects.remove(placemark);
+            }
+
+            placemark = new ymaps.Placemark(coords, {
+                hintContent: 'Партнёр'
+            }, {
+                draggable: true
+            });
+
+            map.geoObjects.add(placemark);
+
+            placemark.events.add('dragend', function(e) {
+                const newCoords = placemark.geometry.getCoordinates();
+                updateCoordinates(newCoords[1], newCoords[0]);
+            });
+        }
+
+        function updateCoordinates(longitude, latitude) {
+            const lng = parseFloat(longitude).toFixed(6);
+            const lat = parseFloat(latitude).toFixed(6);
+
+            document.getElementById('longitude').value = lng;
+            document.getElementById('latitude').value = lat;
+
+            document.getElementById('longitudeDisplay').value = lng;
+            document.getElementById('latitudeDisplay').value = lat;
+
+            showTempMessage(`Координаты: ${lat}, ${lng}`, 'success');
+        }
+
+        function searchAddress() {
+            const address = document.getElementById('addressInput').value.trim();
+
+            if (!address) {
+                showTempMessage('Введите адрес для поиска', 'warning');
+                return;
+            }
+
+            ymaps.geocode(address, { results: 1 }).then(function(res) {
+                const firstGeoObject = res.geoObjects.get(0);
+
+                if (!firstGeoObject) {
+                    showTempMessage('Адрес не найден', 'error');
+                    return;
+                }
+
+                const coords = firstGeoObject.geometry.getCoordinates();
+
+                map.setCenter(coords, 16);
+                addPlacemark(coords);
+                updateCoordinates(coords[1], coords[0]);
+
+                document.getElementById('addressInput').value = '';
+                showTempMessage('Метка перемещена', 'success');
+            }).catch(function(err) {
+                showTempMessage('Ошибка поиска', 'error');
+            });
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const coords = [position.coords.latitude, position.coords.longitude];
+                        map.setCenter(coords, 15);
+                        addPlacemark(coords);
+                        updateCoordinates(coords[1], coords[0]);
+                        showTempMessage('Использовано ваше местоположение', 'success');
+                    },
+                    function(error) {
+                        let errorMessage = 'Ошибка: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Разрешение отклонено';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Информация недоступна';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Превышено время ожидания';
+                                break;
+                            default:
+                                errorMessage += 'Неизвестная ошибка';
+                        }
+                        showTempMessage(errorMessage, 'error');
+                    }
+                );
+            } else {
+                showTempMessage('Браузер не поддерживает геолокацию', 'error');
+            }
+        }
+
+        function clearCoordinates() {
+            if (confirm('Очистить координаты?')) {
+                document.getElementById('longitude').value = '';
+                document.getElementById('latitude').value = '';
+                document.getElementById('longitudeDisplay').value = 'Не выбрано';
+                document.getElementById('latitudeDisplay').value = 'Не выбрано';
+
+                if (placemark) {
+                    map.geoObjects.remove(placemark);
+                    placemark = null;
+                }
+
+                showTempMessage('Координаты очищены', 'info');
+            }
+        }
+
+        function showTempMessage(message, type) {
+            let container = document.getElementById('tempMessageContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'tempMessageContainer';
+                container.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    max-width: 350px;
+                `;
+                document.body.appendChild(container);
+            }
+
+            const msg = document.createElement('div');
+            let bgColor = '#0d6efd';
+            let textColor = '#fff';
+
+            switch(type) {
+                case 'success':
+                    bgColor = '#198754';
+                    textColor = '#fff';
+                    break;
+                case 'error':
+                    bgColor = '#dc3545';
+                    textColor = '#fff';
+                    break;
+                case 'warning':
+                    bgColor = '#ffc107';
+                    textColor = '#000';
+                    break;
+                default:
+                    bgColor = '#0d6efd';
+                    textColor = '#fff';
+            }
+
+            msg.style.cssText = `
+                background-color: ${bgColor};
+                color: ${textColor};
+                padding: 12px 20px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                font-size: 14px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideInRight 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+            `;
+
+            msg.innerHTML = `
+                <span>${message}</span>
+                <button type="button" onclick="this.parentElement.remove()" style="
+                    background: none;
+                    border: none;
+                    color: inherit;
+                    font-size: 20px;
+                    cursor: pointer;
+                    padding: 0;
+                    line-height: 1;
+                ">&times;</button>
+            `;
+
+            container.appendChild(msg);
+
+            setTimeout(() => {
+                if (msg.parentNode) {
+                    msg.style.opacity = '0';
+                    msg.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        if (msg.parentNode) msg.remove();
+                    }, 300);
+                }
+            }, 3000);
+        }
+        // ============================================
+// ДОБАВЛЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЦЕНЫ (ПАКЕТА)
+// ============================================
+function addAdditionalPriceRecord(event, form) {
+    event.preventDefault();
+    
+    var btn = form.querySelector('button[type="submit"]');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Добавление...';
+    btn.disabled = true;
+    
+    var formData = new FormData(form);
+    
+    fetch('/Home/EditCarAddAdditionalPriceRecord', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Скрываем панель
+            var panel = form.closest('.add-panel');
+            if (panel) panel.classList.remove('show');
+            
+            // Очищаем форму
+            form.querySelectorAll('input, textarea').forEach(function(input) {
+                input.value = '';
+            });
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            // Показываем сообщение и перезагружаем страницу
+            showTempMessage('Пакет успешно добавлен!', 'success');
+            setTimeout(function() { 
+                location.reload(); 
+            }, 1500);
+        } else {
+            alert('Ошибка при добавлении: ' + (data.message || 'Неизвестная ошибка'));
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при добавлении: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+    
+    return false;
+}
+
+// ============================================
+// СОХРАНЕНИЕ ДОПОЛНИТЕЛЬНОЙ ЦЕНЫ (ПАКЕТА)
+// ============================================
+function saveAdditionalPriceRecord(event, form) {
+    event.preventDefault();
+    
+    var btn = form.querySelector('button[type="submit"]');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
+    btn.disabled = true;
+    
+    var formData = new FormData(form);
+    
+    fetch('/Home/EditCarSaveAdditionalPriceRecord', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Закрываем редактирование записи
+            var itemCard = form.closest('.item-card');
+            if (itemCard) {
+                var body = itemCard.querySelector('.item-body');
+                var icon = itemCard.querySelector('.toggle-icon');
+                if (body) body.style.display = 'none';
+                if (icon) icon.classList.remove('open');
+                
+                // Обновляем превью
+                var preview = itemCard.querySelector('.item-preview-text');
+                if (preview) {
+                    var nameRu = form.querySelector('input[name="nameRu"]')?.value || '(без названия)';
+                    preview.textContent = nameRu;
+                }
+            }
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            showTempMessage('Пакет сохранён!', 'success');
+        } else {
+            alert('Ошибка при сохранении: ' + (data.message || 'Неизвестная ошибка'));
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+    
+    return false;
+}
+    </script>
+</body>
+</html>
