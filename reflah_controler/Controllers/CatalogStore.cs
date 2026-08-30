@@ -35,7 +35,7 @@ namespace reflah_controler.Controllers
                     connection.Open();
                     string query = @"SELECT id, brand, model, generation, engine, image, 
                             about_ru, result_ru, engine_control_ru, price_ru, grafic,
-                            additional_price_ru, old_url, sort_order
+                            additional_price_ru, old_url, sort_order, SortOrder2
                      FROM reflash_cars ORDER BY brand, model, generation";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -71,7 +71,8 @@ namespace reflah_controler.Controllers
                                     grafic = reader.IsDBNull(reader.GetOrdinal("grafic")) ? "" : reader.GetString("grafic"),
                                     additional_price_ru = reader.IsDBNull(reader.GetOrdinal("additional_price_ru")) ? "" : reader.GetString("additional_price_ru"),
                                     old_url = reader.IsDBNull(reader.GetOrdinal("old_url")) ? "" : reader.GetString("old_url"),
-                                    SortOrder = sortOrder
+                                    SortOrder = sortOrder,
+                                    SortOrder2 = reader.IsDBNull(reader.GetOrdinal("SortOrder2")) ? 0 : reader.GetInt32("SortOrder2")
                                 });
                             }
                         }
@@ -144,7 +145,7 @@ namespace reflah_controler.Controllers
                     connection.Open();
                     string query = @"SELECT id, brand, model, generation, engine, image, 
                                     about_ru, result_ru, engine_control_ru, price_ru, grafic,
-                                    additional_price_ru, old_url, sort_order
+                                    additional_price_ru, old_url, sort_order, SortOrder2
                              FROM reflash_cars WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -170,7 +171,8 @@ namespace reflah_controler.Controllers
                                     grafic = reader.IsDBNull(reader.GetOrdinal("grafic")) ? "" : reader.GetString("grafic"),
                                     additional_price_ru = reader.IsDBNull(reader.GetOrdinal("additional_price_ru")) ? "" : reader.GetString("additional_price_ru"),
                                     old_url = reader.IsDBNull(reader.GetOrdinal("old_url")) ? "" : reader.GetString("old_url"),
-                                    SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order")
+                                    SortOrder = reader.IsDBNull(reader.GetOrdinal("sort_order")) ? 0 : reader.GetInt32("sort_order"),
+                                    SortOrder2 = reader.IsDBNull(reader.GetOrdinal("SortOrder2")) ? 0 : reader.GetInt32("SortOrder2")
                                 };
                             }
                         }

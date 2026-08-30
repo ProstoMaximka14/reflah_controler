@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +22,7 @@ namespace reflah_controler.Controllers
         {
         }
         // ============================================
-        // АВТОМОБИЛИ
+        // РђР’РўРћРњРћР‘РР›Р
         // ============================================
 
         [HttpGet("Cars")]
@@ -38,11 +38,11 @@ namespace reflah_controler.Controllers
             ReflashCarModel car = GetCarById(id);
             if (car == null)
             {
-                TempData["Error"] = "Автомобиль не найден";
+                TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("Cars");
             }
 
-            // ===== ПОЛУЧАЕМ ВСЕ ID ОПЦИЙ ИЗ МАШИНЫ (включая шаблоны) =====
+            // ===== РџРћР›РЈР§РђР•Рњ Р’РЎР• ID РћРџР¦РР™ РР— РњРђРЁРРќР« (РІРєР»СЋС‡Р°СЏ С€Р°Р±Р»РѕРЅС‹) =====
             var allPriceIds = await GetAllPriceIdsFromCarAsync(car);
             var allPrices = GetPricesFromDatabase();
             var filteredPrices = allPrices.Where(p => allPriceIds.Contains(p.Id)).ToList();
@@ -60,11 +60,11 @@ namespace reflah_controler.Controllers
             if (string.IsNullOrEmpty(car.PriceRu))
                 return result;
 
-            // Получаем ID из строки
+            // РџРѕР»СѓС‡Р°РµРј ID РёР· СЃС‚СЂРѕРєРё
             var ids = ParseIdList(car.PriceRu);
             result.AddRange(ids);
 
-            // Проверяем, есть ли среди них шаблоны
+            // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё СЃСЂРµРґРё РЅРёС… С€Р°Р±Р»РѕРЅС‹
             string connectionString = GetConnectionString();
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -81,7 +81,7 @@ namespace reflah_controler.Controllers
 
                     if (sourceTable == "template_price")
                     {
-                        // Это шаблон — получаем все ID из него
+                        // Р­С‚Рѕ С€Р°Р±Р»РѕРЅ вЂ” РїРѕР»СѓС‡Р°РµРј РІСЃРµ ID РёР· РЅРµРіРѕ
                         string linkedIds = null;
                         using (var cmd = new MySqlCommand("SELECT prices FROM template_price WHERE id = @id", connection))
                         {
@@ -164,12 +164,12 @@ namespace reflah_controler.Controllers
             var existingCar = GetCarById(Id);
             if (existingCar == null)
             {
-                TempData["Error"] = "Автомобиль не найден";
+                TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("Cars");
             }
 
             // ============================================================
-            // ОБРАБОТКА ИЗОБРАЖЕНИЯ
+            // РћР‘Р РђР‘РћРўРљРђ РР—РћР‘Р РђР–Р•РќРРЇ
             // ============================================================
             string imagePath = existingCar.Image ?? "";
 
@@ -199,13 +199,13 @@ namespace reflah_controler.Controllers
                     var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                     if (!allowed.Contains(ext))
                     {
-                        TempData["Error"] = "Неподдерживаемый формат файла. Разрешены: JPG, PNG, GIF, WebP";
+                        TempData["Error"] = "РќРµРїРѕРґРґРµСЂР¶РёРІР°РµРјС‹Р№ С„РѕСЂРјР°С‚ С„Р°Р№Р»Р°. Р Р°Р·СЂРµС€РµРЅС‹: JPG, PNG, GIF, WebP";
                         return RedirectToAction("EditCar", new { id = Id });
                     }
 
                     if (imageFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой. Максимальный размер: 5MB";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№. РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ: 5MB";
                         return RedirectToAction("EditCar", new { id = Id });
                     }
 
@@ -231,12 +231,12 @@ namespace reflah_controler.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при сохранении файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё СЃРѕС…СЂР°РЅРµРЅРёРё С„Р°Р№Р»Р°: {ex.Message}";
                 return RedirectToAction("EditCar", new { id = Id });
             }
 
             // ============================================================
-            // ОБРАБОТКА SORT_ORDER — ПОЛНАЯ ПЕРЕНУМЕРАЦИЯ ГРУППЫ
+            // РћР‘Р РђР‘РћРўРљРђ SORT_ORDER вЂ” РџРћР›РќРђРЇ РџР•Р Р•РќРЈРњР•Р РђР¦РРЇ Р“Р РЈРџРџР«
             // ============================================================
             int finalSortOrder = SortOrder;
 
@@ -246,7 +246,7 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
 
-                    // Получаем все машины в этой группе (включая текущую)
+                    // РџРѕР»СѓС‡Р°РµРј РІСЃРµ РјР°С€РёРЅС‹ РІ СЌС‚РѕР№ РіСЂСѓРїРїРµ (РІРєР»СЋС‡Р°СЏ С‚РµРєСѓС‰СѓСЋ)
                     string getGroupQuery = @"SELECT id, sort_order FROM reflash_cars 
                                      WHERE brand = @brand AND model = @model AND generation = @generation 
                                      ORDER BY sort_order, id";
@@ -266,14 +266,14 @@ namespace reflah_controler.Controllers
                         }
                     }
 
-                    // Если в группе есть другие машины
+                    // Р•СЃР»Рё РІ РіСЂСѓРїРїРµ РµСЃС‚СЊ РґСЂСѓРіРёРµ РјР°С€РёРЅС‹
                     if (groupCars.Count > 0)
                     {
-                        // Находим текущую машину в списке
+                        // РќР°С…РѕРґРёРј С‚РµРєСѓС‰СѓСЋ РјР°С€РёРЅСѓ РІ СЃРїРёСЃРєРµ
                         var currentCar = groupCars.FirstOrDefault(c => c.Id == Id);
                         int currentSortOrder = currentCar.SortOrder;
 
-                        // Корректируем SortOrder
+                        // РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј SortOrder
                         if (SortOrder < 1)
                         {
                             finalSortOrder = 1;
@@ -283,11 +283,11 @@ namespace reflah_controler.Controllers
                             finalSortOrder = groupCars.Count;
                         }
 
-                        // ===== ПОЛНАЯ ПЕРЕНУМЕРАЦИЯ ГРУППЫ =====
-                        // Удаляем текущую машину из списка
+                        // ===== РџРћР›РќРђРЇ РџР•Р Р•РќРЈРњР•Р РђР¦РРЇ Р“Р РЈРџРџР« =====
+                        // РЈРґР°Р»СЏРµРј С‚РµРєСѓС‰СѓСЋ РјР°С€РёРЅСѓ РёР· СЃРїРёСЃРєР°
                         groupCars = groupCars.Where(c => c.Id != Id).ToList();
 
-                        // Вставляем текущую машину на новую позицию
+                        // Р’СЃС‚Р°РІР»СЏРµРј С‚РµРєСѓС‰СѓСЋ РјР°С€РёРЅСѓ РЅР° РЅРѕРІСѓСЋ РїРѕР·РёС†РёСЋ
                         if (finalSortOrder <= groupCars.Count)
                         {
                             groupCars.Insert(finalSortOrder - 1, (Id, finalSortOrder));
@@ -297,7 +297,7 @@ namespace reflah_controler.Controllers
                             groupCars.Add((Id, finalSortOrder));
                         }
 
-                        // Перенумеровываем все машины в группе (начиная с 1)
+                        // РџРµСЂРµРЅСѓРјРµСЂРѕРІС‹РІР°РµРј РІСЃРµ РјР°С€РёРЅС‹ РІ РіСЂСѓРїРїРµ (РЅР°С‡РёРЅР°СЏ СЃ 1)
                         for (int i = 0; i < groupCars.Count; i++)
                         {
                             int newOrder = i + 1;
@@ -310,17 +310,17 @@ namespace reflah_controler.Controllers
                             }
                         }
 
-                        // Обновляем finalSortOrder для возврата
+                        // РћР±РЅРѕРІР»СЏРµРј finalSortOrder РґР»СЏ РІРѕР·РІСЂР°С‚Р°
                         finalSortOrder = groupCars.First(c => c.Id == Id).SortOrder;
                     }
                     else
                     {
-                        // Если в группе только одна машина — ставим 1
+                        // Р•СЃР»Рё РІ РіСЂСѓРїРїРµ С‚РѕР»СЊРєРѕ РѕРґРЅР° РјР°С€РёРЅР° вЂ” СЃС‚Р°РІРёРј 1
                         finalSortOrder = 1;
                     }
 
                     // ============================================================
-                    // ОБНОВЛЯЕМ ОСТАЛЬНЫЕ ПОЛЯ ЗАПИСИ
+                    // РћР‘РќРћР’Р›РЇР•Рњ РћРЎРўРђР›Р¬РќР«Р• РџРћР›РЇ Р—РђРџРРЎР
                     // ============================================================
                     string query = @"UPDATE reflash_cars SET 
                 brand = @brand, 
@@ -356,16 +356,16 @@ namespace reflah_controler.Controllers
                 }
 
                 await NotifyReaderSite();
-                TempData["Message"] = $"Автомобиль успешно обновлен. Порядок: {finalSortOrder}";
+                TempData["Message"] = $"РђРІС‚РѕРјРѕР±РёР»СЊ СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ. РџРѕСЂСЏРґРѕРє: {finalSortOrder}";
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}";
                 return RedirectToAction("EditCar", new { id = Id });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР°: {ex.Message}";
                 return RedirectToAction("EditCar", new { id = Id });
             }
 
@@ -379,12 +379,12 @@ namespace reflah_controler.Controllers
 
             try
             {
-                // Сначала получаем данные удаляемой машины
+                // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ СѓРґР°Р»СЏРµРјРѕР№ РјР°С€РёРЅС‹
                 ReflashCarModel carToDelete = GetCarById(id);
 
                 if (carToDelete == null)
                 {
-                    TempData["Error"] = "Автомобиль не найден";
+                    TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                     return RedirectToAction("Cars");
                 }
 
@@ -396,7 +396,7 @@ namespace reflah_controler.Controllers
                 {
                     await connection.OpenAsync();
 
-                    // Удаляем машину
+                    // РЈРґР°Р»СЏРµРј РјР°С€РёРЅСѓ
                     string deleteQuery = "DELETE FROM reflash_cars WHERE id = @id";
                     using (var deleteCmd = new MySqlCommand(deleteQuery, connection))
                     {
@@ -405,8 +405,8 @@ namespace reflah_controler.Controllers
 
                         if (rowsAffected > 0)
                         {
-                            // ===== ПЕРЕНУМЕРОВЫВАЕМ ОСТАВШИЕСЯ МАШИНЫ В ГРУППЕ =====
-                            // Получаем все ID оставшихся машин в группе, отсортированные по sort_order
+                            // ===== РџР•Р Р•РќРЈРњР•Р РћР’Р«Р’РђР•Рњ РћРЎРўРђР’РЁРР•РЎРЇ РњРђРЁРРќР« Р’ Р“Р РЈРџРџР• =====
+                            // РџРѕР»СѓС‡Р°РµРј РІСЃРµ ID РѕСЃС‚Р°РІС€РёС…СЃСЏ РјР°С€РёРЅ РІ РіСЂСѓРїРїРµ, РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРЅС‹Рµ РїРѕ sort_order
                             string getIdsQuery = @"SELECT id FROM reflash_cars 
                                            WHERE brand = @brand AND model = @model AND generation = @generation
                                            ORDER BY sort_order, id";
@@ -426,7 +426,7 @@ namespace reflah_controler.Controllers
                                 }
                             }
 
-                            // Обновляем sort_order для каждой оставшейся машины (начиная с 1)
+                            // РћР±РЅРѕРІР»СЏРµРј sort_order РґР»СЏ РєР°Р¶РґРѕР№ РѕСЃС‚Р°РІС€РµР№СЃСЏ РјР°С€РёРЅС‹ (РЅР°С‡РёРЅР°СЏ СЃ 1)
                             for (int i = 0; i < remainingIds.Count; i++)
                             {
                                 string updateQuery = "UPDATE reflash_cars SET sort_order = @sort_order WHERE id = @id";
@@ -438,19 +438,19 @@ namespace reflah_controler.Controllers
                                 }
                             }
 
-                            TempData["Message"] = $"Автомобиль успешно удален, порядок в группе обновлён ({remainingIds.Count} машин)";
+                            TempData["Message"] = $"РђРІС‚РѕРјРѕР±РёР»СЊ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ, РїРѕСЂСЏРґРѕРє РІ РіСЂСѓРїРїРµ РѕР±РЅРѕРІР»С‘РЅ ({remainingIds.Count} РјР°С€РёРЅ)";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Автомобиль не найден";
+                            TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("Cars");
@@ -461,7 +461,7 @@ namespace reflah_controler.Controllers
         {
             if (CarExists(car.Brand, car.Model, car.Generation, car.Engine))
             {
-                TempData["Error"] = "Автомобиль с такими данными уже существует!";
+                TempData["Error"] = "РђРІС‚РѕРјРѕР±РёР»СЊ СЃ С‚Р°РєРёРјРё РґР°РЅРЅС‹РјРё СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚!";
                 return RedirectToAction("CreateCar");
             }
 
@@ -477,13 +477,13 @@ namespace reflah_controler.Controllers
                 var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 if (!allowed.Contains(ext))
                 {
-                    TempData["Error"] = "Неподдерживаемый формат файла";
+                    TempData["Error"] = "РќРµРїРѕРґРґРµСЂР¶РёРІР°РµРјС‹Р№ С„РѕСЂРјР°С‚ С„Р°Р№Р»Р°";
                     return RedirectToAction("CreateCar");
                 }
 
                 if (imageFile.Length > 5 * 1024 * 1024)
                 {
-                    TempData["Error"] = "Файл слишком большой (макс. 5MB)";
+                    TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃ. 5MB)";
                     return RedirectToAction("CreateCar");
                 }
 
@@ -537,7 +537,7 @@ namespace reflah_controler.Controllers
 
                         long newId = Convert.ToInt64(await command.ExecuteScalarAsync());
 
-                        TempData["Message"] = $"Автомобиль {car.Brand} {car.Model} успешно добавлен";
+                        TempData["Message"] = $"РђРІС‚РѕРјРѕР±РёР»СЊ {car.Brand} {car.Model} СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                         await NotifyReaderSite();
 
                         return RedirectToAction("EditCar", new { id = newId });
@@ -546,7 +546,7 @@ namespace reflah_controler.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР°: {ex.Message}";
                 return RedirectToAction("CreateCar");
             }
         }
@@ -572,14 +572,50 @@ namespace reflah_controler.Controllers
                 }
 
                 await NotifyReaderSite();
-                TempData["Message"] = "Старый URL успешно обновлён";
+                TempData["Message"] = "РЎС‚Р°СЂС‹Р№ URL СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»С‘РЅ";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при обновлении старого URL: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё СЃС‚Р°СЂРѕРіРѕ URL: {ex.Message}";
             }
 
             return RedirectToAction("EditCar", new { id = id });
+        }
+
+        [HttpPost("ReorderGenerations")]
+        public async Task<IActionResult> ReorderGenerations([FromBody] ReorderGenerationsRequest request)
+        {
+            if (request?.Generations == null || request.Generations.Count == 0)
+                return Json(new { success = false, message = "Нет данных" });
+
+            try
+            {
+                string connectionString = GetConnectionString();
+                using var connection = new MySqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                for (int i = 0; i < request.Generations.Count; i++)
+                {
+                    string query = @"
+                UPDATE reflash_cars 
+                SET SortOrder2 = @sort_order 
+                WHERE brand = @brand AND model = @model AND generation = @generation";
+
+                    using var cmd = new MySqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("@sort_order", i);
+                    cmd.Parameters.AddWithValue("@brand", request.Brand ?? "");
+                    cmd.Parameters.AddWithValue("@model", request.Model ?? "");
+                    cmd.Parameters.AddWithValue("@generation", request.Generations[i] ?? "");
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                await NotifyReaderSite();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

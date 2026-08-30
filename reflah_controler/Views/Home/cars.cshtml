@@ -18,10 +18,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        /* ==========================================
-           ОСНОВНЫЕ СТИЛИ
-           ========================================== */
         * {
             margin: 0;
             padding: 0;
@@ -58,60 +56,30 @@
             font-size: 32px;
         }
 
-        .page-subtitle {
-            color: #88889a;
-            font-size: 16px;
-            margin-top: 8px;
-        }
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-3 { gap: 12px; }
+        .mt-3 { margin-top: 16px; }
+        .me-2 { margin-right: 8px; }
 
-        .d-flex {
-            display: flex;
-        }
-
-        .justify-content-between {
-            justify-content: space-between;
-        }
-
-        .align-items-center {
-            align-items: center;
-        }
-
-        .flex-wrap {
-            flex-wrap: wrap;
-        }
-
-        .gap-3 {
-            gap: 12px;
-        }
-
-        .mt-3 {
-            margin-top: 16px;
-        }
-
-        .me-2 {
-            margin-right: 8px;
-        }
-
-        /* ===== СООБЩЕНИЯ ===== */
         .message-box {
             padding: 15px 20px;
             margin-bottom: 20px;
             border-radius: 8px;
         }
-
         .message-success {
             background: #d1e7dd;
             color: #0f5132;
             border: 1px solid #badbcc;
         }
-
         .message-error {
             background: #f8d7da;
             color: #842029;
             border: 1px solid #f5c2c7;
         }
 
-        /* ===== КНОПКИ ===== */
         .btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -125,27 +93,31 @@
             cursor: pointer;
             font-size: 14px;
         }
-
         .btn-primary {
             background: #0d6efd;
             color: white;
         }
-
         .btn-primary:hover {
             background: #0b5ed7;
         }
-
         .btn-outline-secondary {
             background: transparent;
             color: #6c757d;
             border: 1px solid #ced4da;
         }
-
         .btn-outline-secondary:hover {
             border-color: #0d6efd;
             color: #0d6efd;
         }
-
+        .btn-outline-primary {
+            background: transparent;
+            color: #0d6efd;
+            border: 1px solid #0d6efd;
+        }
+        .btn-outline-primary:hover {
+            background: #0d6efd;
+            color: white;
+        }
         .btn-edit {
             background: #0d6efd;
             color: white;
@@ -154,12 +126,10 @@
             border-radius: 6px;
             text-decoration: none;
         }
-
         .btn-edit:hover {
             background: #0b5ed7;
             color: white;
         }
-
         .btn-preview {
             background: transparent;
             color: #6c757d;
@@ -169,15 +139,31 @@
             border-radius: 6px;
             text-decoration: none;
         }
-
         .btn-preview:hover {
             border-color: #0d6efd;
             color: #0d6efd;
         }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+        .btn-delete:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
 
-        /* ==========================================
-           АККОРДЕОН — БРЕНД
-           ========================================== */
+        /* ===== БРЕНД ===== */
         .brand-section {
             margin-bottom: 12px;
             border-radius: 16px;
@@ -186,12 +172,9 @@
             background: #ffffff;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
-
         .brand-section:hover {
             box-shadow: 0 8px 30px rgba(0,0,0,0.1);
         }
-
-        /* ----- ЗАГОЛОВОК БРЕНДА ----- */
         .brand-header {
             display: flex;
             align-items: center;
@@ -202,16 +185,11 @@
             transition: all 0.3s ease;
             user-select: none;
         }
-
-        .brand-header:hover {
-            background: #f0f0f0;
-        }
-
+        .brand-header:hover { background: #f0f0f0; }
         .brand-header.active {
             background: #f0f0f0;
             border-bottom: 1px solid #e0e0e0;
         }
-
         .brand-header .brand-name {
             font-size: 22px;
             font-weight: 700;
@@ -220,12 +198,10 @@
             align-items: center;
             gap: 12px;
         }
-
         .brand-header .brand-name i {
             color: #0d6efd;
             font-size: 20px;
         }
-
         .brand-header .brand-count {
             font-size: 14px;
             color: #88889a;
@@ -237,19 +213,15 @@
             align-items: center;
             gap: 6px;
         }
-
         .brand-header .toggle-icon {
             color: #88889a;
             font-size: 16px;
             transition: transform 0.3s ease;
             margin-left: 8px;
         }
-
         .brand-header.active .toggle-icon {
             transform: rotate(180deg);
         }
-
-        /* ----- КОНТЕНТ БРЕНДА (МОДЕЛИ) ----- */
         .brand-content {
             max-height: 0;
             overflow: hidden;
@@ -258,16 +230,13 @@
             padding: 0 24px;
             background: #ffffff;
         }
-
         .brand-content.open {
             max-height: 10000px;
             opacity: 1;
             padding: 20px 24px;
         }
 
-        /* ==========================================
-           АККОРДЕОН — МОДЕЛЬ (ВЛОЖЕННЫЙ)
-           ========================================== */
+        /* ===== МОДЕЛЬ ===== */
         .model-section {
             margin-bottom: 8px;
             border-radius: 12px;
@@ -275,12 +244,7 @@
             overflow: hidden;
             background: #fafafa;
         }
-
-        .model-section:last-child {
-            margin-bottom: 0;
-        }
-
-        /* ----- ЗАГОЛОВОК МОДЕЛИ ----- */
+        .model-section:last-child { margin-bottom: 0; }
         .model-header {
             display: flex;
             align-items: center;
@@ -291,16 +255,11 @@
             transition: all 0.3s ease;
             user-select: none;
         }
-
-        .model-header:hover {
-            background: #eeeeee;
-        }
-
+        .model-header:hover { background: #eeeeee; }
         .model-header.active {
             background: #eeeeee;
             border-bottom: 1px solid #e0e0e0;
         }
-
         .model-header .model-name {
             font-size: 17px;
             font-weight: 600;
@@ -309,12 +268,10 @@
             align-items: center;
             gap: 10px;
         }
-
         .model-header .model-name i {
             color: #0d6efd;
             font-size: 16px;
         }
-
         .model-header .model-count {
             font-size: 13px;
             color: #88889a;
@@ -326,19 +283,15 @@
             align-items: center;
             gap: 6px;
         }
-
         .model-header .toggle-icon {
             color: #88889a;
             font-size: 14px;
             transition: transform 0.3s ease;
             margin-left: 8px;
         }
-
         .model-header.active .toggle-icon {
             transform: rotate(180deg);
         }
-
-        /* ----- КОНТЕНТ МОДЕЛИ (ПОКОЛЕНИЯ) ----- */
         .model-content {
             max-height: 0;
             overflow: hidden;
@@ -347,16 +300,22 @@
             padding: 0 18px;
             background: #ffffff;
         }
-
         .model-content.open {
             max-height: 10000px;
             opacity: 1;
             padding: 16px 18px;
         }
 
-        /* ==========================================
-           ПОДЗАГОЛОВОК ПОКОЛЕНИЯ
-           ========================================== */
+        /* ===== ПОКОЛЕНИЯ ===== */
+        .generations-sortable {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .generation-block {
+            background: #fff;
+            border-radius: 10px;
+        }
         .generation-subheader {
             display: flex;
             align-items: center;
@@ -366,28 +325,28 @@
             background: #f5f5f5;
             border-radius: 10px;
             border-left: 3px solid #0d6efd;
+            cursor: grab;
+            user-select: none;
         }
-
+        .generation-subheader:active {
+            cursor: grabbing;
+        }
         .generation-subheader .gen-icon {
             color: #0d6efd;
             font-size: 13px;
         }
-
         .generation-subheader .gen-name {
             font-size: 14px;
             font-weight: 500;
             color: #1a1a2e;
         }
-
         .generation-subheader .gen-count {
             font-size: 12px;
             color: #88889a;
             margin-left: auto;
         }
 
-        /* ==========================================
-           СЕТКА КАРТОЧЕК АВТОМОБИЛЕЙ
-           ========================================== */
+        /* ===== СЕТКА КАРТОЧЕК ===== */
         .cars-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -395,10 +354,6 @@
             padding-left: 16px;
             padding-top: 4px;
         }
-
-        /* ==========================================
-           КАРТОЧКА АВТОМОБИЛЯ
-           ========================================== */
         .car-card {
             background: #ffffff;
             border: 1px solid #e0e0e0;
@@ -410,13 +365,11 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             display: block;
         }
-
         .car-card:hover {
             transform: translateY(-4px);
             border-color: #0d6efd;
             box-shadow: 0 12px 28px rgba(0,0,0,0.1);
         }
-
         .car-card .car-image-container {
             width: 100%;
             height: 160px;
@@ -426,98 +379,73 @@
             align-items: center;
             justify-content: center;
         }
-
         .car-card .car-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.4s ease;
         }
-
         .car-card:hover .car-image {
             transform: scale(1.05);
         }
-
         .car-card .no-image {
             font-size: 36px;
             color: #88889a;
         }
-
         .car-card .car-info {
             padding: 14px 16px;
         }
-
         .car-card .car-title {
             font-size: 16px;
             font-weight: 700;
             color: #1a1a2e;
             margin-bottom: 4px;
         }
-
         .car-card .car-details {
             color: #4a4a5e;
             font-size: 13px;
             line-height: 1.8;
         }
-
-        .car-card .car-details .label {
-            color: #88889a;
-            font-size: 12px;
-        }
-
         .car-card .car-actions {
             display: flex;
             gap: 8px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
 
-        /* ==========================================
-           ПУСТОЕ СОСТОЯНИЕ
-           ========================================== */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
             color: #88889a;
         }
-
         .empty-state i {
             font-size: 56px;
             display: block;
             margin-bottom: 16px;
             color: #88889a;
         }
-
         .empty-state h3 {
             color: #1a1a2e;
             margin-bottom: 8px;
         }
-        /* ===== КНОПКА УДАЛЕНИЯ ===== */
-.btn-delete {
-    background: #dc3545;
-    color: white;
-    padding: 6px 14px;
-    font-size: 12px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-}
 
-.btn-delete:hover {
-    background: #bb2d3b;
-    transform: translateY(-2px);
-}
+        /* ===== DRAG-AND-DROP ===== */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #e9ecef !important;
+            border: 2px dashed #6c757d !important;
+        }
+        .sortable-drag {
+            opacity: 0.9;
+            background: #fff !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25) !important;
+            border: 2px solid #0d6efd !important;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- ===== ЗАГОЛОВОК ===== -->
         <div class="page-header">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
@@ -525,7 +453,6 @@
                         <i class="bi bi-car-front-fill"></i>
                         Каталог автомобилей
                     </h1>
-                    
                 </div>
                 <div>
                     <a href="@Url.Action("CreateCar")" class="btn btn-primary">
@@ -543,9 +470,6 @@
             </div>
         </div>
 
-        
-
-        <!-- ===== АККОРДЕОН ===== -->
         @if (Model != null && Model.Any())
         {
             @foreach (var brandGroup in groupedByBrand)
@@ -557,7 +481,6 @@
                     .ToList();
 
                 <div class="brand-section">
-                    <!-- ===== ЗАГОЛОВОК БРЕНДА ===== -->
                     <div class="brand-header" onclick="toggleBrand(this)">
                         <span class="brand-name">
                             <i class="bi bi-tag"></i>
@@ -572,17 +495,16 @@
                         </span>
                     </div>
 
-                    <!-- ===== КОНТЕНТ БРЕНДА (МОДЕЛИ) ===== -->
                     <div class="brand-content">
                         @foreach (var modelGroup in modelsByBrand)
                         {
                             var generationGroups = modelGroup
                                 .GroupBy(c => c.Generation)
-                                .OrderBy(g => g.Key)
+                                .OrderBy(g => g.Min(c => c.SortOrder2))
+                                .ThenBy(g => g.Key)
                                 .ToList();
 
                             <div class="model-section">
-                                <!-- ===== ЗАГОЛОВОК МОДЕЛИ ===== -->
                                 <div class="model-header" onclick="toggleModel(this)">
                                     <span class="model-name">
                                         <i class="bi bi-car-front"></i>
@@ -596,64 +518,61 @@
                                     </span>
                                 </div>
 
-                                <!-- ===== КОНТЕНТ МОДЕЛИ (ПОКОЛЕНИЯ) ===== -->
                                 <div class="model-content">
-                                    @foreach (var genGroup in generationGroups)
-                                    {
-                                        <!-- ПОДЗАГОЛОВОК ПОКОЛЕНИЯ -->
-                                        <div class="generation-subheader">
-                                            <span class="gen-icon"><i class="bi bi-clock-history"></i></span>
-                                            <span class="gen-name">Поколение @genGroup.Key</span>
-                                            <span class="gen-count">
-                                                <i class="bi bi-hash"></i> @genGroup.Count()
-                                            </span>
-                                        </div>
+                                    <div class="generations-sortable"
+                                         data-brand="@brand"
+                                         data-model="@modelGroup.Key">
+                                        @foreach (var genGroup in generationGroups)
+                                        {
+                                            <div class="generation-block" data-generation="@genGroup.Key">
+                                                <div class="generation-subheader">
+                                                    <span class="gen-icon"><i class="bi bi-clock-history"></i></span>
+                                                    <span class="gen-name">Поколение @genGroup.Key</span>
+                                                    <span class="gen-count">
+                                                        <i class="bi bi-hash"></i> @genGroup.Count()
+                                                    </span>
+                                                </div>
 
-                                        <!-- СЕТКА АВТОМОБИЛЕЙ -->
-                                        <div class="cars-grid">
-                                            @foreach (var car in genGroup.OrderBy(c => c.SortOrder))
-                                            {
-                                                <a href="@Url.Action("PreviewCar", new { id = car.Id })" target="_blank" class="car-card">
-                                                    <div class="car-image-container">
-                                                        @if (!string.IsNullOrEmpty(car.Image))
-                                                        {
-                                                            <img src="/shared-fotos/cars/@car.Image" alt="@car.Brand @car.Model" class="car-image" loading="lazy" 
-                                                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-image\'><i class=\'bi bi-car-front\'></i></div>'">
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="no-image">
-                                                                <i class="bi bi-car-front"></i>
+                                                <div class="cars-grid">
+                                                    @foreach (var car in genGroup.OrderBy(c => c.SortOrder))
+                                                    {
+                                                        <a href="@Url.Action("PreviewCar", new { id = car.Id })" target="_blank" class="car-card">
+                                                            <div class="car-image-container">
+                                                                @if (!string.IsNullOrEmpty(car.Image))
+                                                                {
+                                                                    <img src="/shared-fotos/cars/@car.Image" alt="@car.Brand @car.Model" class="car-image" loading="lazy"
+                                                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-image\'><i class=\'bi bi-car-front\'></i></div>'">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="no-image">
+                                                                        <i class="bi bi-car-front"></i>
+                                                                    </div>
+                                                                }
                                                             </div>
-                                                        }
-                                                    </div>
-                                                    <div class="car-info">
-                                                        <!-- ===== ПОЛНАЯ ИНФОРМАЦИЯ ===== -->
-                                                        <div class="car-title">@car.Brand @car.Model</div>
-                                                        <div class="car-details">
-                                                            @car.Generation · @car.Engine · #@car.Id
-                                                        </div>
-                                                        <div class="car-actions">
-                                                            <!-- Ссылка на редактирование -->
-                                                            <a href="@Url.Action("EditCar", new { id = car.Id })" class="btn-edit">
-                                                                    <i class="bi bi-pencil"></i> Редактировать
-                                                                </a>
-    
-                                                                <!-- Ссылка на превью -->
-                                                                <a href="@Url.Action("PreviewCar", new { id = car.Id })" target="_blank" class="btn-preview">
-                                                                    <i class="bi bi-eye"></i> Превью
-                                                                </a>
-    
-                                                                <!-- Кнопка удаления (ОТДЕЛЬНО!) -->
-                                                                <button type="button" class="btn-delete" onclick="confirmDelete(@car.Id, '@car.Brand @car.Model')">
-                                                                    <i class="bi bi-trash"></i> Удалить
-                                                                </button>
+                                                            <div class="car-info">
+                                                                <div class="car-title">@car.Brand @car.Model</div>
+                                                                <div class="car-details">
+                                                                    @car.Generation · @car.Engine · #@car.Id
+                                                                </div>
+                                                                <div class="car-actions">
+                                                                    <a href="@Url.Action("EditCar", new { id = car.Id })" class="btn-edit">
+                                                                        <i class="bi bi-pencil"></i> Редактировать
+                                                                    </a>
+                                                                    <a href="@Url.Action("PreviewCar", new { id = car.Id })" target="_blank" class="btn-preview">
+                                                                        <i class="bi bi-eye"></i> Превью
+                                                                    </a>
+                                                                    <button type="button" class="btn-delete" onclick="event.preventDefault(); event.stopPropagation(); confirmDelete(@car.Id, '@car.Brand @car.Model')">
+                                                                        <i class="bi bi-trash"></i> Удалить
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                    </div>
-                                                </a>
-                                            }
-                                        </div>
-                                    }
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -675,74 +594,98 @@
         }
     </div>
 
-    <!-- ========================================== -->
-    <!-- JAVASCRIPT -->
-    <!-- ========================================== -->
     <script>
-        // ==========================================
-        // РАСКРЫТИЕ/СКРЫТИЕ БРЕНДА
-        // ==========================================
         function toggleBrand(headerElement) {
             const section = headerElement.closest('.brand-section');
             if (!section) return;
-
             const content = section.querySelector('.brand-content');
             if (!content) return;
-
             headerElement.classList.toggle('active');
             content.classList.toggle('open');
         }
 
-        // ==========================================
-        // РАСКРЫТИЕ/СКРЫТИЕ МОДЕЛИ (ВЛОЖЕННЫЙ)
-        // ==========================================
         function toggleModel(headerElement) {
             const section = headerElement.closest('.model-section');
             if (!section) return;
-
             const content = section.querySelector('.model-content');
             if (!content) return;
-
             headerElement.classList.toggle('active');
             content.classList.toggle('open');
         }
 
-        // ==========================================
-        // АВТОМАТИЧЕСКОЕ СКРЫТИЕ СООБЩЕНИЙ
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const messages = document.querySelectorAll('.message-box');
-            messages.forEach(message => {
-                setTimeout(() => {
+        function confirmDelete(id, name) {
+            if (confirm(`Вы уверены, что хотите удалить автомобиль "${name}"?\n\nЭто действие НЕЛЬЗЯ будет отменить!`)) {
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/Home/DeleteCar';
+
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = id;
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Автоскрытие сообщений
+            document.querySelectorAll('.message-box').forEach(function (message) {
+                setTimeout(function () {
                     message.style.opacity = '0';
                     message.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => {
-                        if (message.parentNode) {
-                            message.parentNode.removeChild(message);
-                        }
+                    setTimeout(function () {
+                        if (message.parentNode) message.parentNode.removeChild(message);
                     }, 500);
                 }, 5000);
             });
+
+            // Drag-and-drop поколений
+            document.querySelectorAll('.generations-sortable').forEach(function (container) {
+                if (container.dataset.sortableInitialized) return;
+                container.dataset.sortableInitialized = 'true';
+
+                new Sortable(container, {
+                    animation: 150,
+                    handle: '.generation-subheader',
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onEnd: function () {
+                        var generations = [];
+                        container.querySelectorAll('.generation-block').forEach(function (block) {
+                            var gen = block.dataset.generation;
+                            if (gen !== undefined && gen !== null) {
+                                generations.push(gen);
+                            }
+                        });
+
+                        if (generations.length < 2) return;
+
+                        fetch('/Home/ReorderGenerations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                brand: container.dataset.brand,
+                                model: container.dataset.model,
+                                generations: generations
+                            })
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (!data.success) {
+                                alert(data.message || 'Ошибка сохранения порядка');
+                            }
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                            alert('Ошибка сети');
+                        });
+                    }
+                });
+            });
         });
-        // ==========================================
-        // ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ АВТОМОБИЛЯ
-        // ==========================================
-        function confirmDelete(id, name) {
-    if (confirm(`Вы уверены, что хотите удалить автомобиль "${name}"?\n\nЭто действие НЕЛЬЗЯ будет отменить!`)) {
-        var form = document.createElement('form');
-        form.method = 'post';
-        form.action = '/Home/DeleteCar';
-        
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'id';
-        input.value = id;
-        form.appendChild(input);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
     </script>
 
 </body>

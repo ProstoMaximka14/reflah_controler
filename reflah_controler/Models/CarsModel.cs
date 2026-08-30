@@ -25,5 +25,7 @@
         public string old_url { get; set; }
 
         public int SortOrder { get; set; }
+
+        public int SortOrder2 { get; set; }
     }
 }
