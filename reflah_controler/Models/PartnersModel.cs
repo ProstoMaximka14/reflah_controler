@@ -20,5 +20,7 @@
         public string whatsapp { get; set; }      // WhatsApp
         public string email { get; set; }         // Email
         public string point_name { get; set; }    // Точка (название офиса)
+
+        public string info { get; set; }
     }
 }

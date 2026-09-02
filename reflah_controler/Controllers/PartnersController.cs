@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +22,7 @@ namespace reflah_controler.Controllers
         {
         }
         // ============================================
-        // ПАРТНЁРЫ
+        // РџРђР РўРќРЃР Р«
         // ============================================
 
         [HttpGet("Partners")]
@@ -38,7 +38,7 @@ namespace reflah_controler.Controllers
             PartnersModel partner = GetPartnerById(id);
             if (partner == null)
             {
-                TempData["Error"] = "Партнер не найден";
+                TempData["Error"] = "РџР°СЂС‚РЅРµСЂ РЅРµ РЅР°Р№РґРµРЅ";
                 return RedirectToAction("Partners");
             }
             return View(partner);
@@ -62,7 +62,7 @@ namespace reflah_controler.Controllers
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
                                     city, street, house, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, point_name 
+                                    vk_group_url, telegram, whatsapp, email, point_name, info
                              FROM partners WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -96,6 +96,7 @@ namespace reflah_controler.Controllers
                                     telegram = reader.IsDBNull(reader.GetOrdinal("telegram")) ? "" : reader.GetString("telegram"),
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
+                                    info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
                                     point_name = reader.IsDBNull(reader.GetOrdinal("point_name")) ? "" : reader.GetString("point_name")
                                 };
                             }
@@ -105,7 +106,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке партнера: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ РїР°СЂС‚РЅРµСЂР°: {ex.Message}";
             }
             return partner;
         }
@@ -122,7 +123,7 @@ namespace reflah_controler.Controllers
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
                                     city, street, house, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, point_name 
+                                    vk_group_url, telegram, whatsapp, email, point_name, info
                              FROM partners ORDER BY name";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -155,6 +156,7 @@ namespace reflah_controler.Controllers
                                     telegram = reader.IsDBNull(reader.GetOrdinal("telegram")) ? "" : reader.GetString("telegram"),
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
+                                    info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
                                     point_name = reader.IsDBNull(reader.GetOrdinal("point_name")) ? "" : reader.GetString("point_name")
                                 });
                             }
@@ -164,7 +166,7 @@ namespace reflah_controler.Controllers
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при загрузке партнеров: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё Р·Р°РіСЂСѓР·РєРµ РїР°СЂС‚РЅРµСЂРѕРІ: {ex.Message}";
             }
             return partners;
         }
@@ -186,6 +188,7 @@ namespace reflah_controler.Controllers
             string telegram,
             string whatsapp,
             string email,
+            string info,
             string point_name)
         {
             string connectionString = GetConnectionString();
@@ -208,13 +211,13 @@ namespace reflah_controler.Controllers
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("Partners");
                     }
 
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("Partners");
                     }
 
@@ -233,11 +236,11 @@ namespace reflah_controler.Controllers
                     string query = @"INSERT INTO partners 
                         (name, phone, photo_url, vk_url, website_url, 
                         city, street, house, longitude, latitude,
-                        vk_group_url, telegram, whatsapp, email, point_name) 
+                        vk_group_url, telegram, whatsapp, email, point_name, info) 
                     VALUES 
                         (@name, @phone, @photo_url, @vk_url, @website_url, 
                         @city, @street, @house, @longitude, @latitude,
-                        @vk_group, @telegram, @whatsapp, @email, @point_name)";
+                        @vk_group, @telegram, @whatsapp, @email, @point_name, @info)";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
@@ -256,28 +259,28 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
                         command.Parameters.AddWithValue("@point_name", point_name ?? "");
-
+                        command.Parameters.AddWithValue("@info", info ?? "");
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Партнер {name} успешно добавлен";
+                            TempData["Message"] = $"РџР°СЂС‚РЅРµСЂ {name} СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅ";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Не удалось добавить партнера";
+                            TempData["Error"] = "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ РїР°СЂС‚РЅРµСЂР°";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при добавлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при загрузке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
@@ -301,6 +304,7 @@ namespace reflah_controler.Controllers
             string telegram,
             string whatsapp,
             string email,
+            string info,
             string point_name)
         {
             string connectionString = GetConnectionString();
@@ -323,13 +327,13 @@ namespace reflah_controler.Controllers
 
                     if (!allowedExtensions.Contains(fileExtension))
                     {
-                        TempData["Error"] = "Разрешены только файлы изображений (JPG, PNG, GIF, WebP)";
+                        TempData["Error"] = "Р Р°Р·СЂРµС€РµРЅС‹ С‚РѕР»СЊРєРѕ С„Р°Р№Р»С‹ РёР·РѕР±СЂР°Р¶РµРЅРёР№ (JPG, PNG, GIF, WebP)";
                         return RedirectToAction("Partners");
                     }
 
                     if (photoFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["Error"] = "Файл слишком большой (максимум 5MB)";
+                        TempData["Error"] = "Р¤Р°Р№Р» СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ (РјР°РєСЃРёРјСѓРј 5MB)";
                         return RedirectToAction("Partners");
                     }
 
@@ -369,7 +373,8 @@ namespace reflah_controler.Controllers
                         telegram = @telegram,
                         whatsapp = @whatsapp,
                         email = @email,
-                        point_name = @point_name
+                        point_name = @point_name,
+                        info = @info
                         WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -390,28 +395,29 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
                         command.Parameters.AddWithValue("@point_name", point_name ?? "");
+                        command.Parameters.AddWithValue("@info", info ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
                         if (rowsAffected > 0)
                         {
-                            TempData["Message"] = $"Партнер {name} успешно обновлен";
+                            TempData["Message"] = $"РџР°СЂС‚РЅРµСЂ {name} СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅ";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Партнер не найден";
+                            TempData["Error"] = "РџР°СЂС‚РЅРµСЂ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при обновлении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё: {ex.Message}";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Ошибка при обработке файла: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ С„Р°Р№Р»Р°: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
@@ -465,19 +471,19 @@ namespace reflah_controler.Controllers
                                 }
                             }
 
-                            TempData["Message"] = "Партнер успешно удален";
+                            TempData["Message"] = "РџР°СЂС‚РЅРµСЂ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ";
                             await NotifyReaderSite();
                         }
                         else
                         {
-                            TempData["Error"] = "Партнер не найден";
+                            TempData["Error"] = "РџР°СЂС‚РЅРµСЂ РЅРµ РЅР°Р№РґРµРЅ";
                         }
                     }
                 }
             }
             catch (MySqlException ex)
             {
-                TempData["Error"] = $"Ошибка MySQL при удалении: {ex.Message}";
+                TempData["Error"] = $"РћС€РёР±РєР° MySQL РїСЂРё СѓРґР°Р»РµРЅРёРё: {ex.Message}";
             }
 
             return RedirectToAction("Partners");
