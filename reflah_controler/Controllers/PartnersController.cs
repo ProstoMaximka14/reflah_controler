@@ -61,8 +61,8 @@ namespace reflah_controler.Controllers
                 {
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
-                                    city, street, house, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, point_name, info
+                                    city, longitude, latitude,
+                                    vk_group_url, telegram, whatsapp, email, address, info
                              FROM partners WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -88,8 +88,6 @@ namespace reflah_controler.Controllers
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
-                                    street = reader.IsDBNull(reader.GetOrdinal("street")) ? "" : reader.GetString("street"),
-                                    house = reader.IsDBNull(reader.GetOrdinal("house")) ? "" : reader.GetString("house"),
                                     longitude = reader.IsDBNull(reader.GetOrdinal("longitude")) ? "" : reader.GetString("longitude"),
                                     latitude = reader.IsDBNull(reader.GetOrdinal("latitude")) ? "" : reader.GetString("latitude"),
                                     vk_group = reader.IsDBNull(reader.GetOrdinal("vk_group_url")) ? "" : reader.GetString("vk_group_url"),
@@ -97,7 +95,7 @@ namespace reflah_controler.Controllers
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
                                     info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
-                                    point_name = reader.IsDBNull(reader.GetOrdinal("point_name")) ? "" : reader.GetString("point_name")
+                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address")
                                 };
                             }
                         }
@@ -122,8 +120,8 @@ namespace reflah_controler.Controllers
                 {
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
-                                    city, street, house, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, point_name, info
+                                    city, longitude, latitude,
+                                    vk_group_url, telegram, whatsapp, email, address, info
                              FROM partners ORDER BY name";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -148,8 +146,6 @@ namespace reflah_controler.Controllers
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
-                                    street = reader.IsDBNull(reader.GetOrdinal("street")) ? "" : reader.GetString("street"),
-                                    house = reader.IsDBNull(reader.GetOrdinal("house")) ? "" : reader.GetString("house"),
                                     longitude = reader.IsDBNull(reader.GetOrdinal("longitude")) ? "" : reader.GetString("longitude"),
                                     latitude = reader.IsDBNull(reader.GetOrdinal("latitude")) ? "" : reader.GetString("latitude"),
                                     vk_group = reader.IsDBNull(reader.GetOrdinal("vk_group_url")) ? "" : reader.GetString("vk_group_url"),
@@ -157,7 +153,7 @@ namespace reflah_controler.Controllers
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
                                     info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
-                                    point_name = reader.IsDBNull(reader.GetOrdinal("point_name")) ? "" : reader.GetString("point_name")
+                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address")
                                 });
                             }
                         }
@@ -179,8 +175,7 @@ namespace reflah_controler.Controllers
             string website,
             IFormFile photoFile,
             string photo,
-            string city,
-            string street,
+            string address,
             string house,
             string longitude,
             string latitude,
@@ -188,8 +183,7 @@ namespace reflah_controler.Controllers
             string telegram,
             string whatsapp,
             string email,
-            string info,
-            string point_name)
+            string info)
         {
             string connectionString = GetConnectionString();
 
@@ -235,12 +229,12 @@ namespace reflah_controler.Controllers
                     await connection.OpenAsync();
                     string query = @"INSERT INTO partners 
                         (name, phone, photo_url, vk_url, website_url, 
-                        city, street, house, longitude, latitude,
-                        vk_group_url, telegram, whatsapp, email, point_name, info) 
+                        city, longitude, latitude,
+                        vk_group_url, telegram, whatsapp, email, address, info) 
                     VALUES 
                         (@name, @phone, @photo_url, @vk_url, @website_url, 
-                        @city, @street, @house, @longitude, @latitude,
-                        @vk_group, @telegram, @whatsapp, @email, @point_name, @info)";
+                        @city, @longitude, @latitude,
+                        @vk_group, @telegram, @whatsapp, @email, @address, @info)";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
@@ -249,8 +243,6 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@photo_url", fileName ?? "");
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
-                        command.Parameters.AddWithValue("@city", city ?? "");
-                        command.Parameters.AddWithValue("@street", street ?? "");
                         command.Parameters.AddWithValue("@house", house ?? "");
                         command.Parameters.AddWithValue("@longitude", longitude ?? "");
                         command.Parameters.AddWithValue("@latitude", latitude ?? "");
@@ -258,7 +250,7 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@telegram", telegram ?? "");
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
-                        command.Parameters.AddWithValue("@point_name", point_name ?? "");
+                        command.Parameters.AddWithValue("@address", address ?? "");
                         command.Parameters.AddWithValue("@info", info ?? "");
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
@@ -296,16 +288,14 @@ namespace reflah_controler.Controllers
             IFormFile photoFile,
             string photo,
             string city,
-            string street,
-            string house,
+            string address,
             string longitude,
             string latitude,
             string vk_group,
             string telegram,
             string whatsapp,
             string email,
-            string info,
-            string point_name)
+            string info)
         {
             string connectionString = GetConnectionString();
 
@@ -365,15 +355,13 @@ namespace reflah_controler.Controllers
                         vk_url = @vk_url, 
                         website_url = @website_url,
                         city = @city,
-                        street = @street,
-                        house = @house,
                         longitude = @longitude,
                         latitude = @latitude,
                         vk_group_url = @vk_group,
                         telegram = @telegram,
                         whatsapp = @whatsapp,
                         email = @email,
-                        point_name = @point_name,
+                        address = @address,
                         info = @info
                         WHERE id = @id";
 
@@ -386,15 +374,13 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
                         command.Parameters.AddWithValue("@city", city ?? "");
-                        command.Parameters.AddWithValue("@street", street ?? "");
-                        command.Parameters.AddWithValue("@house", house ?? "");
                         command.Parameters.AddWithValue("@longitude", longitude ?? "");
                         command.Parameters.AddWithValue("@latitude", latitude ?? "");
                         command.Parameters.AddWithValue("@vk_group", vk_group ?? "");
                         command.Parameters.AddWithValue("@telegram", telegram ?? "");
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
-                        command.Parameters.AddWithValue("@point_name", point_name ?? "");
+                        command.Parameters.AddWithValue("@address", address ?? "");
                         command.Parameters.AddWithValue("@info", info ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();

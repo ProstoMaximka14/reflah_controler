@@ -387,8 +387,7 @@
                 <div class="partners-grid">
                     @foreach (var partner in Model)
                     {
-                        var address = string.Join(", ", new[] { partner.city, partner.street, partner.house }
-                        .Where(s => !string.IsNullOrEmpty(s)));
+
 
                         <div class="partner-card">
                             <div class="partner-photo-container">
@@ -469,11 +468,11 @@
                                 </div>
                             </div>
 
-                            @if (!string.IsNullOrEmpty(address))
+                            @if (!string.IsNullOrEmpty(@partner.address))
                             {
                                 <div class="partner-address">
                                     <i class="fas fa-map-pin"></i>
-                                    <span>@address</span>
+                                    <span>@partner.address</span>
                                 </div>
                             }
                         </div>

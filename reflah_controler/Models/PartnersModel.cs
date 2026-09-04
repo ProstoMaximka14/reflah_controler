@@ -9,8 +9,7 @@
         public string vk { get; set; }
         public string website { get; set; }
         public string city { get; set; }
-        public string street { get; set; }
-        public string house { get; set; }
+        public string address { get; set; }
         public string longitude { get; set; }
         public string latitude { get; set; }
 
@@ -19,8 +18,6 @@
         public string telegram { get; set; }      // Telegram
         public string whatsapp { get; set; }      // WhatsApp
         public string email { get; set; }         // Email
-        public string point_name { get; set; }    // Точка (название офиса)
-
         public string info { get; set; }
     }
 }
