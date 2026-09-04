@@ -353,51 +353,109 @@
     <label class="form-label">Группа ВКонтакте</label>
     <input type="url" class="form-control" name="vk_group" value="@Model.vk_group" placeholder="https://vk.com/...">
 </div>
+
 <div class="col-md-6">
     <label class="form-label">Город</label>
     <input type="text" class="form-control" name="city" value="@Model.city">
 </div>
 <div class="col-md-6">
+    <label class="form-label">Город_eng</label>
+    <input type="text" class="form-control" name="city_eng" value="@Model.city_eng">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Город_ger</label>
+    <input type="text" class="form-control" name="city_ger" value="@Model.city_ger">
+</div>
+
+<div class="col-md-6">
+    <label class="form-label">Страна</label>
+    <input type="text" class="form-control" name="country" value="@Model.country">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Страна_eng</label>
+    <input type="text" class="form-control" name="country_eng" value="@Model.country_eng">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Страна_ger</label>
+    <input type="text" class="form-control" name="country_ger" value="@Model.country_ger">
+</div>
+
+<div class="col-md-6">
     <label class="form-label">Адрес</label>
     <input type="text" class="form-control" name="address" value="@Model.address">
 </div>
+<div class="col-md-6">
+    <label class="form-label">Адрес_eng</label>
+    <input type="text" class="form-control" name="address_eng" value="@Model.address_eng">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Адрес_ger</label>
+    <input type="text" class="form-control" name="address_ger" value="@Model.address_ger">
+</div>
+
 <div>
     <label>Info</label>
     <textarea name="info" class="form-control" rows="3">@Model.info</textarea>
 </div>
+<div>
+    <label>Info_eng</label>
+    <textarea name="info_eng" class="form-control" rows="3">@Model.info_eng</textarea>
+</div>
+<div>
+    <label>Info_ger</label>
+    <textarea name="info_ger" class="form-control" rows="3">@Model.info_ger</textarea>
+</div>
                     </div>
                 </div>
             </div>
-            <!-- Координаты для карты -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5><i class="bi bi-map text-primary"></i> Координаты (выберите на карте)</h5>
-                </div>
-                <div class="card-body">
-                    <input type="hidden" name="longitude" id="longitude" value="@Model.longitude">
-                    <input type="hidden" name="latitude" id="latitude" value="@Model.latitude">
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Долгота:</label>
-                            <input type="text" class="form-control" id="longitudeDisplay" readonly 
-                                   value="@(!string.IsNullOrEmpty(Model.longitude) ? Model.longitude : "Не выбрано")">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Широта:</label>
-                            <input type="text" class="form-control" id="latitudeDisplay" readonly 
-                                   value="@(!string.IsNullOrEmpty(Model.latitude) ? Model.latitude : "Не выбрано")">
-                        </div>
-                    </div>
-
-                    <div id="map" style="width: 100%; height: 400px; border-radius: 8px;"></div>
-
-                    <div class="alert alert-info mt-3">
-                        <i class="bi bi-info-circle-fill"></i>
-                        <small>👆 Кликните на карту, чтобы установить метку. Метку можно перетаскивать.</small>
-                    </div>
-                </div>
+            <!-- Координаты -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="bi bi-map text-primary"></i> Координаты</h5>
+    </div>
+    <div class="card-body">
+        <!-- Поля для ручного ввода координат -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Широта (Latitude)</label>
+                <input type="text" class="form-control" id="latInput" 
+                       value="@Model.latitude" placeholder="55.751574">
             </div>
+            <div class="col-md-6">
+                <label class="form-label">Долгота (Longitude)</label>
+                <input type="text" class="form-control" id="lngInput" 
+                       value="@Model.longitude" placeholder="37.573856">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-primary btn-sm" onclick="updateMapFromCoords()">
+                    <i class="bi bi-geo-alt"></i> Показать на карте
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearCoordinates()">
+                    <i class="bi bi-x-circle"></i> Очистить
+                </button>
+            </div>
+        </div>
+
+        <!-- Карта -->
+        <div id="map" style="width: 100%; height: 400px; border-radius: 8px;"></div>
+
+        <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle-fill"></i>
+            <small>
+                👆 Кликните на карту, чтобы установить метку. Метку можно перетаскивать.<br>
+                ✏️ Введите координаты вручную и нажмите "Показать на карте".<br>
+                📍 Нажмите "Моё местоположение" для автоматического определения.
+            </small>
+        </div>
+
+        <!-- Скрытые поля для отправки на сервер -->
+        <input type="hidden" name="longitude" id="longitude" value="@Model.longitude">
+        <input type="hidden" name="latitude" id="latitude" value="@Model.latitude">
+    </div>
+</div>
 
             <!-- Кнопки действий -->
             <div class="d-flex justify-content-between">
@@ -607,33 +665,34 @@
         ymaps.ready(init);
 
         function init() {
-            let defaultCenter = [55.751574, 37.573856];
-            let defaultZoom = 12;
+    let defaultCenter = [55.751574, 37.573856];
+    let defaultZoom = 12;
 
-            let savedLng = document.getElementById('longitude').value;
-            let savedLat = document.getElementById('latitude').value;
+    let savedLng = document.getElementById('longitude').value;
+    let savedLat = document.getElementById('latitude').value;
 
-            if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
-                defaultCenter = [parseFloat(savedLat), parseFloat(savedLng)];
-                defaultZoom = 15;
-            }
+    if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
+        defaultCenter = [parseFloat(savedLat), parseFloat(savedLng)];
+        defaultZoom = 15;
+    }
 
-            map = new ymaps.Map("map", {
-                center: defaultCenter,
-                zoom: defaultZoom,
-                controls: ['zoomControl', 'fullscreenControl']
-            });
+    map = new ymaps.Map("map", {
+        center: defaultCenter,
+        zoom: defaultZoom,
+        controls: ['zoomControl', 'fullscreenControl']
+    });
 
-            if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
-                addPlacemark([parseFloat(savedLat), parseFloat(savedLng)]);
-            }
+    if (savedLng && savedLat && !isNaN(parseFloat(savedLng)) && !isNaN(parseFloat(savedLat))) {
+        addPlacemark([parseFloat(savedLat), parseFloat(savedLng)]);
+    }
 
-            map.events.add('click', function(e) {
-                const coords = e.get('coords');
-                addPlacemark(coords);
-                updateCoordinates(coords[1], coords[0]);
-            });
-        }
+    // КЛИК ПО КАРТЕ — ОБНОВЛЯЕМ ВСЕ ПОЛЯ
+    map.events.add('click', function(e) {
+        const coords = e.get('coords');
+        addPlacemark(coords);
+        updateAllCoordinates(coords[1], coords[0]);
+    });
+}
 
         function addPlacemark(coords) {
             if (placemark) {
@@ -666,6 +725,52 @@
 
             showTempMessage(`Координаты: ${lat}, ${lng}`, 'success');
         }
+
+        // Обновление координат во всех полях
+function updateAllCoordinates(longitude, latitude) {
+    const lng = parseFloat(longitude).toFixed(6);
+    const lat = parseFloat(latitude).toFixed(6);
+
+    document.getElementById('longitude').value = lng;
+    document.getElementById('latitude').value = lat;
+    document.getElementById('lngInput').value = lng;
+    document.getElementById('latInput').value = lat;
+
+    showTempMessage(`Координаты: ${lat}, ${lng}`, 'success');
+}
+
+// Обновление карты из введённых координат
+function updateMapFromCoords() {
+    const lngInput = document.getElementById('lngInput');
+    const latInput = document.getElementById('latInput');
+    
+    let lng = lngInput.value.trim().replace(',', '.');
+    let lat = latInput.value.trim().replace(',', '.');
+    
+    const lngNum = parseFloat(lng);
+    const latNum = parseFloat(lat);
+    
+    if (isNaN(lngNum) || isNaN(latNum)) {
+        showTempMessage('Введите корректные координаты (числа с точкой)', 'error');
+        return;
+    }
+    
+    if (lngNum < -180 || lngNum > 180) {
+        showTempMessage('Долгота должна быть от -180 до 180', 'error');
+        return;
+    }
+    
+    if (latNum < -90 || latNum > 90) {
+        showTempMessage('Широта должна быть от -90 до 90', 'error');
+        return;
+    }
+    
+    const coords = [latNum, lngNum];
+    map.setCenter(coords, 15);
+    addPlacemark(coords);
+    updateAllCoordinates(lngNum, latNum);
+    showTempMessage('Координаты установлены на карте', 'success');
+}
 
         function searchAddress() {
             const address = document.getElementById('addressInput').value.trim();

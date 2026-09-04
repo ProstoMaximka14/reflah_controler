@@ -8,8 +8,19 @@
         public string photo { get; set; }
         public string vk { get; set; }
         public string website { get; set; }
+
         public string city { get; set; }
+        public string city_eng { get; set; }
+        public string city_ger { get; set; }
+
+        public string country { get; set; }
+        public string country_eng { get; set; }
+        public string country_ger { get; set; }
+
         public string address { get; set; }
+        public string address_eng { get; set; }
+        public string address_ger { get; set; }
+
         public string longitude { get; set; }
         public string latitude { get; set; }
 
@@ -19,5 +30,7 @@
         public string whatsapp { get; set; }      // WhatsApp
         public string email { get; set; }         // Email
         public string info { get; set; }
+        public string info_eng { get; set; }
+        public string info_ger { get; set; }
     }
 }

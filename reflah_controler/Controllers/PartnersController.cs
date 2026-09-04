@@ -61,8 +61,8 @@ namespace reflah_controler.Controllers
                 {
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
-                                    city, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, address, info
+                                    city, city_eng, city_ger, country, country_eng, country_ger, longitude, latitude,
+                                    vk_group_url, telegram, whatsapp, email, address, address_eng, address_ger, info, info_eng, info_ger
                              FROM partners WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -87,15 +87,29 @@ namespace reflah_controler.Controllers
                                     photo = photoFileName,
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
+
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
+                                    city_eng = reader.IsDBNull(reader.GetOrdinal("city_eng")) ? "" : reader.GetString("city_eng"),
+                                    city_ger = reader.IsDBNull(reader.GetOrdinal("city_ger")) ? "" : reader.GetString("city_ger"),
+
+                                    country = reader.IsDBNull(reader.GetOrdinal("country")) ? "" : reader.GetString("country"),
+                                    country_eng = reader.IsDBNull(reader.GetOrdinal("country_eng")) ? "" : reader.GetString("country_eng"),
+                                    country_ger = reader.IsDBNull(reader.GetOrdinal("country_ger")) ? "" : reader.GetString("country_ger"),
+
                                     longitude = reader.IsDBNull(reader.GetOrdinal("longitude")) ? "" : reader.GetString("longitude"),
                                     latitude = reader.IsDBNull(reader.GetOrdinal("latitude")) ? "" : reader.GetString("latitude"),
                                     vk_group = reader.IsDBNull(reader.GetOrdinal("vk_group_url")) ? "" : reader.GetString("vk_group_url"),
                                     telegram = reader.IsDBNull(reader.GetOrdinal("telegram")) ? "" : reader.GetString("telegram"),
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
+
                                     info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
-                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address")
+                                    info_eng = reader.IsDBNull(reader.GetOrdinal("info_eng")) ? "" : reader.GetString("info_eng"),
+                                    info_ger = reader.IsDBNull(reader.GetOrdinal("info_ger")) ? "" : reader.GetString("info_ger"),
+
+                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address"),
+                                    address_eng = reader.IsDBNull(reader.GetOrdinal("address_eng")) ? "" : reader.GetString("address_eng"),
+                                    address_ger = reader.IsDBNull(reader.GetOrdinal("address_ger")) ? "" : reader.GetString("address_ger")
                                 };
                             }
                         }
@@ -120,8 +134,8 @@ namespace reflah_controler.Controllers
                 {
                     connection.Open();
                     string query = @"SELECT id, name, phone, photo_url, vk_url, website_url, 
-                                    city, longitude, latitude,
-                                    vk_group_url, telegram, whatsapp, email, address, info
+                                    city, city_eng, city_ger, country, country_eng, country_ger, longitude, latitude,
+                                    vk_group_url, telegram, whatsapp, email, address, address_eng, address_ger, info, info_eng, info_ger
                              FROM partners ORDER BY name";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -145,15 +159,29 @@ namespace reflah_controler.Controllers
                                     photo = photoFileName,
                                     vk = reader.IsDBNull(reader.GetOrdinal("vk_url")) ? "" : reader.GetString("vk_url"),
                                     website = reader.IsDBNull(reader.GetOrdinal("website_url")) ? "" : reader.GetString("website_url"),
+
                                     city = reader.IsDBNull(reader.GetOrdinal("city")) ? "" : reader.GetString("city"),
+                                    city_eng = reader.IsDBNull(reader.GetOrdinal("city_eng")) ? "" : reader.GetString("city_eng"),
+                                    city_ger = reader.IsDBNull(reader.GetOrdinal("city_ger")) ? "" : reader.GetString("city_ger"),
+
+                                    country = reader.IsDBNull(reader.GetOrdinal("country")) ? "" : reader.GetString("country"),
+                                    country_eng = reader.IsDBNull(reader.GetOrdinal("country_eng")) ? "" : reader.GetString("country_eng"),
+                                    country_ger = reader.IsDBNull(reader.GetOrdinal("country_ger")) ? "" : reader.GetString("country_ger"),
+
                                     longitude = reader.IsDBNull(reader.GetOrdinal("longitude")) ? "" : reader.GetString("longitude"),
                                     latitude = reader.IsDBNull(reader.GetOrdinal("latitude")) ? "" : reader.GetString("latitude"),
                                     vk_group = reader.IsDBNull(reader.GetOrdinal("vk_group_url")) ? "" : reader.GetString("vk_group_url"),
                                     telegram = reader.IsDBNull(reader.GetOrdinal("telegram")) ? "" : reader.GetString("telegram"),
                                     whatsapp = reader.IsDBNull(reader.GetOrdinal("whatsapp")) ? "" : reader.GetString("whatsapp"),
                                     email = reader.IsDBNull(reader.GetOrdinal("email")) ? "" : reader.GetString("email"),
+
                                     info = reader.IsDBNull(reader.GetOrdinal("info")) ? "" : reader.GetString("info"),
-                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address")
+                                    info_eng = reader.IsDBNull(reader.GetOrdinal("info_eng")) ? "" : reader.GetString("info_eng"),
+                                    info_ger = reader.IsDBNull(reader.GetOrdinal("info_ger")) ? "" : reader.GetString("info_ger"),
+
+                                    address = reader.IsDBNull(reader.GetOrdinal("address")) ? "" : reader.GetString("address"),
+                                    address_eng = reader.IsDBNull(reader.GetOrdinal("address_eng")) ? "" : reader.GetString("address_eng"),
+                                    address_ger = reader.IsDBNull(reader.GetOrdinal("address_ger")) ? "" : reader.GetString("address_ger")
                                 });
                             }
                         }
@@ -169,21 +197,31 @@ namespace reflah_controler.Controllers
 
         [HttpPost("AddPartner")]
         public async Task<IActionResult> AddPartner(
+            int id,
             string name,
             string phone,
             string vk,
             string website,
             IFormFile photoFile,
             string photo,
+            string city,
+            string city_eng,
+            string city_ger,
+            string country,
+            string country_eng,
+            string country_ger,
             string address,
-            string house,
+            string address_eng,
+            string address_ger,
             string longitude,
             string latitude,
             string vk_group,
             string telegram,
             string whatsapp,
             string email,
-            string info)
+            string info,
+            string info_eng,
+            string info_ger)
         {
             string connectionString = GetConnectionString();
 
@@ -229,29 +267,44 @@ namespace reflah_controler.Controllers
                     await connection.OpenAsync();
                     string query = @"INSERT INTO partners 
                         (name, phone, photo_url, vk_url, website_url, 
-                        city, longitude, latitude,
+                        city, city_eng, city_ger, country, country_eng, country_ger, address_eng, address_ger, info_eng, info_ger, longitude, latitude,
                         vk_group_url, telegram, whatsapp, email, address, info) 
                     VALUES 
                         (@name, @phone, @photo_url, @vk_url, @website_url, 
-                        @city, @longitude, @latitude,
+                        @city, @city_eng, @city_ger, @country, @country_eng, @country_ger, @address_eng, @address_ger, @info_eng, @info_ger, @longitude, @latitude,
                         @vk_group, @telegram, @whatsapp, @email, @address, @info)";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@id", id);
                         command.Parameters.AddWithValue("@name", name ?? "");
                         command.Parameters.AddWithValue("@phone", phone ?? "");
                         command.Parameters.AddWithValue("@photo_url", fileName ?? "");
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
-                        command.Parameters.AddWithValue("@house", house ?? "");
+
+                        command.Parameters.AddWithValue("@city", city ?? "");
+                        command.Parameters.AddWithValue("@city_eng", city_eng ?? "");
+                        command.Parameters.AddWithValue("@city_ger", city_ger ?? "");
+
+                        command.Parameters.AddWithValue("@country", country ?? "");
+                        command.Parameters.AddWithValue("@country_eng", country_eng ?? "");
+                        command.Parameters.AddWithValue("@country_ger", country_ger ?? "");
+
                         command.Parameters.AddWithValue("@longitude", longitude ?? "");
                         command.Parameters.AddWithValue("@latitude", latitude ?? "");
                         command.Parameters.AddWithValue("@vk_group", vk_group ?? "");
                         command.Parameters.AddWithValue("@telegram", telegram ?? "");
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
+
                         command.Parameters.AddWithValue("@address", address ?? "");
+                        command.Parameters.AddWithValue("@address_eng", address_eng ?? "");
+                        command.Parameters.AddWithValue("@address_ger", address_ger ?? "");
+
                         command.Parameters.AddWithValue("@info", info ?? "");
+                        command.Parameters.AddWithValue("@info_eng", info_eng ?? "");
+                        command.Parameters.AddWithValue("@info_ger", info_ger ?? "");
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
                         if (rowsAffected > 0)
@@ -288,14 +341,23 @@ namespace reflah_controler.Controllers
             IFormFile photoFile,
             string photo,
             string city,
+            string city_eng,
+            string city_ger,
+            string country,
+            string country_eng,
+            string country_ger,
             string address,
+            string address_eng,
+            string address_ger,
             string longitude,
             string latitude,
             string vk_group,
             string telegram,
             string whatsapp,
             string email,
-            string info)
+            string info,
+            string info_eng,
+            string info_ger)
         {
             string connectionString = GetConnectionString();
 
@@ -355,6 +417,11 @@ namespace reflah_controler.Controllers
                         vk_url = @vk_url, 
                         website_url = @website_url,
                         city = @city,
+                        city_eng = @city_eng,
+                        city_ger = @city_ger,
+                        country = @country,
+                        country_eng = @country_eng,
+                        country_ger = @country_ger,
                         longitude = @longitude,
                         latitude = @latitude,
                         vk_group_url = @vk_group,
@@ -362,7 +429,11 @@ namespace reflah_controler.Controllers
                         whatsapp = @whatsapp,
                         email = @email,
                         address = @address,
-                        info = @info
+                        address_eng = @address_eng,
+                        address_ger = @address_ger,
+                        info = @info,
+                        info_eng = @info_eng,
+                        info_ger = @info_ger
                         WHERE id = @id";
 
                     using (MySqlCommand command = new MySqlCommand(query, connection))
@@ -373,15 +444,29 @@ namespace reflah_controler.Controllers
                         command.Parameters.AddWithValue("@photo_url", fileName ?? "");
                         command.Parameters.AddWithValue("@vk_url", vk ?? "");
                         command.Parameters.AddWithValue("@website_url", website ?? "");
+
                         command.Parameters.AddWithValue("@city", city ?? "");
+                        command.Parameters.AddWithValue("@city_eng", city_eng ?? "");
+                        command.Parameters.AddWithValue("@city_ger", city_ger ?? "");
+
+                        command.Parameters.AddWithValue("@country", country ?? "");
+                        command.Parameters.AddWithValue("@country_eng", country_eng ?? "");
+                        command.Parameters.AddWithValue("@country_ger", country_ger ?? "");
+
                         command.Parameters.AddWithValue("@longitude", longitude ?? "");
                         command.Parameters.AddWithValue("@latitude", latitude ?? "");
                         command.Parameters.AddWithValue("@vk_group", vk_group ?? "");
                         command.Parameters.AddWithValue("@telegram", telegram ?? "");
                         command.Parameters.AddWithValue("@whatsapp", whatsapp ?? "");
                         command.Parameters.AddWithValue("@email", email ?? "");
+
                         command.Parameters.AddWithValue("@address", address ?? "");
+                        command.Parameters.AddWithValue("@address_eng", address_eng ?? "");
+                        command.Parameters.AddWithValue("@address_ger", address_ger ?? "");
+
                         command.Parameters.AddWithValue("@info", info ?? "");
+                        command.Parameters.AddWithValue("@info_eng", info_eng ?? "");
+                        command.Parameters.AddWithValue("@info_ger", info_ger ?? "");
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
 
